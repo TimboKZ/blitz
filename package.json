@@ -1,0 +1,29 @@
+{
+  "name": "blitz-ssg",
+  "version": "0.0.1",
+  "description": "Dead simple static site generator.",
+  "main": "dist/src/blitz.js",
+  "typings": "dist/src/blitz.d.ts",
+  "preferGlobal": "true",
+  "bin": {
+    "blitz": "./blitz-cli"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimboKZ/blitz.git"
+  },
+  "author": "Timur Kuzhagaliyev",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/TimboKZ/blitz/issues"
+  },
+  "homepage": "https://github.com/TimboKZ/blitz#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.1.2",
+    "typescript": "^2.0.9"
+  }
+}

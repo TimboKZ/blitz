@@ -1,3 +1,9 @@
+# JetBrains IDE files
+.idea
+
+# TGZ files
+*.tgz
+
 # Logs
 logs
 *.log

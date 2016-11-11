@@ -1,6 +1,9 @@
 # JetBrains IDE files
 .idea
 
+# TypeScript typings
+typings
+
 # TGZ files
 *.tgz
 

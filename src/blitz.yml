@@ -17,7 +17,16 @@ absolute_urls: true
 
 # Whether to use directories and expect a server to serve `index.html` (`http://test.org/hello/world/`) or use the
 # content file name with an HTML extension (`http://test.org/hello/world.html`)
-extensions_in_urls: false
+explicit_html_extensions: false
+
+#
+# Globals
+#
+# Passed to every page
+#
+
+globals:
+  author: 'Timur Kuzhagaliyev'
 
 #
 # Routes
@@ -26,11 +35,17 @@ extensions_in_urls: false
 pages:
   - uri: '/'
     content: 'index.md'
-    template: 'index.pug'
+    template: 'page.pug'
   - uri: '/research'
     content: 'research.md'
     template: 'research.pug'
     children: # TODO: Make multiple children sources possible?
-      name: 'research' # TODO: Name of the array that will be passed to Pug
-      directory: 'research'
-      template: 'research-topic.pug'
+      - uri: '/'
+        name: 'researchTopics' # TODO: Name of the object that will be passed to Pug
+        template: 'page.pug'
+        directory: 'research-topics'
+      - uri: '/structure'
+        name: 'researchStructure'
+        template: 'page.pug'
+        content: 'research-structure.mdSS'
+        show_in_menu: true

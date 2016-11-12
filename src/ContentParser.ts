@@ -14,7 +14,7 @@ import {Util} from './Util';
  */
 export class ContentParser {
     /**
-     * Creates a YAML object from everything before the line containing `---`. Then, add a parameter called `content`
+     * Creates a YAML object from everything before the line containing `---`. Then, adds a property called `content`
      * to the newly created object and populates it with everything after `---` line, converted from Markdown into HTML.
      * @since 0.0.1
      */

@@ -3,11 +3,10 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.3
+ * @version 0.0.4
  */
 
 import * as path from 'path';
-import * as fs from 'fs';
 import {Util} from './Util';
 
 /**
@@ -17,26 +16,48 @@ import {Util} from './Util';
 export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
- * Interfaces of which the parsed config file consists
+ * Interface for children of top level pages
+ *
+ * Properties (`directory`) and (`children`, content) are mutually exclusive.
+ *
+ * @since 0.0.4
  */
-export interface IBlitzPageChildren {
+export interface IBlitzChildPage {
+    uri?: string;
     name: string;
-    directory: string;
     template: string;
+
+    /** If the content is to be loaded from a directory */
+    directory?: string;
+
+    /** If the content is to be loaded from a file */
+    content?: string;
+    show_in_menu?: boolean;
+    children?: IBlitzChildPage[];
 }
-export interface IBlitzPage {
-    uri: string;
+
+/**
+ * Top level page of Blitz
+ * @since 0.0.4
+ */
+export interface IBlitzRootPage {
+    uri?: string;
     content: string;
     template: string;
-    children: IBlitzPageChildren[];
+    children?: IBlitzChildPage[];
 }
+
+/**
+ * Main blits config interface
+ * @since 0.0.4
+ */
 export interface IBlitzConfig {
     blitz_version: string;
     site_url: string;
     site_root: string;
     absolute_urls: boolean;
     extensions_in_urls: boolean;
-    pages: IBlitzPage[];
+    pages: IBlitzRootPage[];
 }
 
 /**
@@ -74,4 +95,3 @@ export class ConfigParser {
         return true;
     }
 }
-

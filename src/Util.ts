@@ -166,7 +166,11 @@ export class Util {
      */
     public static getUriComponents(uri: string): string[] {
         let strippedUri = Util.stripSlashes(uri);
-        return strippedUri.split('/');
+        let components = strippedUri.split('/');
+        if (components[0] === '') {
+            return [];
+        }
+        return components;
     }
 }
 

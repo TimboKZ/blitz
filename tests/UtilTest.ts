@@ -36,4 +36,18 @@ describe('Util', () => {
             assert.strictEqual(Util.stripSlashes('/hello/hello/'), 'hello/hello');
         });
     });
+    describe('#getUriComponents()', () => {
+        it('should return components correctly without surrounding slashes', () => {
+            assert.deepEqual(Util.getUriComponents('hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with a single leading slash', () => {
+            assert.deepEqual(Util.getUriComponents('/hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with multiple leading slashes', () => {
+            assert.deepEqual(Util.getUriComponents('/////hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with an empty string', () => {
+            assert.deepEqual(Util.getUriComponents(''), []);
+        });
+    });
 });

@@ -28,4 +28,18 @@ describe('Util', function () {
             chai_1.assert.strictEqual(Util_1.Util.stripSlashes('/hello/hello/'), 'hello/hello');
         });
     });
+    describe('#getUriComponents()', function () {
+        it('should return components correctly without surrounding slashes', function () {
+            chai_1.assert.deepEqual(Util_1.Util.getUriComponents('hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with a single leading slash', function () {
+            chai_1.assert.deepEqual(Util_1.Util.getUriComponents('/hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with multiple leading slashes', function () {
+            chai_1.assert.deepEqual(Util_1.Util.getUriComponents('/////hello/hello'), ['hello', 'hello']);
+        });
+        it('should return components correctly with an empty string', function () {
+            chai_1.assert.deepEqual(Util_1.Util.getUriComponents(''), []);
+        });
+    });
 });

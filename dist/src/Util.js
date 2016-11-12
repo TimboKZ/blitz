@@ -97,7 +97,11 @@ var Util = (function () {
     };
     Util.getUriComponents = function (uri) {
         var strippedUri = Util.stripSlashes(uri);
-        return strippedUri.split('/');
+        var components = strippedUri.split('/');
+        if (components[0] === '') {
+            return [];
+        }
+        return components;
     };
     return Util;
 }());

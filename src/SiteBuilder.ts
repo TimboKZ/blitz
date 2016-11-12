@@ -144,11 +144,11 @@ export class SiteBuilder {
         let uriComponents = currentUriComponents.concat(Util.getUriComponents(page.uri));
         let fileArray;
 
-        if (uriComponents.length > 0 && uriComponents[1] !== '') {
+        if (uriComponents.length > 0) {
             fileArray = uriComponents.slice(0);
             if (this.config.explicit_html_extensions) {
                 let lastId = fileArray.length - 1;
-                fileArray[lastId] = fileArray[lastId] + '.html';
+                fileArray[lastId] = (fileArray[lastId] === '' ? 'index ' : fileArray[lastId]) + '.html';
             } else {
                 fileArray.push(INDEX_FILE_NAME);
             }
@@ -236,7 +236,8 @@ export class SiteBuilder {
      * @since 0.0.3
      */
     private getUrl(uriComponents: string[]): string {
-        let empty = uriComponents.length < 1 || uriComponents[0] === '';
+        // TODO: Improve relative URL creation
+        let empty = uriComponents.length < 1;
         let url = Util.stripSlashes(uriComponents.join('/'));
         if (this.config.absolute_urls) {
             if (!this.config.site_root || this.config.site_root === '') {

@@ -41,11 +41,11 @@ var SiteBuilder = (function () {
         if (isRoot === void 0) { isRoot = true; }
         var uriComponents = currentUriComponents.concat(Util_1.Util.getUriComponents(page.uri));
         var fileArray;
-        if (uriComponents.length > 0 && uriComponents[1] !== '') {
+        if (uriComponents.length > 0) {
             fileArray = uriComponents.slice(0);
             if (this.config.explicit_html_extensions) {
                 var lastId = fileArray.length - 1;
-                fileArray[lastId] = fileArray[lastId] + '.html';
+                fileArray[lastId] = (fileArray[lastId] === '' ? 'index ' : fileArray[lastId]) + '.html';
             }
             else {
                 fileArray.push(INDEX_FILE_NAME);
@@ -123,7 +123,7 @@ var SiteBuilder = (function () {
         return [];
     };
     SiteBuilder.prototype.getUrl = function (uriComponents) {
-        var empty = uriComponents.length < 1 || uriComponents[0] === '';
+        var empty = uriComponents.length < 1;
         var url = Util_1.Util.stripSlashes(uriComponents.join('/'));
         if (this.config.absolute_urls) {
             if (!this.config.site_root || this.config.site_root === '') {

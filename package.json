@@ -27,6 +27,7 @@
     "typescript": "^2.0.9"
   },
   "dependencies": {
+    "js-yaml": "^3.6.1",
     "nomnom": "^1.8.1"
   }
 }

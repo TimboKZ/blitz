@@ -2,6 +2,9 @@
 # Blitz config file
 #
 
+# Version of Blitz used to generate this project. Used for migration purposes.
+blitz_version: '0.0.1'
+
 # Site URL with a trailing slash.
 site_url: 'https://hosting.kawaiidesu.me/'
 

@@ -10,7 +10,7 @@ site_url: 'https://hosting.kawaiidesu.me/'
 
 # Site root without a trailing slash.
 # E.g. if the root of your site is `http://test.org/hello/home/`, set this to `hello/home`.
-site_root: 'blitz'
+site_root: 'blitz-test/build'
 
 # Whether to use absolute URLs (`http://test.org/hello/`) or relative URLs (`./hello/`)
 absolute_urls: true
@@ -36,17 +36,27 @@ pages:
   - uri: '/'
     content: 'index.md'
     template: 'page.pug'
-  - uri: '/research'
-    content: 'research.md'
-    template: 'research.pug'
+    menus:
+      - name: 'mainMenu'
+        title: 'Home'
     child_pages:
-      - uri: '/structure'
-        name: 'researchStructure'
-        template: 'page.pug'
-        content: 'research-structure.md'
-        show_in_menu: true
-    child_directories:
-      - uri: '/'
-        name: 'researchTopics' # TODO: Name of the object that will be passed to Pug
-        template: 'page.pug'
-        directory: 'research-topics'
+      - uri: '/research'
+        name: 'research'
+        content: 'research.md'
+        template: 'research.pug'
+        menus:
+          - name: 'mainMenu'
+            title: 'Research'
+        child_pages:
+          - uri: '/structure'
+            name: 'researchStructure'
+            content: 'research-structure.md'
+            template: 'page.pug'
+            menus:
+              - name: 'mainMenu'
+                title: 'Research Structure'
+        child_directories:
+          - uri: '/'
+            name: 'researchTopics' # TODO: Name of the object that will be passed to Pug
+            template: 'page.pug'
+            directory: 'research-topics'

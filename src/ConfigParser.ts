@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.5
+ * @since 0.0.1
  */
 
 import * as path from 'path';
@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
  * Interface for child directories of top level pages
- * @since 0.0.4
+ * @since 0.0.1
  */
 export interface IBlitzChildDirectory {
     uri?: string;
@@ -28,22 +28,31 @@ export interface IBlitzChildDirectory {
 }
 
 /**
+ * Page config as represented in the Blitz YAML config
+ * @since 0.0.1
+ */
+export interface IBlitzMenu {
+    name: string;
+    title?: string;
+}
+
+/**
  * Interface for child pages of top level pages
- * @since 0.0.4
+ * @since 0.0.1
  */
 export interface IBlitzPage {
     uri?: string;
-    name: string;
+    name?: string;
     template: string;
-    content: string;
-    show_in_menu?: boolean;
+    content: string|any;
+    menus?: IBlitzMenu[];
     child_pages?: IBlitzPage[];
     child_directories?: IBlitzChildDirectory[];
 }
 
 /**
- * Main blits config interface
- * @since 0.0.4
+ * Main Blitz config interface
+ * @since 0.0.1
  */
 export interface IBlitzConfig {
     blitz_version: string;
@@ -83,7 +92,7 @@ export class ConfigParser {
 
     /**
      * Verifies that the supplied object is a valid Blitz config
-     * @since 0.0.2
+     * @since 0.0.1
      */
     public static verify(config: any): boolean {
         // TODO: Write actual checks

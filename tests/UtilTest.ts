@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.1
+ * @since 0.0.1
  */
 
 import {assert} from 'chai';
@@ -48,6 +48,23 @@ describe('Util', () => {
         });
         it('should return components correctly with an empty string', () => {
             assert.deepEqual(Util.getUriComponents(''), []);
+        });
+    });
+    describe('#extractFileName()', () => {
+        it('should return string unchanged if it has no extension', () => {
+            assert.equal(Util.extractFileName('hello'), 'hello');
+        });
+        it('should remove leading directories string unchanged if it has no extension', () => {
+            assert.equal(Util.extractFileName('test/hello'), 'hello');
+            assert.equal(Util.extractFileName('test\\hello'), 'hello');
+        });
+        it('should remove leading directories string and extension', () => {
+            assert.equal(Util.extractFileName('test/hello.test'), 'hello');
+            assert.equal(Util.extractFileName('test\\hello.jpg'), 'hello');
+        });
+        it('should remove only one extension', () => {
+            assert.equal(Util.extractFileName('test/hello.qwe.test'), 'hello.qwe');
+            assert.equal(Util.extractFileName('test\\hello.123.jpg'), 'hello.123');
         });
     });
 });

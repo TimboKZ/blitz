@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.3
+ * @since 0.0.1
  */
 
 import * as path from 'path';
@@ -23,36 +23,69 @@ const TEMPLATES_DIRECTORY = 'templates';
 
 /**
  * Index file name in case someone uses a value other than `index.html`
- * @since 0.0.2
+ * @since 0.0.1
  */
 const INDEX_FILE_NAME = 'index.html';
 
 /**
- * Pug cache interface
- * @since 0.0.2
+ * Representation of a Blitz file of the static site, as seen in the map
+ * @since 0.0.1
  */
-interface IPugCache {
-    [path: string]: (locals?: any) => string;
+interface IBlitzMapFile {
+    name: string;
+    url: string;
+    contentData: any;
+    blitzData: any;
+    generator: (locals?: any) => string;
+}
+
+/**
+ * Representation of a Blitz directory of the static site, as seen in the map
+ * @since 0.0.1
+ */
+interface IBlitzMapDirectory {
+    directories?: {
+        [name: string]: IBlitzMapDirectory;
+    };
+    files?: {
+        [name: string]: IBlitzMapFile;
+    };
 }
 
 /**
  * Page menu interface
- * @since 0.0.3
+ * @since 0.0.1
  */
 interface IBlitzPageMenuItem {
     title: string;
     url: string;
+    active: boolean;
 }
 
 /**
- * Interface for data extracted from the content file with additional post processing data, such as URL
- * @since 0.0.3
+ * Page menu interface
+ * @since 0.0.1
  */
-interface IBlitzPageData {
+interface IBlitzPageMenus {
+    [name: string]: IBlitzPageMenuItem[];
+}
+
+/**
+ * Page content data with inserted URL
+ * @since 0.0.1
+ */
+interface IBlitzProcessedPage {
     url: string;
-    title?: string;
-    menu_button?: string;
-    [key: string]: any;
+    content: string;
+    [key: string]: string;
+}
+
+/**
+ * Pug cache interface
+ * @since 0.0.1
+ */
+interface IPugCache {
+    [path: string]: (locals?: any) => string;
 }
 
 /**
@@ -68,7 +101,7 @@ export class SiteBuilder {
 
     /**
      * Root directory of the project
-     * @since 0.0.2
+     * @since 0.0.1
      */
     private projectPath: string;
 
@@ -80,15 +113,27 @@ export class SiteBuilder {
 
     /**
      * Absolute paths to locations, content and templates directories
-     * @since 0.0.2
+     * @since 0.0.1
      */
     private assetsPath: string;
     private contentPath: string;
     private templatesPath: string;
 
     /**
+     * Site map that will be used to build static files for the website. It will be generated beforehand.
+     * @since 0.0.1
+     */
+    private siteMap: IBlitzMapDirectory;
+
+    /**
+     * Object holding all menus generated from the config
+     * @since 0.0.1
+     */
+    private menus: IBlitzPageMenus = {};
+
+    /**
      * Cache of compiled Pug functions
-     * @since 0.0.2
+     * @since 0.0.1
      */
     private pugCache: IPugCache = {};
 
@@ -114,155 +159,329 @@ export class SiteBuilder {
             Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        this.iterate();
+        this.prepareMap();
+        console.log(JSON.stringify(this.siteMap));
     }
 
     /**
-     * Iterates over the pages in the config, gradually building up the static site
+     * Iterates over all pages and directories specified in the config, generating menus, preparing Pug files, etc.
+     *
+     * If uri is not specified, file name from the `content` property will be used
+     *
      * @since 0.0.1
      */
-    private iterate() {
-        let count = this.config.pages.length;
-        for (let i = 0; i < count; i++) {
-            let page = this.config.pages[i];
-            if (this.buildPage(page) === undefined) {
-                Util.error('Failed to build a root page!');
-                Util.error('Aborting build process!');
-                return undefined;
+    private prepareMap() {
+        let pages = this.config.pages;
+        let pageCount = pages.length;
+        let map: IBlitzMapDirectory = {
+            directories: {},
+            files: {},
+        };
+        for (let i = 0; i < pageCount; i++) {
+            let pageData = this.parseConfigPage(pages[i], map);
+            if (pageData === undefined) {
+                Util.error('Could not create map, failed on page with URI `' + pageData.url + '`!');
+                return;
             }
         }
+        this.siteMap = map;
     }
 
     /**
-     * Builds up the root page and its children recursively
-     * @since 0.0.2
+     * Parses a page from the config inserting into the site map
+     * @since 0.0.1
      */
-    private buildPage(page: IBlitzPage,
-                      currentUriComponents: string[] = [],
-                      isRoot: boolean = true): IBlitzPageData {
+    private parseConfigPage(page: IBlitzPage,
+                            parentDirectory: IBlitzMapDirectory,
+                            parentUriComponents: string[] = [],
+                            parent?: IBlitzProcessedPage): IBlitzProcessedPage {
 
-        let uriComponents = currentUriComponents.concat(Util.getUriComponents(page.uri));
-        let fileArray;
-
-        if (uriComponents.length > 0) {
-            fileArray = uriComponents.slice(0);
-            if (this.config.explicit_html_extensions) {
-                let lastId = fileArray.length - 1;
-                fileArray[lastId] = (fileArray[lastId] === '' ? 'index ' : fileArray[lastId]) + '.html';
-            } else {
-                fileArray.push(INDEX_FILE_NAME);
-            }
+        // Generate file and directory arrays and extract filename
+        let uriComponents;
+        if (page.uri === undefined) {
+            uriComponents = [Util.extractFileName(page.content)];
         } else {
-            fileArray = [INDEX_FILE_NAME];
+            uriComponents = Util.getUriComponents(page.uri);
+        }
+        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
+        let fileArray = this.generateFileArray(uriComponents);
+        let fileName = fileArray[fileArray.length - 1];
+        let fileNameWithoutExtension = Util.extractFileName(fileName);
+        let directoryArray = fileArray.slice(0, fileArray.length - 1);
+        let pageUrl = this.generateUrl(fileArray, []);
+
+        // Switch to a relevant directory
+        let currentDirectory = parentDirectory;
+        let directoryCount = directoryArray.length;
+        for (let k = 0; k < directoryCount; k++) {
+            let newDirectory = directoryArray[k];
+            if (currentDirectory.directories[newDirectory] === undefined) {
+                currentDirectory.directories[newDirectory] = {
+                    directories: {},
+                    files: {},
+                };
+            }
+            currentDirectory = currentDirectory.directories[newDirectory];
         }
 
-        let menu: IBlitzPageMenuItem[] = [];
-        let childPages = {};
+        // Extract content and prepare pug
+        // If passed `content` is a string, use it as path to compile Pug, otherwise use `content` object as is
+        let pageContent = page.content;
+        if (typeof page.content === 'string') {
+            pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
+        }
+        let pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
+        if (pageContent === undefined || pugFunction === undefined) {
+            Util.error('Could not extract content and compile Pug!');
+            return undefined;
+        }
+
+        // Created a processed page data object
+        let processedPageData = objectAssign({}, pageContent, {url: pageUrl});
+
+        // Setup Blitz data that will be extracted from children
+        let blitzData = {
+            parent,
+        };
+
+        // Parse child pages
         if (page.child_pages && page.child_pages.length > 0) {
-            let childPageCount = page.child_pages.length;
-            for (let i = 0; i < childPageCount; i++) {
+            let pageCount = page.child_pages.length;
+            for (let i = 0; i < pageCount; i++) {
                 let childPage = page.child_pages[i];
-                let childPageObject = this.buildPage(childPage, uriComponents, false);
-                if (!childPageObject) {
-                    Util.error('Could not build child page!');
+                let childData = this.parseConfigPage(
+                    childPage,
+                    currentDirectory,
+                    uriComponents,
+                    processedPageData
+                );
+                if (childData === undefined) {
+                    Util.error('Failed parsing child page!');
                     return undefined;
                 }
-                childPages[childPage.name] = childPageObject;
-                if (childPage.show_in_menu !== false) {
-                    let menuButtonText = childPage.name;
-                    if (childPageObject.menu_button) {
-                        menuButtonText = childPageObject.menu_button;
-                    } else if (childPageObject.title) {
-                        menuButtonText = childPageObject.title;
-                    }
-                    menu.push({
-                        title: menuButtonText,
-                        url: childPageObject.url,
-                    });
-                }
+                blitzData[childPage.name] = childData;
             }
         }
 
-        let childDirectories = [];
+        // Parse child directories
         if (page.child_directories && page.child_directories.length > 0) {
             let childDirectoryCount = page.child_directories.length;
             for (let i = 0; i < childDirectoryCount; i++) {
                 let childDirectory = page.child_directories[i];
-                let childDirectoryObject = this.buildChildDirectory(childDirectory, uriComponents);
-                if (childDirectoryObject === undefined) {
-                    Util.error('Could not build child directory!');
+                let childData = this.parseConfigDirectory(
+                    childDirectory,
+                    currentDirectory,
+                    uriComponents,
+                    processedPageData
+                );
+                if (childData === undefined) {
+                    Util.error('Failed parsing child directory!');
                     return undefined;
                 }
-                childDirectories[childDirectory.name] = childDirectoryObject;
+                blitzData[childDirectory.name] = childData;
             }
         }
 
-        let pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
-        let menuButtonText = isRoot ? 'Index' : page.name;
-        if (pageContent.menu_button) {
-            menuButtonText = pageContent.menu_button;
-        } else if (pageContent.title) {
-            menuButtonText = pageContent.title;
-        }
-        let pageUrl = this.getUrl(uriComponents);
-        menu.unshift({
-            title: menuButtonText,
+        // Generate file data for the map and append it to said map
+        let fileData: IBlitzMapFile = {
+            name: fileName,
             url: pageUrl,
-        });
-        let pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
-        let blitzLocals = {
-            menu,
-            // TODO: Add functions like URL
-            url: pageUrl,
+            contentData: pageContent,
+            blitzData,
+            generator: pugFunction,
         };
-        let locals = objectAssign({}, this.config.globals, pageContent, childPages, childDirectories, blitzLocals);
-        if (!Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals))) {
-            Util.error('Could not write root page to file!');
+        currentDirectory.files[fileData.name] = fileData;
+
+        // Append data to menu if needed
+        if (pageContent.menus) {
+            let menuCount = pageContent.menus.length;
+            for (let k = 0; k < menuCount; k++) {
+                let menu = pageContent.menus[k];
+                let menuTitle = fileNameWithoutExtension;
+                if (pageContent.menu_title) {
+                    menuTitle = pageContent.menu_title;
+                } else if (menu.title) {
+                    menuTitle = menu.title;
+                } else if (pageContent.title) {
+                    menuTitle = pageContent.title;
+                }
+                if (this.menus[menu.name] === undefined) {
+                    this.menus[menu.name] = [];
+                }
+                this.menus[menu.name].push({
+                    title: menuTitle,
+                    url: pageUrl,
+                    active: false,
+                });
+            }
+        }
+
+        // Return page data to parent
+        return processedPageData;
+
+    }
+
+    /** Parses a page from the config inserting into the site map
+     * @since 0.0.1
+     */
+    private parseConfigDirectory(directory: IBlitzChildDirectory,
+                                 parentDirectory: IBlitzMapDirectory,
+                                 parentUriComponents: string[] = [],
+                                 parent?: IBlitzProcessedPage): IBlitzProcessedPage[] {
+
+        // Generate file and directory arrays and extract filename
+        let uriComponents;
+        if (directory.uri === undefined) {
+            uriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
+        } else {
+            uriComponents = Util.getUriComponents(directory.uri);
+        }
+        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
+        let directoryArray = uriComponents.slice(0);
+
+        // Switch to a relevant directory
+        let currentDirectory = parentDirectory;
+        let directoryCount = directoryArray.length;
+        for (let k = 0; k < directoryCount; k++) {
+            let newDirectory = directoryArray[k];
+            if (currentDirectory.directories[newDirectory] === undefined) {
+                currentDirectory.directories[newDirectory] = {
+                    directories: {},
+                    files: {},
+                };
+            }
+            currentDirectory = currentDirectory.directories[newDirectory];
+        }
+
+        let pagesContent = ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
+        if (pagesContent === undefined) {
+            Util.error('Could not extract content from directory!');
             return undefined;
         }
-        return objectAssign({}, pageContent, {url: pageUrl});
-    }
 
-    /**
-     * Builds up a child directory
-     * @since 0.0.3
-     */
-    private buildChildDirectory(directoryConfig: IBlitzChildDirectory, currentFileArray: string[]): IBlitzPageData[] {
-        return [];
-    }
+        let processedPages: IBlitzProcessedPage[] = [];
 
-    /**
-     * Generates a URL based on current config and file array
-     * @since 0.0.3
-     */
-    private getUrl(uriComponents: string[]): string {
-        // TODO: Improve relative URL creation
-        let empty = uriComponents.length < 1;
-        let url = Util.stripSlashes(uriComponents.join('/'));
-        if (this.config.absolute_urls) {
-            if (!this.config.site_root || this.config.site_root === '') {
-                url = '/' + url;
-            } else {
-                url = '/' + this.config.site_root + '/' + url;
+        let pageContentCount = pagesContent.length;
+        for (let i = 0; i < pageContentCount; i++) {
+            let pageContent = pagesContent[i];
+            let pageUri = '/' + Util.extractFileName(pageContent.file);
+            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                pageUri = '/' + pageContent[directory.uri_key];
             }
-        } else {
-            url = './' + url;
+            let pageConfigData: IBlitzPage = {
+                uri: pageUri,
+                template: directory.template,
+                content: pageContent,
+            };
+            let pageData = this.parseConfigPage(pageConfigData, currentDirectory, uriComponents, parent);
+            if (pageData === undefined) {
+                Util.error('Could not parse config page generated for directory!');
+                return undefined;
+            }
+            processedPages.push(pageData);
         }
-        if (this.config.explicit_html_extensions) {
-            url = url + (empty ? 'index' : '') + '.html';
+
+        return processedPages;
+    }
+
+    /**
+     * Generates a file array using URI components and Blitz config
+     * @since 0.0.1
+     */
+    private generateFileArray(uriComponents: string[]) {
+        let fileArray = uriComponents.slice(0);
+        if (!this.config.explicit_html_extensions || fileArray.length === 0) {
+            fileArray.push(INDEX_FILE_NAME);
         } else {
-            url = url + (empty ? '' : '/');
+            let lastId = fileArray.length - 1;
+            fileArray[lastId] = fileArray[lastId] + '.html';
         }
-        return url;
+        return fileArray;
+    }
+
+    /**
+     * Generates a URL to target file, take into account current directory and config settings, such as whether
+     * absolute URLs are enabled, etc.
+     *
+     * This function is public for unit testing purposes.
+     *
+     * @since 0.0.1
+     */
+    public generateUrl(targetFileArray: string[], currentDirectoryArray: string[]): string {
+        let urlArray = targetFileArray.slice(0);
+        let targetDirectoryArray = targetFileArray.slice(0, targetFileArray.length - 1);
+        let fileName = targetFileArray.slice(-1)[0];
+        if (!this.config.explicit_html_extensions) {
+            let lastId = targetFileArray.length - 1;
+            if (targetFileArray[lastId] === INDEX_FILE_NAME) {
+                urlArray.pop();
+            }
+        }
+        if (this.config.absolute_urls) {
+            let absoluteUrl = '';
+            if (this.config.site_root !== undefined && this.config.site_root !== '') {
+                absoluteUrl = '/' + Util.stripSlashes(this.config.site_root);
+            }
+            if (urlArray.length > 0) {
+                absoluteUrl = absoluteUrl + '/' + urlArray.join('/');
+            }
+            if (absoluteUrl === '') {
+                absoluteUrl = '/';
+            }
+            return absoluteUrl;
+        } else {
+            let relativeUrl = '';
+            let differentRoot = false;
+            let targetLength = targetDirectoryArray.length;
+            let currentLength = currentDirectoryArray.length;
+            for (let i = 0; i < Math.max(targetLength, currentLength); i++) {
+                if (i >= targetLength) {
+                    if (relativeUrl !== '') {
+                        relativeUrl = '/' + relativeUrl;
+                    }
+                    relativeUrl = '..' + relativeUrl;
+                } else if (i >= currentLength) {
+                    if (relativeUrl !== '') {
+                        relativeUrl = relativeUrl + '/';
+                    }
+                    relativeUrl = relativeUrl + targetDirectoryArray[i];
+                } else {
+                    if (targetDirectoryArray[i] !== currentDirectoryArray[i] || differentRoot) {
+                        differentRoot = true;
+                        if (relativeUrl !== '') {
+                            relativeUrl = relativeUrl + '/';
+                        }
+                        relativeUrl = relativeUrl + targetDirectoryArray[i];
+                        if (relativeUrl !== '') {
+                            relativeUrl = '/' + relativeUrl;
+                        }
+                        relativeUrl = '..' + relativeUrl;
+                    }
+                }
+            }
+            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                if (relativeUrl !== '') {
+                    relativeUrl = relativeUrl + '/';
+                }
+                relativeUrl = relativeUrl + fileName;
+            }
+            return './' + relativeUrl;
+        }
     }
 
     /**
      * Compiles Pug file or returns compiled function from cache if the file has been compiled before
-     * @since 0.0.2
+     * @since 0.0.1
      */
     private compilePug(path: string): (locals?: any) => string {
         if (!this.pugCache[path]) {
-            this.pugCache[path] = pug.compileFile(path);
+            try {
+                this.pugCache[path] = pug.compileFile(path);
+            } catch (e) {
+                Util.error('Error compiling `' + path + '`!');
+                Util.stackTrace(e);
+                return undefined;
+            }
         }
         return this.pugCache[path];
     }

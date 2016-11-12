@@ -40,6 +40,15 @@ var Util = (function () {
     Util.parseMarkdown = function (markdown) {
         return marked(markdown);
     };
+    Util.pathExists = function (path) {
+        try {
+            fs.accessSync(path);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    };
     Util.writeFileFromArray = function (basePath, array, contents) {
         if (array.length === 0) {
             Util.error('Cannot write file from an empty array!');
@@ -58,34 +67,34 @@ var Util = (function () {
             fs.writeFileSync(path.join(currentPath, array[count - 1]), contents);
         }
         catch (e) {
-            Util.error('Error writing to `' + path + '`!');
+            Util.error('Error writing to `' + basePath + '`!');
             Util.stackTrace(e);
             return false;
         }
         return true;
     };
-    Util.getFileContents = function (path) {
+    Util.getFileContents = function (filePath) {
         var fileContents;
-        Util.debug('Reading contents of `' + path + '`...');
+        Util.debug('Reading contents of `' + filePath + '`...');
         try {
-            fileContents = fs.readFileSync(path, 'utf8');
+            fileContents = fs.readFileSync(filePath, 'utf8');
         }
         catch (e) {
-            Util.error('Error reading `' + path + '`. Are you sure it exists?');
+            Util.error('Error reading `' + filePath + '`. Are you sure it exists?');
             Util.stackTrace(e);
             return undefined;
         }
         return fileContents;
     };
-    Util.createDirectory = function (path) {
+    Util.createDirectory = function (directoryPath) {
         try {
-            if (!fs.existsSync(path)) {
-                fs.mkdirSync(path);
+            if (!fs.existsSync(directoryPath)) {
+                fs.mkdirSync(directoryPath);
             }
             return true;
         }
         catch (e) {
-            Util.error('Error creating directory `' + path + '`.');
+            Util.error('Error creating directory `' + directoryPath + '`.');
             Util.stackTrace(e);
             return false;
         }
@@ -102,6 +111,9 @@ var Util = (function () {
             return [];
         }
         return components;
+    };
+    Util.extractFileName = function (filePath) {
+        return path.basename(filePath).replace(/\.[^/.]+$/, '');
     };
     return Util;
 }());

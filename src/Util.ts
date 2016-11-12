@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.6
+ * @since 0.0.1
  */
 
 import * as yaml from 'js-yaml';
@@ -19,7 +19,7 @@ import * as colors from 'colors';
 export class Util {
     /**
      * Logs an object to console prefixing it with the specified string.
-     * @since 0.0.5
+     * @since 0.0.1
      */
     public static logWithPrefix(prefix: string, object: any) {
         console.log(prefix + ' ' + object.toString());
@@ -27,7 +27,6 @@ export class Util {
 
     /**
      * Logs data into console
-     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
      * @since 0.0.1
      */
     public static log(object: any) {
@@ -36,8 +35,7 @@ export class Util {
 
     /**
      * Logs error data into console
-     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
-     * @since 0.0.2
+     * @since 0.0.1
      */
     public static error(object: any) {
         Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
@@ -45,7 +43,7 @@ export class Util {
 
     /**
      * Print out the error as is
-     * @since 0.0.5
+     * @since 0.0.1
      */
     public static stackTrace(object: any) {
         console.log(object);
@@ -53,7 +51,6 @@ export class Util {
 
     /**
      * Logs debug data into console
-     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
      * @since 0.0.1
      */
     public static debug(object: any) {
@@ -64,7 +61,7 @@ export class Util {
 
     /**
      * Produces an object from YAML string if possible, returns undefined otherwise.
-     * @since 0.0.2
+     * @since 0.0.1
      */
     public static parseYaml(yamlString: string): any {
         Util.debug('Parsing  YAML...');
@@ -81,16 +78,30 @@ export class Util {
 
     /**
      * Converts Markdown into HTML
-     * @since 0.0.2
+     * @since 0.0.1
      */
     public static parseMarkdown(markdown: string): string {
         return marked(markdown);
     }
 
     /**
+     * Checks that a directory or a file exists
+     * @since 0.0.1
+     */
+    public static pathExists(path: string): boolean {
+        try {
+            // TODO: Add mode to `accessSync()`
+            fs.accessSync(path);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
      * Creates folders with names identical to that in the array, and uses the last element in the array as the file
      * name to which the contents will be written.
-     * @since 0.0.6
+     * @since 0.0.1
      */
     public static writeFileFromArray(basePath: string, array: string[], contents: string): boolean {
         if (array.length === 0) {
@@ -109,7 +120,7 @@ export class Util {
         try {
             fs.writeFileSync(path.join(currentPath, array[count - 1]), contents);
         } catch (e) {
-            Util.error('Error writing to `' + path + '`!');
+            Util.error('Error writing to `' + basePath + '`!');
             Util.stackTrace(e);
             return false;
         }
@@ -118,15 +129,15 @@ export class Util {
 
     /**
      * Loads file from the specified path if possible, returns undefined otherwise
-     * @since 0.0.3
+     * @since 0.0.1
      */
-    public static getFileContents(path: string): string {
+    public static getFileContents(filePath: string): string {
         let fileContents: string;
-        Util.debug('Reading contents of `' + path + '`...');
+        Util.debug('Reading contents of `' + filePath + '`...');
         try {
-            fileContents = fs.readFileSync(path, 'utf8');
+            fileContents = fs.readFileSync(filePath, 'utf8');
         } catch (e) {
-            Util.error('Error reading `' + path + '`. Are you sure it exists?');
+            Util.error('Error reading `' + filePath + '`. Are you sure it exists?');
             Util.stackTrace(e);
             return undefined;
         }
@@ -135,16 +146,16 @@ export class Util {
 
     /**
      * Creates a directory if it doesn't exist
-     * @since 0.0.4
+     * @since 0.0.1
      */
-    public static createDirectory(path: string): boolean {
+    public static createDirectory(directoryPath: string): boolean {
         try {
-            if (!fs.existsSync(path)) {
-                fs.mkdirSync(path);
+            if (!fs.existsSync(directoryPath)) {
+                fs.mkdirSync(directoryPath);
             }
             return true;
         } catch (e) {
-            Util.error('Error creating directory `' + path + '`.');
+            Util.error('Error creating directory `' + directoryPath + '`.');
             Util.stackTrace(e);
             return false;
         }
@@ -152,7 +163,7 @@ export class Util {
 
     /**
      * Removes all consequent leading and trailing forward slashes
-     * @since 0.0.4
+     * @since 0.0.1
      */
     public static stripSlashes(stringWithSlashes: string): string {
         stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
@@ -162,7 +173,7 @@ export class Util {
 
     /**
      * Breaks a URI down into components
-     * @since 0.0.6
+     * @since 0.0.1
      */
     public static getUriComponents(uri: string): string[] {
         let strippedUri = Util.stripSlashes(uri);
@@ -171,6 +182,14 @@ export class Util {
             return [];
         }
         return components;
+    }
+
+    /**
+     * Extracts the filename from path, removing the extension
+     * @since 0.0.1
+     */
+    public static extractFileName(filePath: string) {
+        return path.basename(filePath).replace(/\.[^/.]+$/, '');
     }
 }
 

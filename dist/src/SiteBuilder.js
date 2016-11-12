@@ -140,6 +140,7 @@ var SiteBuilder = (function () {
         }
         var processedPageData = objectAssign({}, pageContent, { url: pageUrl });
         var blitzData = {
+            url: pageUrl,
             parent: parent,
         };
         if (page.child_pages && page.child_pages.length > 0) {

@@ -323,6 +323,7 @@ export class SiteBuilder {
 
         // Setup Blitz data that will be extracted from children
         let blitzData = {
+            url: pageUrl,
             parent,
         };
 

@@ -1,0 +1,8 @@
+/.idea/
+/src/
+/tests/
+/dist/tests/
+/typings/
+/tslint.json
+/gulpfile.js
+/blitz-ssg-*

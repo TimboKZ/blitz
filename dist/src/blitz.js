@@ -16,6 +16,11 @@ function main(argv) {
             flag: true,
             help: 'Skips all confirmation prompts by replying `yes`',
         },
+        map: {
+            abbr: 'm',
+            flag: true,
+            help: 'Print out a Blitz site map before building it',
+        },
         debug: {
             abbr: 'd',
             flag: true,

@@ -80,8 +80,56 @@ var SiteBuilder = (function () {
             if (directory.files.hasOwnProperty(fileName)) {
                 var file = directory.files[fileName];
                 var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                var processedMenus = {};
+                for (var menuName in this.menus) {
+                    if (this.menus.hasOwnProperty(menuName)) {
+                        var menu = this.menus[menuName];
+                        var itemCount = menu.length;
+                        var processedMenu = [];
+                        for (var i = 0; i < itemCount; i++) {
+                            var item = menu[i];
+                            var url = item.url();
+                            if (item.directoryArray !== undefined) {
+                                var array = item.directoryArray;
+                                if (item.fileName !== undefined) {
+                                    array = array.concat([item.fileName]);
+                                }
+                                url = this.generateUrl(array, currentDirectoryArray);
+                            }
+                            var active = file.url() === item.url();
+                            processedMenu.push({
+                                title: item.title,
+                                url: url,
+                                active: active,
+                            });
+                        }
+                        processedMenus[menuName] = processedMenu;
+                    }
+                }
+                for (var dataKey in file.blitzData) {
+                    if (file.blitzData.hasOwnProperty(dataKey)) {
+                        if (dataKey === 'url') {
+                            file.blitzData[dataKey] = file.blitzData[dataKey](currentDirectoryArray);
+                        }
+                        var dataValue = file.blitzData[dataKey];
+                        if (Object.prototype.toString.call(dataValue) === '[object Array]') {
+                            var dataLength = dataValue.length;
+                            for (var i = 0; i < dataLength; i++) {
+                                if (dataValue[i].url !== undefined && typeof dataValue[i].url === 'function') {
+                                    file.blitzData[dataKey][i].url
+                                        = file.blitzData[dataKey][i].url(currentDirectoryArray);
+                                }
+                            }
+                        }
+                        else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
+                            if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
+                                file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
+                            }
+                        }
+                    }
+                }
                 var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
-                    menus: this.menus,
+                    menus: processedMenus,
                     asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                 });
                 if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
@@ -117,9 +165,10 @@ var SiteBuilder = (function () {
         var partialDirectoryArray = partialFileArray.slice(0, partialFileArray.length - 1);
         var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
         var fileArray = this.generateFileArray(fullUriComponents);
+        var directoryArray = fileArray.slice(0, fileArray.length - 1);
         var fileName = fileArray[fileArray.length - 1];
         var fileNameWithoutExtension = Util_1.Util.extractFileName(fileName);
-        var pageUrl = this.generateUrl(fileArray, []);
+        var urlGenerator = this.getUrlGenerator(fileArray);
         var currentPageDirectory = this.descendToDirectory(parentDirectory, partialDirectoryArray);
         var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
         var pageContent = page.content;
@@ -131,9 +180,9 @@ var SiteBuilder = (function () {
             Util_1.Util.error('Could not extract content and compile Pug!');
             return undefined;
         }
-        var processedPageData = objectAssign({}, pageContent, { url: pageUrl });
+        var processedPageData = objectAssign({}, pageContent, { url: urlGenerator });
         var blitzData = {
-            url: pageUrl,
+            url: urlGenerator,
             parent: parent,
         };
         if (page.child_pages && page.child_pages.length > 0) {
@@ -162,7 +211,7 @@ var SiteBuilder = (function () {
         }
         var fileData = {
             name: fileName,
-            url: pageUrl,
+            url: urlGenerator,
             contentData: pageContent,
             blitzData: blitzData,
             generator: pugFunction,
@@ -185,11 +234,18 @@ var SiteBuilder = (function () {
                 if (this.menus[menu.name] === undefined) {
                     this.menus[menu.name] = [];
                 }
-                this.menus[menu.name].push({
+                var menuItem = {
                     title: menuTitle,
-                    url: pageUrl,
+                    url: urlGenerator,
                     active: false,
-                });
+                };
+                if (!this.config.absolute_urls) {
+                    menuItem.directoryArray = directoryArray;
+                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                        menuItem.fileName = fileName;
+                    }
+                }
+                this.menus[menu.name].push(menuItem);
             }
         }
         return processedPageData;
@@ -261,7 +317,11 @@ var SiteBuilder = (function () {
     SiteBuilder.prototype.generateAssetUrl = function (currentDirectoryArray, assetFileArray) {
         return this.generateUrl(['assets'].concat(assetFileArray), currentDirectoryArray);
     };
+    SiteBuilder.prototype.getUrlGenerator = function (targetFileArray) {
+        return this.generateUrl.bind(this, targetFileArray);
+    };
     SiteBuilder.prototype.generateUrl = function (targetFileArray, currentDirectoryArray) {
+        if (currentDirectoryArray === void 0) { currentDirectoryArray = []; }
         var urlArray = targetFileArray.slice(0);
         var targetDirectoryArray = targetFileArray.slice(0, targetFileArray.length - 1);
         var fileName = targetFileArray.slice(-1)[0];
@@ -316,7 +376,8 @@ var SiteBuilder = (function () {
                     }
                 }
             }
-            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+            if ((this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME)
+                && targetFileArray.length !== 0) {
                 if (relativeUrl !== '') {
                     relativeUrl = relativeUrl + '/';
                 }

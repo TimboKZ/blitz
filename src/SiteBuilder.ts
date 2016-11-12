@@ -36,7 +36,7 @@ const INDEX_FILE_NAME = 'index.html';
  */
 interface IBlitzMapFile {
     name: string;
-    url: string;
+    url: (currentDirectoryArray: string[] = []) => string;
     contentData: any;
     blitzData: any;
     generator: (locals?: any) => string;
@@ -56,6 +56,21 @@ interface IBlitzMapDirectory {
 }
 
 /**
+ * Interfaces for menus before processing
+ * @since 0.0.1
+ */
+interface IBlitzMapMenuItem {
+    title: string;
+    url: (currentDirectoryArray: string[] = []) => string;
+    fileName?: string;
+    directoryArray?: string[];
+    active: boolean;
+}
+interface IBlitzMapMenus {
+    [name: string]: IBlitzMapMenuItem[];
+}
+
+/**
  * Page menu interface
  * @since 0.0.1
  */
@@ -64,11 +79,6 @@ interface IBlitzPageMenuItem {
     url: string;
     active: boolean;
 }
-
-/**
- * Page menu interface
- * @since 0.0.1
- */
 interface IBlitzPageMenus {
     [name: string]: IBlitzPageMenuItem[];
 }
@@ -132,7 +142,7 @@ export class SiteBuilder {
      * Object holding all menus generated from the config
      * @since 0.0.1
      */
-    private menus: IBlitzPageMenus = {};
+    private menus: IBlitzMapMenus = {};
 
     /**
      * Cache of compiled Pug functions
@@ -224,6 +234,9 @@ export class SiteBuilder {
 
     /**
      * Builds all files in a directory, recursively
+     *
+     * This function also processes menus, updating relative links (if any) and marking current page as active
+     *
      * @since 0.0.1
      */
     private buildDirectory(directory: IBlitzMapDirectory, currentDirectoryArray: string[] = []): boolean {
@@ -233,13 +246,65 @@ export class SiteBuilder {
                 let file = directory.files[fileName];
                 let fileArray = currentDirectoryArray.slice(0).concat([file.name]);
                 // TODO: Active menu point?
+
+                // Process menus
+                let processedMenus: IBlitzPageMenus = {};
+                for (let menuName in this.menus) {
+                    if (this.menus.hasOwnProperty(menuName)) {
+                        let menu = this.menus[menuName];
+                        let itemCount = menu.length;
+                        let processedMenu = [];
+                        for (let i = 0; i < itemCount; i++) {
+                            let item = menu[i];
+                            let url = item.url();
+                            if (item.directoryArray !== undefined) {
+                                let array = item.directoryArray;
+                                if (item.fileName !== undefined) {
+                                    array = array.concat([item.fileName]);
+                                }
+                                url = this.generateUrl(array, currentDirectoryArray);
+                            }
+                            let active = file.url() === item.url();
+                            processedMenu.push({
+                                title: item.title,
+                                url,
+                                active,
+                            });
+                        }
+                        processedMenus[menuName] = processedMenu;
+                    }
+                }
+
+                // Process URLs in Blitz data
+                for (let dataKey in file.blitzData) {
+                    if (file.blitzData.hasOwnProperty(dataKey)) {
+                        if (dataKey === 'url') {
+                            file.blitzData[dataKey] = file.blitzData[dataKey](currentDirectoryArray);
+                        }
+                        let dataValue = file.blitzData[dataKey];
+                        if (Object.prototype.toString.call(dataValue) === '[object Array]') {
+                            let dataLength = dataValue.length;
+                            for (let i = 0; i < dataLength; i++) {
+                                if (dataValue[i].url !== undefined && typeof dataValue[i].url === 'function') {
+                                    file.blitzData[dataKey][i].url
+                                        = file.blitzData[dataKey][i].url(currentDirectoryArray);
+                                }
+                            }
+                        } else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
+                            if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
+                                file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
+                            }
+                        }
+                    }
+                }
+
                 let locals = objectAssign(
                     {},
                     this.config.globals,
                     file.contentData,
                     file.blitzData,
                     {
-                        menus: this.menus,
+                        menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                     }
                 );
@@ -290,9 +355,10 @@ export class SiteBuilder {
         // URI components with the parent
         let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
         let fileArray = this.generateFileArray(fullUriComponents);
+        let directoryArray = fileArray.slice(0, fileArray.length - 1);
         let fileName = fileArray[fileArray.length - 1];
         let fileNameWithoutExtension = Util.extractFileName(fileName);
-        let pageUrl = this.generateUrl(fileArray, []);
+        let urlGenerator = this.getUrlGenerator(fileArray);
 
         let currentPageDirectory = this.descendToDirectory(parentDirectory, partialDirectoryArray);
         let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
@@ -310,11 +376,11 @@ export class SiteBuilder {
         }
 
         // Created a processed page data object
-        let processedPageData = objectAssign({}, pageContent, {url: pageUrl});
+        let processedPageData = objectAssign({}, pageContent, {url: urlGenerator});
 
         // Setup Blitz data that will be extracted from children
         let blitzData = {
-            url: pageUrl,
+            url: urlGenerator,
             parent,
         };
 
@@ -359,7 +425,7 @@ export class SiteBuilder {
         // Generate file data for the map and append it to said map
         let fileData: IBlitzMapFile = {
             name: fileName,
-            url: pageUrl,
+            url: urlGenerator,
             contentData: pageContent,
             blitzData,
             generator: pugFunction,
@@ -382,11 +448,18 @@ export class SiteBuilder {
                 if (this.menus[menu.name] === undefined) {
                     this.menus[menu.name] = [];
                 }
-                this.menus[menu.name].push({
+                let menuItem: IBlitzMapMenuItem = {
                     title: menuTitle,
-                    url: pageUrl,
+                    url: urlGenerator,
                     active: false,
-                });
+                };
+                if (!this.config.absolute_urls) {
+                    menuItem.directoryArray = directoryArray;
+                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                        menuItem.fileName = fileName;
+                    }
+                }
+                this.menus[menu.name].push(menuItem);
             }
         }
 
@@ -494,6 +567,14 @@ export class SiteBuilder {
     }
 
     /**
+     * Partiall applies `generateUrl()` for easier relative URL generation
+     * @since 0.0.1
+     */
+    private getUrlGenerator(targetFileArray: string[]): (currentDirectoryArray: string[] = []) => string {
+        return this.generateUrl.bind(this, targetFileArray);
+    }
+
+    /**
      * Generates a URL to target file, take into account current directory and config settings, such as whether
      * absolute URLs are enabled, etc.
      *
@@ -501,7 +582,7 @@ export class SiteBuilder {
      *
      * @since 0.0.1
      */
-    public generateUrl(targetFileArray: string[], currentDirectoryArray: string[]): string {
+    public generateUrl(targetFileArray: string[], currentDirectoryArray: string[] = []): string {
         let urlArray = targetFileArray.slice(0);
         let targetDirectoryArray = targetFileArray.slice(0, targetFileArray.length - 1);
         let fileName = targetFileArray.slice(-1)[0];
@@ -553,7 +634,8 @@ export class SiteBuilder {
                     }
                 }
             }
-            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+            if ((this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME)
+                && targetFileArray.length !== 0) {
                 if (relativeUrl !== '') {
                     relativeUrl = relativeUrl + '/';
                 }

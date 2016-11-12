@@ -1,9 +1,9 @@
 "use strict";
 var nomnom = require('nomnom');
 var fs = require('fs');
+var path = require('path');
 var Util_1 = require('./Util');
 var Config_1 = require('./Config');
-var CONFIG_NAME = 'blitz.yml';
 var CONTENT_PATH = 'content';
 var TEMPLATES_PATH = 'templates';
 function main(argv) {
@@ -50,7 +50,17 @@ function init() {
 function build() {
     var directory = process.cwd();
     Util_1.Util.log('Building static site files in ' + directory + '...');
-    var config = Config_1.Config.loadConfig();
+    var config = Config_1.Config.load();
+    if (!config) {
+        return Util_1.Util.error('Could not load the config!');
+    }
+    if (!Config_1.Config.verify(config)) {
+        return Util_1.Util.error('Config is invalid!');
+    }
     Util_1.Util.debug('Starting building process...');
     Util_1.Util.log(config);
+    var buildDirectory = path.join(directory, 'build');
+    if (!fs.existsSync(buildDirectory)) {
+        fs.mkdirSync(buildDirectory);
+    }
 }

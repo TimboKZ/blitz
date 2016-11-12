@@ -3,11 +3,12 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.3
+ * @version 0.0.4
  */
 
 import * as nomnom from 'nomnom';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as pug from 'pug';
 import {Util} from './Util';
 import {Config} from './Config';
@@ -16,7 +17,6 @@ import {Config} from './Config';
  * Blitz constants, self-explanatory
  * @since 0.0.2
  */
-const CONFIG_NAME = 'blitz.yml';
 const CONTENT_PATH = 'content';
 const TEMPLATES_PATH = 'templates';
 
@@ -85,7 +85,18 @@ function init() {
 function build() {
     let directory = process.cwd();
     Util.log('Building static site files in ' + directory + '...');
-    let config = Config.loadConfig();
+    let config = Config.load();
+    if (!config) {
+        return Util.error('Could not load the config!');
+    }
+    if (!Config.verify(config)) {
+        return Util.error('Config is invalid!');
+    }
     Util.debug('Starting building process...');
     Util.log(config);
+    let buildDirectory = path.join(directory, 'build');
+    if (!fs.existsSync(buildDirectory)) {
+        fs.mkdirSync(buildDirectory);
+    }
+
 }

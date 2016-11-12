@@ -13,6 +13,7 @@ import * as fse from 'fs-extra';
 import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
 import {Util} from './Util';
+import {args} from './blitz';
 
 /**
  * Constants indicating the locations of assets, content and templates
@@ -176,8 +177,10 @@ export class SiteBuilder {
             Util.error('Map generation failed!');
             return undefined;
         }
-
         Util.debug('Site map generated!');
+        if (args.map) {
+            Util.log(JSON.stringify(this.siteMap));
+        }
         Util.debug('Building site . . . ');
         if (!this.buildSite()) {
             Util.error('Site building failed!');
@@ -273,38 +276,26 @@ export class SiteBuilder {
                             parent?: IBlitzProcessedPage): IBlitzProcessedPage {
 
         // Generate file and directory arrays and extract filename
-        let uriComponents;
+        let ownUriComponents;
         if (page.uri === undefined) {
-            uriComponents = [Util.extractFileName(page.content)];
+            ownUriComponents = [Util.extractFileName(page.content)];
         } else {
-            uriComponents = Util.getUriComponents(page.uri);
+            ownUriComponents = Util.getUriComponents(page.uri);
         }
 
         // URI components without the parent
-        let partialUriComponents = uriComponents.slice(0);
-        let partialDirectoryArray = this.generateFileArray(partialUriComponents);
-        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
+        let partialFileArray = this.generateFileArray(ownUriComponents);
+        let partialDirectoryArray = partialFileArray.slice(0, partialFileArray.length - 1);
 
-        // URI Ccomponents with the parent
-        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
-        let fileArray = this.generateFileArray(uriComponents);
+        // URI components with the parent
+        let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+        let fileArray = this.generateFileArray(fullUriComponents);
         let fileName = fileArray[fileArray.length - 1];
         let fileNameWithoutExtension = Util.extractFileName(fileName);
         let pageUrl = this.generateUrl(fileArray, []);
 
-        // Switch to a relevant directory
-        let currentDirectory = parentDirectory;
-        let directoryCount = partialDirectoryArray.length;
-        for (let k = 0; k < directoryCount; k++) {
-            let newDirectory = partialDirectoryArray[k];
-            if (currentDirectory.directories[newDirectory] === undefined) {
-                currentDirectory.directories[newDirectory] = {
-                    directories: {},
-                    files: {},
-                };
-            }
-            currentDirectory = currentDirectory.directories[newDirectory];
-        }
+        let currentPageDirectory = this.descendToDirectory(parentDirectory, partialDirectoryArray);
+        let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
 
         // Extract content and prepare pug
         // If passed `content` is a string, use it as path to compile Pug, otherwise use `content` object as is
@@ -334,8 +325,8 @@ export class SiteBuilder {
                 let childPage = page.child_pages[i];
                 let childData = this.parseConfigPage(
                     childPage,
-                    currentDirectory,
-                    uriComponents,
+                    childrenDirectory,
+                    fullUriComponents,
                     processedPageData
                 );
                 if (childData === undefined) {
@@ -353,8 +344,8 @@ export class SiteBuilder {
                 let childDirectory = page.child_directories[i];
                 let childData = this.parseConfigDirectory(
                     childDirectory,
-                    currentDirectory,
-                    uriComponents,
+                    childrenDirectory,
+                    fullUriComponents,
                     processedPageData
                 );
                 if (childData === undefined) {
@@ -373,7 +364,7 @@ export class SiteBuilder {
             blitzData,
             generator: pugFunction,
         };
-        currentDirectory.files[fileData.name] = fileData;
+        currentPageDirectory.files[fileData.name] = fileData;
 
         // Append data to menu if needed
         if (page.menus) {
@@ -413,34 +404,17 @@ export class SiteBuilder {
                                  parent?: IBlitzProcessedPage): IBlitzProcessedPage[] {
 
         // Generate file and directory arrays and extract filename
-        let uriComponents;
+        let ownUriComponents;
         if (directory.uri === undefined) {
-            uriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
+            ownUriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
         } else {
-            uriComponents = Util.getUriComponents(directory.uri);
+            ownUriComponents = Util.getUriComponents(directory.uri);
         }
-
-        // URI components without the parent
-        let partialUriComponents = uriComponents.slice(0);
-        let partialDirectoryArray = this.generateFileArray(partialUriComponents);
-        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
 
         // URI Components with the parent
-        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
+        let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
 
-        // Switch to a relevant directory
-        let currentDirectory = parentDirectory;
-        let directoryCount = partialDirectoryArray.length;
-        for (let k = 0; k < directoryCount; k++) {
-            let newDirectory = partialDirectoryArray[k];
-            if (currentDirectory.directories[newDirectory] === undefined) {
-                currentDirectory.directories[newDirectory] = {
-                    directories: {},
-                    files: {},
-                };
-            }
-            currentDirectory = currentDirectory.directories[newDirectory];
-        }
+        let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
 
         let pagesContent = ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
         if (pagesContent === undefined) {
@@ -462,7 +436,7 @@ export class SiteBuilder {
                 template: directory.template,
                 content: pageContent,
             };
-            let pageData = this.parseConfigPage(pageConfigData, currentDirectory, uriComponents, parent);
+            let pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
             if (pageData === undefined) {
                 Util.error('Could not parse config page generated for directory!');
                 return undefined;
@@ -471,6 +445,26 @@ export class SiteBuilder {
         }
 
         return processedPages;
+    }
+
+    /**
+     * Descend to the final directory in the array, returning a reference to it
+     * @since 0.0.1
+     */
+    private descendToDirectory(directory: IBlitzMapDirectory, directoryArray: string[]): IBlitzMapDirectory {
+        let currentDirectory = directory;
+        let directoryCount = directoryArray.length;
+        for (let i = 0; i < directoryCount; i++) {
+            let newDirectory = directoryArray[i];
+            if (currentDirectory.directories[newDirectory] === undefined) {
+                currentDirectory.directories[newDirectory] = {
+                    directories: {},
+                    files: {},
+                };
+            }
+            currentDirectory = currentDirectory.directories[newDirectory];
+        }
+        return currentDirectory;
     }
 
     /**
@@ -495,7 +489,7 @@ export class SiteBuilder {
      *
      * @since 0.0.1
      */
-    public generateAssetUrl(currentDirectoryArray: string[], assetFileArray: string[]): string {
+    private generateAssetUrl(currentDirectoryArray: string[], assetFileArray: string[]): string {
         return this.generateUrl(['assets'].concat(assetFileArray), currentDirectoryArray);
     }
 

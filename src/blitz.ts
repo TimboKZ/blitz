@@ -51,22 +51,24 @@ export function main(argv: string[]) {
     switch (action) {
         case 'init':
             init();
+            Util.log('Project initiliasation completed!');
             break;
         case 'build':
             build();
+            Util.log('Build completed!');
             break;
         case 'preview':
             Util.log('This command has not yet been implemented.');
             // TODO: Implement preview feature.
             break;
         case undefined:
-            Util.log('Use `blitz -h` for help.');
+            Util.log('Use ' + 'blitz -h'.cyan + ' for help.');
+            Util.log('For full documentation, refer to ' + 'https://github.com/TimboKZ/blitz'.cyan);
             break;
         default:
-            Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
+            Util.log('Unrecognised action: ' + action.cyan + '. Use `blitz -h` for help.');
             Util.log('For full documentation, refer to ' + 'https://github.com/TimboKZ/blitz'.cyan);
     }
-    Util.log('Done!');
 }
 
 /**

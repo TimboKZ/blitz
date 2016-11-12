@@ -5,6 +5,7 @@ var objectAssign = require('object-assign');
 var fse = require('fs-extra');
 var ContentParser_1 = require('./ContentParser');
 var Util_1 = require('./Util');
+var blitz_1 = require('./blitz');
 var ASSETS_DIRECTORY = 'assets';
 var BUILD_ASSETS_DIRECTORY = 'assets';
 var CONTENT_DIRECTORY = 'content';
@@ -43,6 +44,9 @@ var SiteBuilder = (function () {
             return undefined;
         }
         Util_1.Util.debug('Site map generated!');
+        if (blitz_1.args.map) {
+            Util_1.Util.log(JSON.stringify(this.siteMap));
+        }
         Util_1.Util.debug('Building site . . . ');
         if (!this.buildSite()) {
             Util_1.Util.error('Site building failed!');
@@ -102,33 +106,22 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.parseConfigPage = function (page, parentDirectory, parentUriComponents, parent) {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
-        var uriComponents;
+        var ownUriComponents;
         if (page.uri === undefined) {
-            uriComponents = [Util_1.Util.extractFileName(page.content)];
+            ownUriComponents = [Util_1.Util.extractFileName(page.content)];
         }
         else {
-            uriComponents = Util_1.Util.getUriComponents(page.uri);
+            ownUriComponents = Util_1.Util.getUriComponents(page.uri);
         }
-        var partialUriComponents = uriComponents.slice(0);
-        var partialDirectoryArray = this.generateFileArray(partialUriComponents);
-        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
-        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
-        var fileArray = this.generateFileArray(uriComponents);
+        var partialFileArray = this.generateFileArray(ownUriComponents);
+        var partialDirectoryArray = partialFileArray.slice(0, partialFileArray.length - 1);
+        var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+        var fileArray = this.generateFileArray(fullUriComponents);
         var fileName = fileArray[fileArray.length - 1];
         var fileNameWithoutExtension = Util_1.Util.extractFileName(fileName);
         var pageUrl = this.generateUrl(fileArray, []);
-        var currentDirectory = parentDirectory;
-        var directoryCount = partialDirectoryArray.length;
-        for (var k = 0; k < directoryCount; k++) {
-            var newDirectory = partialDirectoryArray[k];
-            if (currentDirectory.directories[newDirectory] === undefined) {
-                currentDirectory.directories[newDirectory] = {
-                    directories: {},
-                    files: {},
-                };
-            }
-            currentDirectory = currentDirectory.directories[newDirectory];
-        }
+        var currentPageDirectory = this.descendToDirectory(parentDirectory, partialDirectoryArray);
+        var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
         var pageContent = page.content;
         if (typeof page.content === 'string') {
             pageContent = ContentParser_1.ContentParser.parseFile(path.join(this.contentPath, page.content));
@@ -147,7 +140,7 @@ var SiteBuilder = (function () {
             var pageCount = page.child_pages.length;
             for (var i = 0; i < pageCount; i++) {
                 var childPage = page.child_pages[i];
-                var childData = this.parseConfigPage(childPage, currentDirectory, uriComponents, processedPageData);
+                var childData = this.parseConfigPage(childPage, childrenDirectory, fullUriComponents, processedPageData);
                 if (childData === undefined) {
                     Util_1.Util.error('Failed parsing child page!');
                     return undefined;
@@ -159,7 +152,7 @@ var SiteBuilder = (function () {
             var childDirectoryCount = page.child_directories.length;
             for (var i = 0; i < childDirectoryCount; i++) {
                 var childDirectory = page.child_directories[i];
-                var childData = this.parseConfigDirectory(childDirectory, currentDirectory, uriComponents, processedPageData);
+                var childData = this.parseConfigDirectory(childDirectory, childrenDirectory, fullUriComponents, processedPageData);
                 if (childData === undefined) {
                     Util_1.Util.error('Failed parsing child directory!');
                     return undefined;
@@ -174,7 +167,7 @@ var SiteBuilder = (function () {
             blitzData: blitzData,
             generator: pugFunction,
         };
-        currentDirectory.files[fileData.name] = fileData;
+        currentPageDirectory.files[fileData.name] = fileData;
         if (page.menus) {
             var menuCount = page.menus.length;
             for (var k = 0; k < menuCount; k++) {
@@ -203,29 +196,15 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.parseConfigDirectory = function (directory, parentDirectory, parentUriComponents, parent) {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
-        var uriComponents;
+        var ownUriComponents;
         if (directory.uri === undefined) {
-            uriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
+            ownUriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
         }
         else {
-            uriComponents = Util_1.Util.getUriComponents(directory.uri);
+            ownUriComponents = Util_1.Util.getUriComponents(directory.uri);
         }
-        var partialUriComponents = uriComponents.slice(0);
-        var partialDirectoryArray = this.generateFileArray(partialUriComponents);
-        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
-        uriComponents = parentUriComponents.slice(0).concat(uriComponents);
-        var currentDirectory = parentDirectory;
-        var directoryCount = partialDirectoryArray.length;
-        for (var k = 0; k < directoryCount; k++) {
-            var newDirectory = partialDirectoryArray[k];
-            if (currentDirectory.directories[newDirectory] === undefined) {
-                currentDirectory.directories[newDirectory] = {
-                    directories: {},
-                    files: {},
-                };
-            }
-            currentDirectory = currentDirectory.directories[newDirectory];
-        }
+        var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+        var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
         var pagesContent = ContentParser_1.ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
         if (pagesContent === undefined) {
             Util_1.Util.error('Could not extract content from directory!');
@@ -244,7 +223,7 @@ var SiteBuilder = (function () {
                 template: directory.template,
                 content: pageContent,
             };
-            var pageData = this.parseConfigPage(pageConfigData, currentDirectory, uriComponents, parent);
+            var pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
             if (pageData === undefined) {
                 Util_1.Util.error('Could not parse config page generated for directory!');
                 return undefined;
@@ -252,6 +231,21 @@ var SiteBuilder = (function () {
             processedPages.push(pageData);
         }
         return processedPages;
+    };
+    SiteBuilder.prototype.descendToDirectory = function (directory, directoryArray) {
+        var currentDirectory = directory;
+        var directoryCount = directoryArray.length;
+        for (var i = 0; i < directoryCount; i++) {
+            var newDirectory = directoryArray[i];
+            if (currentDirectory.directories[newDirectory] === undefined) {
+                currentDirectory.directories[newDirectory] = {
+                    directories: {},
+                    files: {},
+                };
+            }
+            currentDirectory = currentDirectory.directories[newDirectory];
+        }
+        return currentDirectory;
     };
     SiteBuilder.prototype.generateFileArray = function (uriComponents) {
         var fileArray = uriComponents.slice(0);

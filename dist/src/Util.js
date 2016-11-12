@@ -1,7 +1,6 @@
 "use strict";
 var yaml = require('js-yaml');
 var marked = require('marked');
-var blitz_1 = require('./blitz');
 var Util = (function () {
     function Util() {
     }
@@ -12,7 +11,7 @@ var Util = (function () {
         console.log(object);
     };
     Util.debug = function (object) {
-        if (blitz_1.args.debug) {
+        if (global.debug) {
             console.log(object);
         }
     };

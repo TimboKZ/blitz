@@ -36,7 +36,7 @@ export class Util {
      * @since 0.0.1
      */
     public static debug(object: any) {
-        if (args.debug) {
+        if (global.debug) {
             console.log(object);
         }
     }
@@ -50,7 +50,7 @@ export class Util {
         let parsedYaml: any;
         try {
             parsedYaml = yaml.safeLoad(yamlString);
-        } catch (e: Error) {
+        } catch (e) {
             Util.error('Error parsing YAML!');
             Util.error(e);
             return undefined;

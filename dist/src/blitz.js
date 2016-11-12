@@ -24,6 +24,7 @@ function main(argv) {
             help: 'Print debug info',
         },
     }).parse(argv);
+    global.debug = exports.args.debug;
     var action = exports.args.action;
     switch (action) {
         case 'init':

@@ -9,7 +9,7 @@
     "blitz": "./blitz-cli"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./dist/tests/"
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,15 @@
   },
   "homepage": "https://github.com/TimboKZ/blitz#readme",
   "devDependencies": {
+    "chai": "^3.5.0",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.1.2",
+    "mocha": "^3.1.2",
     "typescript": "^2.0.9"
   },
   "dependencies": {
     "js-yaml": "^3.6.1",
+    "marked": "^0.3.6",
     "nomnom": "^1.8.1",
     "pug": "^2.0.0-beta6"
   }

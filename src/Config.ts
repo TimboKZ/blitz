@@ -30,7 +30,7 @@ export class Config {
         Util.debug('Loading Blitz config from `' + configPath + '`...');
         try {
             configContent = fs.readFileSync(configPath, 'utf8');
-        } catch (e: Error) {
+        } catch (e) {
             Util.error('Error reading `' + configPath + '`. Are you sure it exists?');
             Util.error(e);
             return undefined;
@@ -41,6 +41,7 @@ export class Config {
             return undefined;
         }
         Util.debug('Successfully parsed YAML!');
+
         return config;
     }
 

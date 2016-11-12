@@ -48,6 +48,7 @@ export function main(argv: string[]) {
                 help: 'Print debug info',
             },
         }).parse(argv);
+    global.debug = args.debug;
     let action = args.action;
     switch (action) {
         case 'init':

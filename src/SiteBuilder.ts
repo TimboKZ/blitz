@@ -3,14 +3,13 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.2
+ * @version 0.0.3
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import * as pug from 'pug';
 import * as objectAssign from 'object-assign';
-import {IBlitzConfig, IBlitzRootPage, IBlitzChildPage} from './ConfigParser';
+import {IBlitzConfig, IBlitzRootPage, IBlitzChildPage, IBlitzChildDirectory} from './ConfigParser';
 import {ContentParser} from './ContentParser';
 import {Util} from './Util';
 
@@ -34,6 +33,24 @@ const INDEX_FILE_NAME = 'index.html';
  */
 interface IPugCache {
     [path: string]: (locals?: any) => string;
+}
+
+/**
+ * Page menu interface
+ * @since 0.0.3
+ */
+interface IBlitzPageMenuItem {
+    title: string;
+    link: string;
+}
+
+/**
+ * Interface for data extracted from the content file with additional post processing data, such as URL
+ * @since 0.0.3
+ */
+interface IBlitzChildData {
+    url: string;
+    [key: string]: any;
 }
 
 /**
@@ -106,29 +123,11 @@ export class SiteBuilder {
         let count = this.config.pages.length;
         for (let i = 0; i < count; i++) {
             let page = this.config.pages[i];
-            this.buildRootPage(page);
-
-            continue;
-
-            // TODO: Cache Pug functions
-            // TODO: Delete existing files from the directory
-            let pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
-            let pugFunction = pug.compileFile(path.join(this.templatesPath, page.template));
-            let strippedUri = Util.stripSlashes(page.uri);
-            let urlComponents = strippedUri.split('/');
-            let currentPath = this.buildPath;
-            if (strippedUri.length !== 0) {
-                let componentCount = urlComponents.length;
-                for (let k = 0; k < componentCount; k++) {
-                    let urlComponent = urlComponents[k];
-                    currentPath = path.join(currentPath, urlComponent);
-                    if (!Util.createDirectory(currentPath)) {
-                        Util.error('Could not create the directory `' + currentPath + '`!');
-                        return undefined;
-                    }
-                }
+            if (!this.buildRootPage(page)) {
+                Util.error('Failed to build a root page!');
+                Util.error('Aborting build process!');
+                return undefined;
             }
-            fs.writeFileSync(path.join(currentPath, 'index.html'), pugFunction(pageContent));
         }
     }
 
@@ -139,10 +138,7 @@ export class SiteBuilder {
      *
      * @since 0.0.2
      */
-    private buildRootPage(page: IBlitzRootPage) {
-
-        let menu = [];
-        let children = [];
+    private buildRootPage(page: IBlitzRootPage): boolean {
 
         let uriComponents = Util.getUriComponents(page.uri);
         let fileArray;
@@ -159,22 +155,88 @@ export class SiteBuilder {
             fileArray = [INDEX_FILE_NAME];
         }
 
-        if (page.children) {
+        let menu = [];
+        let childPages = {};
+        if (page.child_pages && page.child_pages.length > 0) {
+            let childPageCount = page.child_pages.length;
+            for (let i = 0; i < childPageCount; i++) {
+                let childPage = page.child_pages[i];
+                let childPageObject = this.buildChildPage(childPage, uriComponents);
+                if (!childPageObject) {
+                    Util.error('Could not build child page!');
+                    return false;
+                }
+                childPages[childPage.name] = childPageObject;
+                if (childPage.show_in_menu) {
+                    // TODO: Fetch URL and Title for `menu` array
+                }
+            }
+        }
 
+        let childDirectories = [];
+        if (page.child_directories && page.child_directories.length > 0) {
+            let childDirectoryCount = page.child_directories.length;
+            for (let i = 0; i < childDirectoryCount; i++) {
+                let childDirectory = page.child_directories[i];
+                let childDirectoryObject = this.buildChildDirectory(childDirectory, uriComponents);
+                if (childDirectoryObject === undefined) {
+                    Util.error('Could not build child directory!');
+                    return false;
+                }
+                childDirectories[childDirectory.name] = childDirectoryObject;
+            }
         }
 
         let pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
         let pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
-        let locals = objectAssign({}, this.config.globals, pageContent, {menu, children});
-        Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals));
+        let blitzLocals = {
+            menu,
+            // TODO: Add functions like URL
+            url: this.getUrl(uriComponents),
+        };
+        let locals = objectAssign({}, this.config.globals, pageContent, childPages, childDirectories, blitzLocals);
+        if (!Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals))) {
+            Util.error('Could not write root page to file!');
+            return false;
+        }
+        return true;
     }
 
     /**
      * Builds up a child page recursively
      * @since 0.0.2
      */
-    private buildChildPage(pageConfig: IBlitzChildPage) {
+    private buildChildPage(pageConfig: IBlitzChildPage, currentFileArray: string[]): IBlitzChildData {
+        return {
+            url: '/test',
+        };
+    }
 
+    /**
+     * Builds up a child directory
+     * @since 0.0.3
+     */
+    private buildChildDirectory(directoryConfig: IBlitzChildDirectory, currentFileArray: string[]): IBlitzChildData[] {
+        return [];
+    }
+
+    /**
+     * Generates a URL based on current config and file array
+     * @since 0.0.3
+     */
+    private getUrl(uriComponents: string[]): string {
+        let url = uriComponents.join('/');
+        if (this.config.absolute_urls) {
+            url = '/' + this.config.site_root + '/' + url;
+        } else {
+            url = './' + url;
+        }
+        if (this.config.explicit_html_extensions) {
+            url = url + '.html';
+        } else {
+            url = url + '/';
+        }
+        return url;
     }
 
     /**

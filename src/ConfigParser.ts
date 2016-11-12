@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.4
+ * @version 0.0.5
  */
 
 import * as path from 'path';
@@ -16,25 +16,27 @@ import {Util} from './Util';
 export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
- * Interface for children of top level pages
- *
- * Properties (`directory`) and (`children`, content) are mutually exclusive.
- *
+ * Interface for child pages of top level pages
  * @since 0.0.4
  */
 export interface IBlitzChildPage {
     uri?: string;
     name: string;
     template: string;
-
-    /** If the content is to be loaded from a directory */
-    directory?: string;
-    uri_key?: string;
-
-    /** If the content is to be loaded from a file */
-    content?: string;
+    content: string;
     show_in_menu?: boolean;
     children?: IBlitzChildPage[];
+}
+
+/**
+ * Interface for child directories of top level pages
+ * @since 0.0.4
+ */
+export interface IBlitzChildDirectory {
+    uri?: string;
+    name: string;
+    template: string;
+    directory: string;
 }
 
 /**
@@ -45,7 +47,8 @@ export interface IBlitzRootPage {
     uri?: string;
     content: string;
     template: string;
-    children?: IBlitzChildPage[];
+    child_pages?: IBlitzChildPage[];
+    child_directories?: IBlitzChildDirectory[];
 }
 
 /**

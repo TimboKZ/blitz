@@ -1,5 +1,4 @@
 "use strict";
-var fs = require('fs');
 var path = require('path');
 var pug = require('pug');
 var objectAssign = require('object-assign');
@@ -30,30 +29,14 @@ var SiteBuilder = (function () {
         var count = this.config.pages.length;
         for (var i = 0; i < count; i++) {
             var page = this.config.pages[i];
-            this.buildRootPage(page);
-            continue;
-            var pageContent = ContentParser_1.ContentParser.parseFile(path.join(this.contentPath, page.content));
-            var pugFunction = pug.compileFile(path.join(this.templatesPath, page.template));
-            var strippedUri = Util_1.Util.stripSlashes(page.uri);
-            var urlComponents = strippedUri.split('/');
-            var currentPath = this.buildPath;
-            if (strippedUri.length !== 0) {
-                var componentCount = urlComponents.length;
-                for (var k = 0; k < componentCount; k++) {
-                    var urlComponent = urlComponents[k];
-                    currentPath = path.join(currentPath, urlComponent);
-                    if (!Util_1.Util.createDirectory(currentPath)) {
-                        Util_1.Util.error('Could not create the directory `' + currentPath + '`!');
-                        return undefined;
-                    }
-                }
+            if (!this.buildRootPage(page)) {
+                Util_1.Util.error('Failed to build a root page!');
+                Util_1.Util.error('Aborting build process!');
+                return undefined;
             }
-            fs.writeFileSync(path.join(currentPath, 'index.html'), pugFunction(pageContent));
         }
     };
     SiteBuilder.prototype.buildRootPage = function (page) {
-        var menu = [];
-        var children = [];
         var uriComponents = Util_1.Util.getUriComponents(page.uri);
         var fileArray;
         if (uriComponents.length > 0 && uriComponents[1] !== '') {
@@ -69,14 +52,71 @@ var SiteBuilder = (function () {
         else {
             fileArray = [INDEX_FILE_NAME];
         }
-        if (page.children) {
+        var menu = [];
+        var childPages = {};
+        if (page.child_pages && page.child_pages.length > 0) {
+            var childPageCount = page.child_pages.length;
+            for (var i = 0; i < childPageCount; i++) {
+                var childPage = page.child_pages[i];
+                var childPageObject = this.buildChildPage(childPage, uriComponents);
+                if (!childPageObject) {
+                    Util_1.Util.error('Could not build child page!');
+                    return false;
+                }
+                childPages[childPage.name] = childPageObject;
+                if (childPage.show_in_menu) {
+                }
+            }
+        }
+        var childDirectories = [];
+        if (page.child_directories && page.child_directories.length > 0) {
+            var childDirectoryCount = page.child_directories.length;
+            for (var i = 0; i < childDirectoryCount; i++) {
+                var childDirectory = page.child_directories[i];
+                var childDirectoryObject = this.buildChildDirectory(childDirectory, uriComponents);
+                if (childDirectoryObject === undefined) {
+                    Util_1.Util.error('Could not build child directory!');
+                    return false;
+                }
+                childDirectories[childDirectory.name] = childDirectoryObject;
+            }
         }
         var pageContent = ContentParser_1.ContentParser.parseFile(path.join(this.contentPath, page.content));
         var pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
-        var locals = objectAssign({}, this.config.globals, pageContent, { menu: menu, children: children });
-        Util_1.Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals));
+        var blitzLocals = {
+            menu: menu,
+            url: this.getUrl(uriComponents),
+        };
+        var locals = objectAssign({}, this.config.globals, pageContent, childPages, childDirectories, blitzLocals);
+        if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals))) {
+            Util_1.Util.error('Could not write root page to file!');
+            return false;
+        }
+        return true;
     };
-    SiteBuilder.prototype.buildChildPage = function (pageConfig) {
+    SiteBuilder.prototype.buildChildPage = function (pageConfig, currentFileArray) {
+        return {
+            url: '/test',
+        };
+    };
+    SiteBuilder.prototype.buildChildDirectory = function (directoryConfig, currentFileArray) {
+        return [];
+    };
+    SiteBuilder.prototype.getUrl = function (uriComponents) {
+        var url = uriComponents.join('/');
+        if (this.config.absolute_urls) {
+            url = '/' + this.config.site_root + '/' + url;
+        }
+        else {
+            url = './' + url;
+        }
+        if (this.config.explicit_html_extensions) {
+            url = url + '.html';
+        }
+        else {
+            url = url + '/';
+        }
+        return url;
     };
     SiteBuilder.prototype.compilePug = function (path) {
         if (!this.pugCache[path]) {

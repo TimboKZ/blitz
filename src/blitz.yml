@@ -39,13 +39,14 @@ pages:
   - uri: '/research'
     content: 'research.md'
     template: 'research.pug'
-    children:
+    child_pages:
+      - uri: '/structure'
+        name: 'researchStructure'
+        template: 'page.pug'
+        content: 'research-structure.md'
+        show_in_menu: true
+    child_directories:
       - uri: '/'
         name: 'researchTopics' # TODO: Name of the object that will be passed to Pug
         template: 'page.pug'
         directory: 'research-topics'
-      - uri: '/structure'
-        name: 'researchStructure'
-        template: 'page.pug'
-        content: 'research-structure.mdSS'
-        show_in_menu: true

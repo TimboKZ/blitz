@@ -16,38 +16,28 @@ import {Util} from './Util';
 export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
- * Interface for child pages of top level pages
- * @since 0.0.4
- */
-export interface IBlitzChildPage {
-    uri?: string;
-    name: string;
-    template: string;
-    content: string;
-    show_in_menu?: boolean;
-    children?: IBlitzChildPage[];
-}
-
-/**
  * Interface for child directories of top level pages
  * @since 0.0.4
  */
 export interface IBlitzChildDirectory {
     uri?: string;
+    uri_key?: string;
     name: string;
     template: string;
     directory: string;
 }
 
 /**
- * Top level page of Blitz
+ * Interface for child pages of top level pages
  * @since 0.0.4
  */
-export interface IBlitzRootPage {
+export interface IBlitzPage {
     uri?: string;
-    content: string;
+    name: string;
     template: string;
-    child_pages?: IBlitzChildPage[];
+    content: string;
+    show_in_menu?: boolean;
+    child_pages?: IBlitzPage[];
     child_directories?: IBlitzChildDirectory[];
 }
 
@@ -62,7 +52,7 @@ export interface IBlitzConfig {
     absolute_urls: boolean;
     explicit_html_extensions: boolean;
     globals: any;
-    pages: IBlitzRootPage[];
+    pages: IBlitzPage[];
 }
 
 /**

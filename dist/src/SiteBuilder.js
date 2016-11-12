@@ -29,15 +29,17 @@ var SiteBuilder = (function () {
         var count = this.config.pages.length;
         for (var i = 0; i < count; i++) {
             var page = this.config.pages[i];
-            if (!this.buildRootPage(page)) {
+            if (this.buildPage(page) === undefined) {
                 Util_1.Util.error('Failed to build a root page!');
                 Util_1.Util.error('Aborting build process!');
                 return undefined;
             }
         }
     };
-    SiteBuilder.prototype.buildRootPage = function (page) {
-        var uriComponents = Util_1.Util.getUriComponents(page.uri);
+    SiteBuilder.prototype.buildPage = function (page, currentUriComponents, isRoot) {
+        if (currentUriComponents === void 0) { currentUriComponents = []; }
+        if (isRoot === void 0) { isRoot = true; }
+        var uriComponents = currentUriComponents.concat(Util_1.Util.getUriComponents(page.uri));
         var fileArray;
         if (uriComponents.length > 0 && uriComponents[1] !== '') {
             fileArray = uriComponents.slice(0);
@@ -58,13 +60,24 @@ var SiteBuilder = (function () {
             var childPageCount = page.child_pages.length;
             for (var i = 0; i < childPageCount; i++) {
                 var childPage = page.child_pages[i];
-                var childPageObject = this.buildChildPage(childPage, uriComponents);
+                var childPageObject = this.buildPage(childPage, uriComponents, false);
                 if (!childPageObject) {
                     Util_1.Util.error('Could not build child page!');
-                    return false;
+                    return undefined;
                 }
                 childPages[childPage.name] = childPageObject;
-                if (childPage.show_in_menu) {
+                if (childPage.show_in_menu !== false) {
+                    var menuButtonText_1 = childPage.name;
+                    if (childPageObject.menu_button) {
+                        menuButtonText_1 = childPageObject.menu_button;
+                    }
+                    else if (childPageObject.title) {
+                        menuButtonText_1 = childPageObject.title;
+                    }
+                    menu.push({
+                        title: menuButtonText_1,
+                        url: childPageObject.url,
+                    });
                 }
             }
         }
@@ -76,45 +89,58 @@ var SiteBuilder = (function () {
                 var childDirectoryObject = this.buildChildDirectory(childDirectory, uriComponents);
                 if (childDirectoryObject === undefined) {
                     Util_1.Util.error('Could not build child directory!');
-                    return false;
+                    return undefined;
                 }
                 childDirectories[childDirectory.name] = childDirectoryObject;
             }
         }
         var pageContent = ContentParser_1.ContentParser.parseFile(path.join(this.contentPath, page.content));
+        var menuButtonText = isRoot ? 'Index' : page.name;
+        if (pageContent.menu_button) {
+            menuButtonText = pageContent.menu_button;
+        }
+        else if (pageContent.title) {
+            menuButtonText = pageContent.title;
+        }
+        var pageUrl = this.getUrl(uriComponents);
+        menu.unshift({
+            title: menuButtonText,
+            url: pageUrl,
+        });
         var pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
         var blitzLocals = {
             menu: menu,
-            url: this.getUrl(uriComponents),
+            url: pageUrl,
         };
         var locals = objectAssign({}, this.config.globals, pageContent, childPages, childDirectories, blitzLocals);
         if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals))) {
             Util_1.Util.error('Could not write root page to file!');
-            return false;
+            return undefined;
         }
-        return true;
-    };
-    SiteBuilder.prototype.buildChildPage = function (pageConfig, currentFileArray) {
-        return {
-            url: '/test',
-        };
+        return objectAssign({}, pageContent, { url: pageUrl });
     };
     SiteBuilder.prototype.buildChildDirectory = function (directoryConfig, currentFileArray) {
         return [];
     };
     SiteBuilder.prototype.getUrl = function (uriComponents) {
-        var url = uriComponents.join('/');
+        var empty = uriComponents.length < 1 || uriComponents[0] === '';
+        var url = Util_1.Util.stripSlashes(uriComponents.join('/'));
         if (this.config.absolute_urls) {
-            url = '/' + this.config.site_root + '/' + url;
+            if (!this.config.site_root || this.config.site_root === '') {
+                url = '/' + url;
+            }
+            else {
+                url = '/' + this.config.site_root + '/' + url;
+            }
         }
         else {
             url = './' + url;
         }
         if (this.config.explicit_html_extensions) {
-            url = url + '.html';
+            url = url + (empty ? 'index' : '') + '.html';
         }
         else {
-            url = url + '/';
+            url = url + (empty ? '' : '/');
         }
         return url;
     };

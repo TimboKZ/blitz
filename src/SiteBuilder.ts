@@ -9,7 +9,7 @@
 import * as path from 'path';
 import * as pug from 'pug';
 import * as objectAssign from 'object-assign';
-import {IBlitzConfig, IBlitzRootPage, IBlitzChildPage, IBlitzChildDirectory} from './ConfigParser';
+import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
 import {Util} from './Util';
 
@@ -41,15 +41,17 @@ interface IPugCache {
  */
 interface IBlitzPageMenuItem {
     title: string;
-    link: string;
+    url: string;
 }
 
 /**
  * Interface for data extracted from the content file with additional post processing data, such as URL
  * @since 0.0.3
  */
-interface IBlitzChildData {
+interface IBlitzPageData {
     url: string;
+    title?: string;
+    menu_button?: string;
     [key: string]: any;
 }
 
@@ -123,7 +125,7 @@ export class SiteBuilder {
         let count = this.config.pages.length;
         for (let i = 0; i < count; i++) {
             let page = this.config.pages[i];
-            if (!this.buildRootPage(page)) {
+            if (this.buildPage(page) === undefined) {
                 Util.error('Failed to build a root page!');
                 Util.error('Aborting build process!');
                 return undefined;
@@ -132,15 +134,14 @@ export class SiteBuilder {
     }
 
     /**
-     * Builds up a root page, starting a recursive process for children
-     *
-     * Note: Duplicate URLs get overwritten.
-     *
+     * Builds up the root page and its children recursively
      * @since 0.0.2
      */
-    private buildRootPage(page: IBlitzRootPage): boolean {
+    private buildPage(page: IBlitzPage,
+                      currentUriComponents: string[] = [],
+                      isRoot: boolean = true): IBlitzPageData {
 
-        let uriComponents = Util.getUriComponents(page.uri);
+        let uriComponents = currentUriComponents.concat(Util.getUriComponents(page.uri));
         let fileArray;
 
         if (uriComponents.length > 0 && uriComponents[1] !== '') {
@@ -155,20 +156,29 @@ export class SiteBuilder {
             fileArray = [INDEX_FILE_NAME];
         }
 
-        let menu = [];
+        let menu: IBlitzPageMenuItem[] = [];
         let childPages = {};
         if (page.child_pages && page.child_pages.length > 0) {
             let childPageCount = page.child_pages.length;
             for (let i = 0; i < childPageCount; i++) {
                 let childPage = page.child_pages[i];
-                let childPageObject = this.buildChildPage(childPage, uriComponents);
+                let childPageObject = this.buildPage(childPage, uriComponents, false);
                 if (!childPageObject) {
                     Util.error('Could not build child page!');
-                    return false;
+                    return undefined;
                 }
                 childPages[childPage.name] = childPageObject;
-                if (childPage.show_in_menu) {
-                    // TODO: Fetch URL and Title for `menu` array
+                if (childPage.show_in_menu !== false) {
+                    let menuButtonText = childPage.name;
+                    if (childPageObject.menu_button) {
+                        menuButtonText = childPageObject.menu_button;
+                    } else if (childPageObject.title) {
+                        menuButtonText = childPageObject.title;
+                    }
+                    menu.push({
+                        title: menuButtonText,
+                        url: childPageObject.url,
+                    });
                 }
             }
         }
@@ -181,42 +191,43 @@ export class SiteBuilder {
                 let childDirectoryObject = this.buildChildDirectory(childDirectory, uriComponents);
                 if (childDirectoryObject === undefined) {
                     Util.error('Could not build child directory!');
-                    return false;
+                    return undefined;
                 }
                 childDirectories[childDirectory.name] = childDirectoryObject;
             }
         }
 
         let pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
+        let menuButtonText = isRoot ? 'Index' : page.name;
+        if (pageContent.menu_button) {
+            menuButtonText = pageContent.menu_button;
+        } else if (pageContent.title) {
+            menuButtonText = pageContent.title;
+        }
+        let pageUrl = this.getUrl(uriComponents);
+        menu.unshift({
+            title: menuButtonText,
+            url: pageUrl,
+        });
         let pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
         let blitzLocals = {
             menu,
             // TODO: Add functions like URL
-            url: this.getUrl(uriComponents),
+            url: pageUrl,
         };
         let locals = objectAssign({}, this.config.globals, pageContent, childPages, childDirectories, blitzLocals);
         if (!Util.writeFileFromArray(this.buildPath, fileArray, pugFunction(locals))) {
             Util.error('Could not write root page to file!');
-            return false;
+            return undefined;
         }
-        return true;
-    }
-
-    /**
-     * Builds up a child page recursively
-     * @since 0.0.2
-     */
-    private buildChildPage(pageConfig: IBlitzChildPage, currentFileArray: string[]): IBlitzChildData {
-        return {
-            url: '/test',
-        };
+        return objectAssign({}, pageContent, {url: pageUrl});
     }
 
     /**
      * Builds up a child directory
      * @since 0.0.3
      */
-    private buildChildDirectory(directoryConfig: IBlitzChildDirectory, currentFileArray: string[]): IBlitzChildData[] {
+    private buildChildDirectory(directoryConfig: IBlitzChildDirectory, currentFileArray: string[]): IBlitzPageData[] {
         return [];
     }
 
@@ -225,16 +236,21 @@ export class SiteBuilder {
      * @since 0.0.3
      */
     private getUrl(uriComponents: string[]): string {
-        let url = uriComponents.join('/');
+        let empty = uriComponents.length < 1 || uriComponents[0] === '';
+        let url = Util.stripSlashes(uriComponents.join('/'));
         if (this.config.absolute_urls) {
-            url = '/' + this.config.site_root + '/' + url;
+            if (!this.config.site_root || this.config.site_root === '') {
+                url = '/' + url;
+            } else {
+                url = '/' + this.config.site_root + '/' + url;
+            }
         } else {
             url = './' + url;
         }
         if (this.config.explicit_html_extensions) {
-            url = url + '.html';
+            url = url + (empty ? 'index' : '') + '.html';
         } else {
-            url = url + '/';
+            url = url + (empty ? '' : '/');
         }
         return url;
     }

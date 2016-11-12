@@ -3,13 +3,14 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.2
+ * @version 0.0.3
  */
 
 import * as nomnom from 'nomnom';
 import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as pug from 'pug';
+import {Util} from './Util';
+import {Config} from './Config';
 
 /**
  * Blitz constants, self-explanatory
@@ -23,7 +24,7 @@ const TEMPLATES_PATH = 'templates';
  * Command line arguments passed to Blitz
  * @since 0.0.1
  */
-let args;
+export let args;
 
 /**
  * Entry point into Blitz. Parses arguments and routes the request to a relevant function.
@@ -41,6 +42,11 @@ export function main(argv: string[]) {
                 flag: true,
                 help: 'Skips all confirmation prompts by replying `yes`',
             },
+            debug: {
+                abbr: 'd',
+                flag: true,
+                help: 'Print debug info',
+            },
         }).parse(argv);
     let action = args.action;
     switch (action) {
@@ -51,10 +57,10 @@ export function main(argv: string[]) {
             build();
             break;
         case undefined:
-            console.log('Use `blitz -h` for help.');
+            Util.log('Use `blitz -h` for help.');
             break;
         default:
-            console.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
+            Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
     }
 }
 
@@ -63,10 +69,10 @@ export function main(argv: string[]) {
  * @since 0.0.1
  */
 function init() {
-    console.log('Initialising a new Blitz project...');
+    Util.log('Initialising a new Blitz project...');
     let files = fs.readdirSync(process.cwd());
     if (files.length > 0 && !args.yes) {
-        console.log('Directory is not empty! Overwrite files?');
+        Util.log('Directory is not empty! Overwrite files?');
         // TODO: Ask for confirmation
     }
     // TODO: Create files for basic project once structure is established
@@ -78,23 +84,8 @@ function init() {
  */
 function build() {
     let directory = process.cwd();
-    console.log('Building static site files in ' + directory + '...');
-    let configPath = path.join(directory, CONFIG_NAME);
-    let configContent: string;
-    try {
-        configContent = fs.readFileSync(configPath, 'utf8');
-    } catch (e: Error) {
-        console.log('Error reading `' + configPath + '`. Are you sure it exists?');
-        console.log(e);
-        return;
-    }
-    let config: any;
-    try {
-        config = yaml.safeLoad(configContent);
-    } catch (e: Error) {
-        console.log('Error parsing YAML! Are you sure `' + configPath + '` is valid?');
-        console.log(e);
-        return;
-    }
-    console.log(config);
+    Util.log('Building static site files in ' + directory + '...');
+    let config = Config.loadConfig();
+    Util.debug('Starting building process...');
+    Util.log(config);
 }

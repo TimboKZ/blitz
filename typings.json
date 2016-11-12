@@ -7,6 +7,7 @@
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",
     "node": "registry:dt/node#6.0.0+20161110151007",
     "nomnom": "registry:dt/nomnom#0.0.0+20160317120654",
+    "object-assign": "registry:dt/object-assign#4.0.1+20161006140353",
     "pug": "registry:dt/pug#2.0.0-beta6+20160919072324"
   }
 }

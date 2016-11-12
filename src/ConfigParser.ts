@@ -29,6 +29,7 @@ export interface IBlitzChildPage {
 
     /** If the content is to be loaded from a directory */
     directory?: string;
+    uri_key?: string;
 
     /** If the content is to be loaded from a file */
     content?: string;
@@ -56,7 +57,8 @@ export interface IBlitzConfig {
     site_url: string;
     site_root: string;
     absolute_urls: boolean;
-    extensions_in_urls: boolean;
+    explicit_html_extensions: boolean;
+    globals: any;
     pages: IBlitzRootPage[];
 }
 

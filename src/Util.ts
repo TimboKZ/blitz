@@ -3,12 +3,13 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.5
+ * @version 0.0.6
  */
 
 import * as yaml from 'js-yaml';
 import * as marked from 'marked';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as colors from 'colors';
 
 /**
@@ -87,6 +88,35 @@ export class Util {
     }
 
     /**
+     * Creates folders with names identical to that in the array, and uses the last element in the array as the file
+     * name to which the contents will be written.
+     * @since 0.0.6
+     */
+    public static writeFileFromArray(basePath: string, array: string[], contents: string): boolean {
+        if (array.length === 0) {
+            Util.error('Cannot write file from an empty array!');
+            console.trace();
+            return false;
+        }
+        let currentPath = basePath;
+        let count = array.length;
+        for (let i = 0; i < count - 1; i++) {
+            currentPath = path.join(currentPath, array[i]);
+            if (!Util.createDirectory(currentPath)) {
+                return false;
+            }
+        }
+        try {
+            fs.writeFileSync(path.join(currentPath, array[count - 1]), contents);
+        } catch (e) {
+            Util.error('Error writing to `' + path + '`!');
+            Util.stackTrace(e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Loads file from the specified path if possible, returns undefined otherwise
      * @since 0.0.3
      */
@@ -128,6 +158,15 @@ export class Util {
         stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
         stringWithSlashes = stringWithSlashes.replace(new RegExp('/*$'), '');
         return stringWithSlashes;
+    }
+
+    /**
+     * Breaks a URI down into components
+     * @since 0.0.6
+     */
+    public static getUriComponents(uri: string): string[] {
+        let strippedUri = Util.stripSlashes(uri);
+        return strippedUri.split('/');
     }
 }
 

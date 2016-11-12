@@ -88,6 +88,6 @@ function build() {
     }
     Util.debug('Starting building process...');
     let buildDirectory = path.join(directory, 'build');
-    let builder = new SiteBuilder(config, buildDirectory);
+    let builder = new SiteBuilder(config, directory, 'build');
     builder.build();
 }

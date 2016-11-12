@@ -2,6 +2,7 @@
 var yaml = require('js-yaml');
 var marked = require('marked');
 var fs = require('fs');
+var path = require('path');
 var colors = require('colors');
 var Util = (function () {
     function Util() {
@@ -39,6 +40,30 @@ var Util = (function () {
     Util.parseMarkdown = function (markdown) {
         return marked(markdown);
     };
+    Util.writeFileFromArray = function (basePath, array, contents) {
+        if (array.length === 0) {
+            Util.error('Cannot write file from an empty array!');
+            console.trace();
+            return false;
+        }
+        var currentPath = basePath;
+        var count = array.length;
+        for (var i = 0; i < count - 1; i++) {
+            currentPath = path.join(currentPath, array[i]);
+            if (!Util.createDirectory(currentPath)) {
+                return false;
+            }
+        }
+        try {
+            fs.writeFileSync(path.join(currentPath, array[count - 1]), contents);
+        }
+        catch (e) {
+            Util.error('Error writing to `' + path + '`!');
+            Util.stackTrace(e);
+            return false;
+        }
+        return true;
+    };
     Util.getFileContents = function (path) {
         var fileContents;
         Util.debug('Reading contents of `' + path + '`...');
@@ -69,6 +94,10 @@ var Util = (function () {
         stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
         stringWithSlashes = stringWithSlashes.replace(new RegExp('/*$'), '');
         return stringWithSlashes;
+    };
+    Util.getUriComponents = function (uri) {
+        var strippedUri = Util.stripSlashes(uri);
+        return strippedUri.split('/');
     };
     return Util;
 }());

@@ -59,6 +59,6 @@ function build() {
     }
     Util_1.Util.debug('Starting building process...');
     var buildDirectory = path.join(directory, 'build');
-    var builder = new SiteBuilder_1.SiteBuilder(config, buildDirectory);
+    var builder = new SiteBuilder_1.SiteBuilder(config, directory, 'build');
     builder.build();
 }

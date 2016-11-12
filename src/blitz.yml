@@ -15,8 +15,8 @@ site_root: 'blitz'
 # Whether to use absolute URLs (`http://test.org/hello/`) or relative URLs (`./hello/`)
 absolute_urls: true
 
-# Whether to use directories and expect a server to serve `index.html` (`http://test.org/hello/world/`) or use the
-# content file name with an HTML extension (`http://test.org/hello/world.html`)
+# Whether to use directories and expect a server to serve `index.html` (`http://test.org/hello/world/`) or add explicit
+# HTML extension (`http://test.org/hello/world.html`)
 explicit_html_extensions: false
 
 #
@@ -39,7 +39,7 @@ pages:
   - uri: '/research'
     content: 'research.md'
     template: 'research.pug'
-    children: # TODO: Make multiple children sources possible?
+    children:
       - uri: '/'
         name: 'researchTopics' # TODO: Name of the object that will be passed to Pug
         template: 'page.pug'

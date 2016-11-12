@@ -33,6 +33,7 @@
     "js-yaml": "^3.6.1",
     "marked": "^0.3.6",
     "nomnom": "^1.8.1",
+    "object-assign": "^4.1.0",
     "pug": "^2.0.0-beta6"
   }
 }

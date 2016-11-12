@@ -162,6 +162,33 @@ export class Util {
     }
 
     /**
+     * Recursively removes a directory if it exists
+     * @since 0.0.1
+     */
+    public static removeDirectory(directoryPath: string): boolean {
+        let files = [];
+        try {
+            if (fs.existsSync(directoryPath)) {
+                files = fs.readdirSync(directoryPath);
+                files.forEach((file) => {
+                    let currentPath = path.join(directoryPath, file);
+                    if (fs.lstatSync(currentPath).isDirectory()) {
+                        Util.removeDirectory(currentPath);
+                    } else {
+                        fs.unlinkSync(currentPath);
+                    }
+                });
+                fs.rmdirSync(directoryPath);
+            }
+        } catch (e) {
+            Util.error('Could not recursively remove a directory!');
+            Util.stackTrace(e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Removes all consequent leading and trailing forward slashes
      * @since 0.0.1
      */

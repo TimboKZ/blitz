@@ -1,7 +1,6 @@
 "use strict";
 var nomnom = require('nomnom');
 var fs = require('fs');
-var path = require('path');
 var SiteBuilder_1 = require('./SiteBuilder');
 var Util_1 = require('./Util');
 var ConfigParser_1 = require('./ConfigParser');
@@ -32,11 +31,15 @@ function main(argv) {
         case 'build':
             build();
             break;
+        case 'preview':
+            Util_1.Util.log('This command has not yet been implemented.');
+            break;
         case undefined:
             Util_1.Util.log('Use `blitz -h` for help.');
             break;
         default:
             Util_1.Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
+            Util_1.Util.log('For full documentation, refer to ' + 'https://github.com/TimboKZ/blitz'.cyan);
     }
     Util_1.Util.log('Done!');
 }
@@ -59,7 +62,6 @@ function build() {
         return Util_1.Util.error('ConfigParser is invalid!');
     }
     Util_1.Util.debug('Starting building process...');
-    var buildDirectory = path.join(directory, 'build');
     var builder = new SiteBuilder_1.SiteBuilder(config, directory, 'build');
     builder.build();
 }

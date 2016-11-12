@@ -2,6 +2,7 @@
   "globalDependencies": {
     "chai": "registry:dt/chai#3.4.0+20160601211834",
     "colors": "registry:dt/colors#0.6.0-1+20160914114039",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20161004190449",
     "js-yaml": "registry:dt/js-yaml#3.5.2+20160316171810",
     "marked": "registry:dt/marked#0.0.0+20160325085301",
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",

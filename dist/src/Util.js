@@ -99,6 +99,30 @@ var Util = (function () {
             return false;
         }
     };
+    Util.removeDirectory = function (directoryPath) {
+        var files = [];
+        try {
+            if (fs.existsSync(directoryPath)) {
+                files = fs.readdirSync(directoryPath);
+                files.forEach(function (file) {
+                    var currentPath = path.join(directoryPath, file);
+                    if (fs.lstatSync(currentPath).isDirectory()) {
+                        Util.removeDirectory(currentPath);
+                    }
+                    else {
+                        fs.unlinkSync(currentPath);
+                    }
+                });
+                fs.rmdirSync(directoryPath);
+            }
+        }
+        catch (e) {
+            Util.error('Could not recursively remove a directory!');
+            Util.stackTrace(e);
+            return false;
+        }
+        return true;
+    };
     Util.stripSlashes = function (stringWithSlashes) {
         stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
         stringWithSlashes = stringWithSlashes.replace(new RegExp('/*$'), '');

@@ -50,11 +50,16 @@ export function main(argv: string[]) {
         case 'build':
             build();
             break;
+        case 'preview':
+            Util.log('This command has not yet been implemented.');
+            // TODO: Implement preview feature.
+            break;
         case undefined:
             Util.log('Use `blitz -h` for help.');
             break;
         default:
             Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
+            Util.log('For full documentation, refer to ' + 'https://github.com/TimboKZ/blitz'.cyan);
     }
     Util.log('Done!');
 }
@@ -88,7 +93,6 @@ function build() {
         return Util.error('ConfigParser is invalid!');
     }
     Util.debug('Starting building process...');
-    let buildDirectory = path.join(directory, 'build');
     let builder = new SiteBuilder(config, directory, 'build');
     builder.build();
 }

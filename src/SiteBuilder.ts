@@ -9,6 +9,7 @@
 import * as path from 'path';
 import * as pug from 'pug';
 import * as objectAssign from 'object-assign';
+import * as fse from 'fs-extra';
 import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
 import {Util} from './Util';
@@ -18,6 +19,7 @@ import {Util} from './Util';
  * @since 0.0.1
  */
 const ASSETS_DIRECTORY = 'assets';
+const BUILD_ASSETS_DIRECTORY = 'assets';
 const CONTENT_DIRECTORY = 'content';
 const TEMPLATES_DIRECTORY = 'templates';
 
@@ -155,8 +157,18 @@ export class SiteBuilder {
      * @since 0.0.1
      */
     public build() {
+        if (!Util.removeDirectory(this.buildPath)) {
+            Util.error('Could not remove the existing build directory (or check that it exists)!');
+            return undefined;
+        }
         if (!Util.createDirectory(this.buildPath)) {
             Util.error('Could not create the directory for the build!');
+            return undefined;
+        }
+        try {
+            fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+        } catch (err) {
+            Util.error('Could not copy assets into the build folder!');
             return undefined;
         }
         Util.debug('Generating site map . . . ');
@@ -223,7 +235,10 @@ export class SiteBuilder {
                     this.config.globals,
                     file.contentData,
                     file.blitzData,
-                    {menus: this.menus}
+                    {
+                        menus: this.menus,
+                        asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                    }
                 );
                 if (!Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
                     Util.error('Could not write file from array!');
@@ -470,6 +485,17 @@ export class SiteBuilder {
             fileArray[lastId] = fileArray[lastId] + '.html';
         }
         return fileArray;
+    }
+
+    /**
+     * Uses `generateUrl()` to produce an absolute or relative URL to an asset.
+     *
+     * The arguments are deliberately reversed for easier partial application.
+     *
+     * @since 0.0.1
+     */
+    public generateAssetUrl(currentDirectoryArray: string[], assetFileArray: string[]): string {
+        return this.generateUrl(['assets'].concat(assetFileArray), currentDirectoryArray);
     }
 
     /**

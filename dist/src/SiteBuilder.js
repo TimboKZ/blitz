@@ -2,9 +2,11 @@
 var path = require('path');
 var pug = require('pug');
 var objectAssign = require('object-assign');
+var fse = require('fs-extra');
 var ContentParser_1 = require('./ContentParser');
 var Util_1 = require('./Util');
 var ASSETS_DIRECTORY = 'assets';
+var BUILD_ASSETS_DIRECTORY = 'assets';
 var CONTENT_DIRECTORY = 'content';
 var TEMPLATES_DIRECTORY = 'templates';
 var INDEX_FILE_NAME = 'index.html';
@@ -20,8 +22,19 @@ var SiteBuilder = (function () {
         this.templatesPath = path.join(projectPath, TEMPLATES_DIRECTORY);
     }
     SiteBuilder.prototype.build = function () {
+        if (!Util_1.Util.removeDirectory(this.buildPath)) {
+            Util_1.Util.error('Could not remove the existing build directory (or check that it exists)!');
+            return undefined;
+        }
         if (!Util_1.Util.createDirectory(this.buildPath)) {
             Util_1.Util.error('Could not create the directory for the build!');
+            return undefined;
+        }
+        try {
+            fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+        }
+        catch (err) {
+            Util_1.Util.error('Could not copy assets into the build folder!');
             return undefined;
         }
         Util_1.Util.debug('Generating site map . . . ');
@@ -63,7 +76,10 @@ var SiteBuilder = (function () {
             if (directory.files.hasOwnProperty(fileName)) {
                 var file = directory.files[fileName];
                 var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
-                var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, { menus: this.menus });
+                var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
+                    menus: this.menus,
+                    asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                });
                 if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
                     Util_1.Util.error('Could not write file from array!');
                     return false;
@@ -246,6 +262,9 @@ var SiteBuilder = (function () {
             fileArray[lastId] = fileArray[lastId] + '.html';
         }
         return fileArray;
+    };
+    SiteBuilder.prototype.generateAssetUrl = function (currentDirectoryArray, assetFileArray) {
+        return this.generateUrl(['assets'].concat(assetFileArray), currentDirectoryArray);
     };
     SiteBuilder.prototype.generateUrl = function (targetFileArray, currentDirectoryArray) {
         var urlArray = targetFileArray.slice(0);

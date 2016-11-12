@@ -2,10 +2,9 @@
 var nomnom = require('nomnom');
 var fs = require('fs');
 var path = require('path');
+var SiteBuilder_1 = require('./SiteBuilder');
 var Util_1 = require('./Util');
-var Config_1 = require('./Config');
-var CONTENT_PATH = 'content';
-var TEMPLATES_PATH = 'templates';
+var ConfigParser_1 = require('./ConfigParser');
 function main(argv) {
     exports.args = nomnom.script('blitz')
         .options({
@@ -51,17 +50,15 @@ function init() {
 function build() {
     var directory = process.cwd();
     Util_1.Util.log('Building static site files in ' + directory + '...');
-    var config = Config_1.Config.load();
+    var config = ConfigParser_1.ConfigParser.load();
     if (!config) {
         return Util_1.Util.error('Could not load the config!');
     }
-    if (!Config_1.Config.verify(config)) {
-        return Util_1.Util.error('Config is invalid!');
+    if (!ConfigParser_1.ConfigParser.verify(config)) {
+        return Util_1.Util.error('ConfigParser is invalid!');
     }
     Util_1.Util.debug('Starting building process...');
-    Util_1.Util.log(config);
     var buildDirectory = path.join(directory, 'build');
-    if (!fs.existsSync(buildDirectory)) {
-        fs.mkdirSync(buildDirectory);
-    }
+    var builder = new SiteBuilder_1.SiteBuilder(config, buildDirectory);
+    builder.build();
 }

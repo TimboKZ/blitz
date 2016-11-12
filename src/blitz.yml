@@ -17,13 +17,13 @@ absolute_urls: true
 
 # Whether to use directories and expect a server to serve `index.html` (`http://test.org/hello/world/`) or use the
 # content file name with an HTML extension (`http://test.org/hello/world.html`)
-extensions_in_urls: true
+extensions_in_urls: false
 
 #
 # Routes
 #
 
-map:
+pages:
   - uri: '/'
     content: 'index.md'
     template: 'index.pug'

@@ -45,6 +45,24 @@ var Util = (function () {
         }
         return fileContents;
     };
+    Util.createDirectory = function (path) {
+        try {
+            if (!fs.existsSync(path)) {
+                fs.mkdirSync(path);
+            }
+            return true;
+        }
+        catch (e) {
+            Util.error('Error creating directory `' + path + '`.');
+            Util.error(e);
+            return false;
+        }
+    };
+    Util.stripSlashes = function (stringWithSlashes) {
+        stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
+        stringWithSlashes = stringWithSlashes.replace(new RegExp('/*$'), '');
+        return stringWithSlashes;
+    };
     return Util;
 }());
 exports.Util = Util;

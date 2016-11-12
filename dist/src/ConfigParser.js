@@ -3,10 +3,10 @@ var path = require('path');
 var fs = require('fs');
 var Util_1 = require('./Util');
 exports.DEFAULT_CONFIG_NAME = 'blitz.yml';
-var Config = (function () {
-    function Config() {
+var ConfigParser = (function () {
+    function ConfigParser() {
     }
-    Config.load = function (configPath) {
+    ConfigParser.load = function (configPath) {
         if (configPath === void 0) { configPath = path.join(process.cwd(), exports.DEFAULT_CONFIG_NAME); }
         var configContent;
         Util_1.Util.debug('Loading Blitz config from `' + configPath + '`...');
@@ -26,9 +26,9 @@ var Config = (function () {
         Util_1.Util.debug('Successfully parsed YAML!');
         return config;
     };
-    Config.verify = function (config) {
+    ConfigParser.verify = function (config) {
         return true;
     };
-    return Config;
+    return ConfigParser;
 }());
-exports.Config = Config;
+exports.ConfigParser = ConfigParser;

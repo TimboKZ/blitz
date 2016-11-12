@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.3
+ * @version 0.0.4
  */
 
 import * as yaml from 'js-yaml';
@@ -81,6 +81,33 @@ export class Util {
             return undefined;
         }
         return fileContents;
+    }
+
+    /**
+     * Creates a directory if it doesn't exist
+     * @since 0.0.4
+     */
+    public static createDirectory(path: string): boolean {
+        try {
+            if (!fs.existsSync(path)) {
+                fs.mkdirSync(path);
+            }
+            return true;
+        } catch (e) {
+            Util.error('Error creating directory `' + path + '`.');
+            Util.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * Removes all consequent leading and trailing forward slashes
+     * @since 0.0.4
+     */
+    public static stripSlashes(stringWithSlashes: string): string {
+        stringWithSlashes = stringWithSlashes.replace(new RegExp('^/*'), '');
+        stringWithSlashes = stringWithSlashes.replace(new RegExp('/*$'), '');
+        return stringWithSlashes;
     }
 }
 

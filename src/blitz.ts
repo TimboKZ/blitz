@@ -9,16 +9,9 @@
 import * as nomnom from 'nomnom';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as pug from 'pug';
+import {SiteBuilder} from './SiteBuilder';
 import {Util} from './Util';
-import {Config} from './Config';
-
-/**
- * Blitz constants, self-explanatory
- * @since 0.0.2
- */
-const CONTENT_PATH = 'content';
-const TEMPLATES_PATH = 'templates';
+import {ConfigParser} from './ConfigParser';
 
 /**
  * Command line arguments passed to Blitz
@@ -86,18 +79,15 @@ function init() {
 function build() {
     let directory = process.cwd();
     Util.log('Building static site files in ' + directory + '...');
-    let config = Config.load();
+    let config = ConfigParser.load();
     if (!config) {
         return Util.error('Could not load the config!');
     }
-    if (!Config.verify(config)) {
-        return Util.error('Config is invalid!');
+    if (!ConfigParser.verify(config)) {
+        return Util.error('ConfigParser is invalid!');
     }
     Util.debug('Starting building process...');
-    Util.log(config);
     let buildDirectory = path.join(directory, 'build');
-    if (!fs.existsSync(buildDirectory)) {
-        fs.mkdirSync(buildDirectory);
-    }
-
+    let builder = new SiteBuilder(config, buildDirectory);
+    builder.build();
 }

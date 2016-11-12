@@ -24,8 +24,18 @@ var SiteBuilder = (function () {
             Util_1.Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        this.prepareMap();
-        console.log(JSON.stringify(this.siteMap));
+        Util_1.Util.debug('Generating site map . . . ');
+        if (!this.prepareMap()) {
+            Util_1.Util.error('Map generation failed!');
+            return undefined;
+        }
+        Util_1.Util.debug('Site map generated!');
+        Util_1.Util.debug('Building site . . . ');
+        if (!this.buildSite()) {
+            Util_1.Util.error('Site building failed!');
+            return undefined;
+        }
+        Util_1.Util.debug('Site built successfully!');
     };
     SiteBuilder.prototype.prepareMap = function () {
         var pages = this.config.pages;
@@ -38,10 +48,41 @@ var SiteBuilder = (function () {
             var pageData = this.parseConfigPage(pages[i], map);
             if (pageData === undefined) {
                 Util_1.Util.error('Could not create map, failed on page with URI `' + pageData.url + '`!');
-                return;
+                return false;
             }
         }
         this.siteMap = map;
+        return true;
+    };
+    SiteBuilder.prototype.buildSite = function () {
+        return this.buildDirectory(this.siteMap);
+    };
+    SiteBuilder.prototype.buildDirectory = function (directory, currentDirectoryArray) {
+        if (currentDirectoryArray === void 0) { currentDirectoryArray = []; }
+        for (var fileName in directory.files) {
+            if (directory.files.hasOwnProperty(fileName)) {
+                var file = directory.files[fileName];
+                var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, { menus: this.menus });
+                if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
+                    Util_1.Util.error('Could not write file from array!');
+                    return false;
+                }
+            }
+        }
+        for (var directoryName in directory.directories) {
+            if (directory.directories.hasOwnProperty(directoryName)) {
+                var directoryData = directory.directories[directoryName];
+                var directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);
+                var directoryPath = path.join.apply(undefined, directoryArray);
+                if (!Util_1.Util.createDirectory(path.join(this.buildPath, directoryPath))) {
+                    Util_1.Util.error('Could not create directory for the build!');
+                    return false;
+                }
+                this.buildDirectory(directoryData, directoryArray);
+            }
+        }
+        return true;
     };
     SiteBuilder.prototype.parseConfigPage = function (page, parentDirectory, parentUriComponents, parent) {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
@@ -52,16 +93,18 @@ var SiteBuilder = (function () {
         else {
             uriComponents = Util_1.Util.getUriComponents(page.uri);
         }
+        var partialUriComponents = uriComponents.slice(0);
+        var partialDirectoryArray = this.generateFileArray(partialUriComponents);
+        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
         uriComponents = parentUriComponents.slice(0).concat(uriComponents);
         var fileArray = this.generateFileArray(uriComponents);
         var fileName = fileArray[fileArray.length - 1];
         var fileNameWithoutExtension = Util_1.Util.extractFileName(fileName);
-        var directoryArray = fileArray.slice(0, fileArray.length - 1);
         var pageUrl = this.generateUrl(fileArray, []);
         var currentDirectory = parentDirectory;
-        var directoryCount = directoryArray.length;
+        var directoryCount = partialDirectoryArray.length;
         for (var k = 0; k < directoryCount; k++) {
-            var newDirectory = directoryArray[k];
+            var newDirectory = partialDirectoryArray[k];
             if (currentDirectory.directories[newDirectory] === undefined) {
                 currentDirectory.directories[newDirectory] = {
                     directories: {},
@@ -115,10 +158,10 @@ var SiteBuilder = (function () {
             generator: pugFunction,
         };
         currentDirectory.files[fileData.name] = fileData;
-        if (pageContent.menus) {
-            var menuCount = pageContent.menus.length;
+        if (page.menus) {
+            var menuCount = page.menus.length;
             for (var k = 0; k < menuCount; k++) {
-                var menu = pageContent.menus[k];
+                var menu = page.menus[k];
                 var menuTitle = fileNameWithoutExtension;
                 if (pageContent.menu_title) {
                     menuTitle = pageContent.menu_title;
@@ -150,12 +193,14 @@ var SiteBuilder = (function () {
         else {
             uriComponents = Util_1.Util.getUriComponents(directory.uri);
         }
+        var partialUriComponents = uriComponents.slice(0);
+        var partialDirectoryArray = this.generateFileArray(partialUriComponents);
+        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
         uriComponents = parentUriComponents.slice(0).concat(uriComponents);
-        var directoryArray = uriComponents.slice(0);
         var currentDirectory = parentDirectory;
-        var directoryCount = directoryArray.length;
+        var directoryCount = partialDirectoryArray.length;
         for (var k = 0; k < directoryCount; k++) {
-            var newDirectory = directoryArray[k];
+            var newDirectory = partialDirectoryArray[k];
             if (currentDirectory.directories[newDirectory] === undefined) {
                 currentDirectory.directories[newDirectory] = {
                     directories: {},

@@ -38,6 +38,7 @@ function main(argv) {
         default:
             Util_1.Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
     }
+    Util_1.Util.log('Done!');
 }
 exports.main = main;
 function init() {

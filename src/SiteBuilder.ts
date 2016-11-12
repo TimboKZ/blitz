@@ -159,8 +159,19 @@ export class SiteBuilder {
             Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        this.prepareMap();
-        console.log(JSON.stringify(this.siteMap));
+        Util.debug('Generating site map . . . ');
+        if (!this.prepareMap()) {
+            Util.error('Map generation failed!');
+            return undefined;
+        }
+
+        Util.debug('Site map generated!');
+        Util.debug('Building site . . . ');
+        if (!this.buildSite()) {
+            Util.error('Site building failed!');
+            return undefined;
+        }
+        Util.debug('Site built successfully!');
     }
 
     /**
@@ -170,7 +181,7 @@ export class SiteBuilder {
      *
      * @since 0.0.1
      */
-    private prepareMap() {
+    private prepareMap(): boolean {
         let pages = this.config.pages;
         let pageCount = pages.length;
         let map: IBlitzMapDirectory = {
@@ -181,10 +192,60 @@ export class SiteBuilder {
             let pageData = this.parseConfigPage(pages[i], map);
             if (pageData === undefined) {
                 Util.error('Could not create map, failed on page with URI `' + pageData.url + '`!');
-                return;
+                return false;
             }
         }
         this.siteMap = map;
+        return true;
+    }
+
+    /**
+     * Builds the site using the previously generated map and menus
+     * @since 0.0.1
+     */
+    private buildSite(): boolean {
+        return this.buildDirectory(this.siteMap);
+    }
+
+    /**
+     * Builds all files in a directory, recursively
+     * @since 0.0.1
+     */
+    private buildDirectory(directory: IBlitzMapDirectory, currentDirectoryArray: string[] = []): boolean {
+
+        for (let fileName in directory.files) {
+            if (directory.files.hasOwnProperty(fileName)) {
+                let file = directory.files[fileName];
+                let fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                // TODO: Active menu point?
+                let locals = objectAssign(
+                    {},
+                    this.config.globals,
+                    file.contentData,
+                    file.blitzData,
+                    {menus: this.menus}
+                );
+                if (!Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
+                    Util.error('Could not write file from array!');
+                    return false;
+                }
+            }
+        }
+
+        for (let directoryName in directory.directories) {
+            if (directory.directories.hasOwnProperty(directoryName)) {
+                let directoryData = directory.directories[directoryName];
+                let directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);
+                let directoryPath = path.join.apply(undefined, directoryArray);
+                if (!Util.createDirectory(path.join(this.buildPath, directoryPath))) {
+                    Util.error('Could not create directory for the build!');
+                    return false;
+                }
+                this.buildDirectory(directoryData, directoryArray);
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -203,18 +264,24 @@ export class SiteBuilder {
         } else {
             uriComponents = Util.getUriComponents(page.uri);
         }
+
+        // URI components without the parent
+        let partialUriComponents = uriComponents.slice(0);
+        let partialDirectoryArray = this.generateFileArray(partialUriComponents);
+        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
+
+        // URI Ccomponents with the parent
         uriComponents = parentUriComponents.slice(0).concat(uriComponents);
         let fileArray = this.generateFileArray(uriComponents);
         let fileName = fileArray[fileArray.length - 1];
         let fileNameWithoutExtension = Util.extractFileName(fileName);
-        let directoryArray = fileArray.slice(0, fileArray.length - 1);
         let pageUrl = this.generateUrl(fileArray, []);
 
         // Switch to a relevant directory
         let currentDirectory = parentDirectory;
-        let directoryCount = directoryArray.length;
+        let directoryCount = partialDirectoryArray.length;
         for (let k = 0; k < directoryCount; k++) {
-            let newDirectory = directoryArray[k];
+            let newDirectory = partialDirectoryArray[k];
             if (currentDirectory.directories[newDirectory] === undefined) {
                 currentDirectory.directories[newDirectory] = {
                     directories: {},
@@ -293,10 +360,10 @@ export class SiteBuilder {
         currentDirectory.files[fileData.name] = fileData;
 
         // Append data to menu if needed
-        if (pageContent.menus) {
-            let menuCount = pageContent.menus.length;
+        if (page.menus) {
+            let menuCount = page.menus.length;
             for (let k = 0; k < menuCount; k++) {
-                let menu = pageContent.menus[k];
+                let menu = page.menus[k];
                 let menuTitle = fileNameWithoutExtension;
                 if (pageContent.menu_title) {
                     menuTitle = pageContent.menu_title;
@@ -336,14 +403,20 @@ export class SiteBuilder {
         } else {
             uriComponents = Util.getUriComponents(directory.uri);
         }
+
+        // URI components without the parent
+        let partialUriComponents = uriComponents.slice(0);
+        let partialDirectoryArray = this.generateFileArray(partialUriComponents);
+        partialDirectoryArray = partialDirectoryArray.slice(0, partialDirectoryArray.length - 1);
+
+        // URI Components with the parent
         uriComponents = parentUriComponents.slice(0).concat(uriComponents);
-        let directoryArray = uriComponents.slice(0);
 
         // Switch to a relevant directory
         let currentDirectory = parentDirectory;
-        let directoryCount = directoryArray.length;
+        let directoryCount = partialDirectoryArray.length;
         for (let k = 0; k < directoryCount; k++) {
-            let newDirectory = directoryArray[k];
+            let newDirectory = partialDirectoryArray[k];
             if (currentDirectory.directories[newDirectory] === undefined) {
                 currentDirectory.directories[newDirectory] = {
                     directories: {},

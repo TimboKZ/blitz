@@ -56,6 +56,7 @@ export function main(argv: string[]) {
         default:
             Util.log('Unrecognised action: `' + action + '`. Use `blitz -h` for help.');
     }
+    Util.log('Done!');
 }
 
 /**

@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 import {Util} from './Util';
@@ -31,5 +31,18 @@ export class ContentParser {
         }
         yamlObject.content = htmlContent;
         return yamlObject;
+    }
+
+    /**
+     * Loads content of the supplied file and pipes it into `Util.parse()`
+     * @since 0.0.2
+     */
+    public static parseFile(path: string): any {
+        let fileContents = Util.getFileContents(path);
+        if (!fileContents) {
+            Util.error('Could not load the specified file for parsing!');
+            return undefined;
+        }
+        return ContentParser.parse(fileContents);
     }
 }

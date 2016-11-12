@@ -1,6 +1,7 @@
 "use strict";
 var yaml = require('js-yaml');
 var marked = require('marked');
+var fs = require('fs');
 var Util = (function () {
     function Util() {
     }
@@ -30,6 +31,19 @@ var Util = (function () {
     };
     Util.parseMarkdown = function (markdown) {
         return marked(markdown);
+    };
+    Util.getFileContents = function (path) {
+        var fileContents;
+        Util.debug('Reading contents of `' + path + '`...');
+        try {
+            fileContents = fs.readFileSync(path, 'utf8');
+        }
+        catch (e) {
+            Util.error('Error reading `' + path + '`. Are you sure it exists?');
+            Util.error(e);
+            return undefined;
+        }
+        return fileContents;
     };
     return Util;
 }());

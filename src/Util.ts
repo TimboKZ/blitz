@@ -3,12 +3,12 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.2
+ * @version 0.0.3
  */
 
 import * as yaml from 'js-yaml';
 import * as marked from 'marked';
-import {args} from './blitz';
+import * as fs from 'fs';
 
 /**
  * @class Utility class for Blitz.
@@ -64,6 +64,23 @@ export class Util {
      */
     public static parseMarkdown(markdown: string): string {
         return marked(markdown);
+    }
+
+    /**
+     * Loads file from the specified path if possible, returns undefined otherwise
+     * @since 0.0.3
+     */
+    public static getFileContents(path: string): string {
+        let fileContents: string;
+        Util.debug('Reading contents of `' + path + '`...');
+        try {
+            fileContents = fs.readFileSync(path, 'utf8');
+        } catch (e) {
+            Util.error('Error reading `' + path + '`. Are you sure it exists?');
+            Util.error(e);
+            return undefined;
+        }
+        return fileContents;
     }
 }
 

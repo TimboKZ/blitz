@@ -16,6 +16,14 @@ var ContentParser = (function () {
         yamlObject.content = htmlContent;
         return yamlObject;
     };
+    ContentParser.parseFile = function (path) {
+        var fileContents = Util_1.Util.getFileContents(path);
+        if (!fileContents) {
+            Util_1.Util.error('Could not load the specified file for parsing!');
+            return undefined;
+        }
+        return ContentParser.parse(fileContents);
+    };
     return ContentParser;
 }());
 exports.ContentParser = ContentParser;

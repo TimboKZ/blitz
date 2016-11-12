@@ -29,6 +29,7 @@
     "typescript": "^2.0.9"
   },
   "dependencies": {
+    "colors": "^1.1.2",
     "js-yaml": "^3.6.1",
     "marked": "^0.3.6",
     "nomnom": "^1.8.1",

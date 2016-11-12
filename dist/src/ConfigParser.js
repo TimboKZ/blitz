@@ -1,6 +1,5 @@
 "use strict";
 var path = require('path');
-var fs = require('fs');
 var Util_1 = require('./Util');
 exports.DEFAULT_CONFIG_NAME = 'blitz.yml';
 var ConfigParser = (function () {
@@ -8,14 +7,10 @@ var ConfigParser = (function () {
     }
     ConfigParser.load = function (configPath) {
         if (configPath === void 0) { configPath = path.join(process.cwd(), exports.DEFAULT_CONFIG_NAME); }
-        var configContent;
         Util_1.Util.debug('Loading Blitz config from `' + configPath + '`...');
-        try {
-            configContent = fs.readFileSync(configPath, 'utf8');
-        }
-        catch (e) {
-            Util_1.Util.error('Error reading `' + configPath + '`. Are you sure it exists?');
-            Util_1.Util.error(e);
+        var configContent = Util_1.Util.getFileContents(configPath);
+        if (!configContent) {
+            Util_1.Util.error('Error loading config file! Are you sure `' + configPath + '` exists?');
             return undefined;
         }
         var config = Util_1.Util.parseYaml(configContent);

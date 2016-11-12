@@ -3,12 +3,13 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.4
+ * @version 0.0.5
  */
 
 import * as yaml from 'js-yaml';
 import * as marked from 'marked';
 import * as fs from 'fs';
+import * as colors from 'colors';
 
 /**
  * @class Utility class for Blitz.
@@ -16,28 +17,47 @@ import * as fs from 'fs';
  */
 export class Util {
     /**
+     * Logs an object to console prefixing it with the specified string.
+     * @since 0.0.5
+     */
+    public static logWithPrefix(prefix: string, object: any) {
+        console.log(prefix + ' ' + object.toString());
+    }
+
+    /**
      * Logs data into console
+     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
      * @since 0.0.1
      */
     public static log(object: any) {
-        console.log(object);
+        Util.logWithPrefix(colors.cyan('[Blitz LOG]'), object);
     }
 
     /**
      * Logs error data into console
+     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
      * @since 0.0.2
      */
     public static error(object: any) {
+        Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
+    }
+
+    /**
+     * Print out the error as is
+     * @since 0.0.5
+     */
+    public static stackTrace(object: any) {
         console.log(object);
     }
 
     /**
      * Logs debug data into console
+     * @since 0.0.5 Now uses `logWithPrefix()` and `colors`
      * @since 0.0.1
      */
     public static debug(object: any) {
         if (global.debug) {
-            console.log(object);
+            Util.logWithPrefix(colors.yellow('[Blitz DEBUG]'), object);
         }
     }
 
@@ -52,7 +72,7 @@ export class Util {
             parsedYaml = yaml.safeLoad(yamlString);
         } catch (e) {
             Util.error('Error parsing YAML!');
-            Util.error(e);
+            Util.stackTrace(e);
             return undefined;
         }
         return parsedYaml;
@@ -77,7 +97,7 @@ export class Util {
             fileContents = fs.readFileSync(path, 'utf8');
         } catch (e) {
             Util.error('Error reading `' + path + '`. Are you sure it exists?');
-            Util.error(e);
+            Util.stackTrace(e);
             return undefined;
         }
         return fileContents;
@@ -95,7 +115,7 @@ export class Util {
             return true;
         } catch (e) {
             Util.error('Error creating directory `' + path + '`.');
-            Util.error(e);
+            Util.stackTrace(e);
             return false;
         }
     }

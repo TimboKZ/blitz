@@ -49,13 +49,10 @@ export class ConfigParser {
      * @since 0.0.1
      */
     public static load(configPath: string = path.join(process.cwd(), DEFAULT_CONFIG_NAME)): IBlitzConfig {
-        let configContent: string;
         Util.debug('Loading Blitz config from `' + configPath + '`...');
-        try {
-            configContent = fs.readFileSync(configPath, 'utf8');
-        } catch (e) {
-            Util.error('Error reading `' + configPath + '`. Are you sure it exists?');
-            Util.error(e);
+        let configContent = Util.getFileContents(configPath);
+        if (!configContent) {
+            Util.error('Error loading config file! Are you sure `' + configPath + '` exists?');
             return undefined;
         }
         let config = Util.parseYaml(configContent);

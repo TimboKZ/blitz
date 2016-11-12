@@ -2,18 +2,25 @@
 var yaml = require('js-yaml');
 var marked = require('marked');
 var fs = require('fs');
+var colors = require('colors');
 var Util = (function () {
     function Util() {
     }
+    Util.logWithPrefix = function (prefix, object) {
+        console.log(prefix + ' ' + object.toString());
+    };
     Util.log = function (object) {
-        console.log(object);
+        Util.logWithPrefix(colors.cyan('[Blitz LOG]'), object);
     };
     Util.error = function (object) {
+        Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
+    };
+    Util.stackTrace = function (object) {
         console.log(object);
     };
     Util.debug = function (object) {
         if (global.debug) {
-            console.log(object);
+            Util.logWithPrefix(colors.yellow('[Blitz DEBUG]'), object);
         }
     };
     Util.parseYaml = function (yamlString) {
@@ -24,7 +31,7 @@ var Util = (function () {
         }
         catch (e) {
             Util.error('Error parsing YAML!');
-            Util.error(e);
+            Util.stackTrace(e);
             return undefined;
         }
         return parsedYaml;
@@ -40,7 +47,7 @@ var Util = (function () {
         }
         catch (e) {
             Util.error('Error reading `' + path + '`. Are you sure it exists?');
-            Util.error(e);
+            Util.stackTrace(e);
             return undefined;
         }
         return fileContents;
@@ -54,7 +61,7 @@ var Util = (function () {
         }
         catch (e) {
             Util.error('Error creating directory `' + path + '`.');
-            Util.error(e);
+            Util.stackTrace(e);
             return false;
         }
     };

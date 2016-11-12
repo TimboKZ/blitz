@@ -1,0 +1,33 @@
+#
+# Blitz config file
+#
+
+# Site URL with a trailing slash.
+site_url: 'https://hosting.kawaiidesu.me/'
+
+# Site root without a trailing slash.
+# E.g. if the root of your site is `http://test.org/hello/home/`, set this to `hello/home`.
+site_root: 'blitz'
+
+# Whether to use absolute URLs (`http://test.org/hello/`) or relative URLs (`./hello/`)
+absolute_urls: true
+
+# Whether to use directories and expect a server to serve `index.html` (`http://test.org/hello/world/`) or use the
+# content file name with an HTML extension (`http://test.org/hello/world.html`)
+extensions_in_urls: true
+
+#
+# Routes
+#
+
+map:
+  - uri: '/'
+    content: 'index.md'
+    template: 'index.pug'
+  - uri: '/research'
+    content: 'research.md'
+    template: 'research.pug'
+    children: # TODO: Make multiple children sources possible?
+      name: 'research' # TODO: Name of the array that will be passed to Pug
+      directory: 'research'
+      template: 'research-topic.pug'

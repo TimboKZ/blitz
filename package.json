@@ -25,5 +25,8 @@
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.1.2",
     "typescript": "^2.0.9"
+  },
+  "dependencies": {
+    "nomnom": "^1.8.1"
   }
 }

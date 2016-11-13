@@ -131,6 +131,8 @@ var SiteBuilder = (function () {
                 var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
                     menus: processedMenus,
                     asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                    site_url: this.config.site_url,
+                    site_root: this.config.site_root,
                 });
                 if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
                     Util_1.Util.error('Could not write file from array!');

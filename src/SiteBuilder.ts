@@ -306,6 +306,8 @@ export class SiteBuilder {
                     {
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                        site_url: this.config.site_url,
+                        site_root: this.config.site_root,
                     }
                 );
                 if (!Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {

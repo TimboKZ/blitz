@@ -139,6 +139,14 @@ var Util = (function () {
     Util.extractFileName = function (filePath) {
         return path.basename(filePath).replace(/\.[^/.]+$/, '');
     };
+    Util.generateRandomString = function (length) {
+        var characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        var result = '';
+        for (var i = length; i > 0; --i) {
+            result += characters[Math.floor(Math.random() * characters.length)];
+        }
+        return result;
+    };
     return Util;
 }());
 exports.Util = Util;

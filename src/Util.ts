@@ -218,5 +218,18 @@ export class Util {
     public static extractFileName(filePath: string) {
         return path.basename(filePath).replace(/\.[^/.]+$/, '');
     }
+
+    /**
+     *
+     * @since 0.1.0
+     */
+    public static generateRandomString(length: number): string {
+        let characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let result = '';
+        for (let i = length; i > 0; --i) {
+            result += characters[Math.floor(Math.random() * characters.length)];
+        }
+        return result;
+    }
 }
 

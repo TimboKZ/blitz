@@ -13,6 +13,7 @@ var TEMPLATES_DIRECTORY = 'templates';
 var INDEX_FILE_NAME = 'index.html';
 var SiteBuilder = (function () {
     function SiteBuilder(config, projectPath, buildDirectory) {
+        this.pageUrls = {};
         this.menus = {};
         this.pugCache = {};
         this.config = config;
@@ -21,6 +22,7 @@ var SiteBuilder = (function () {
         this.assetsPath = path.join(projectPath, ASSETS_DIRECTORY);
         this.contentPath = path.join(projectPath, CONTENT_DIRECTORY);
         this.templatesPath = path.join(projectPath, TEMPLATES_DIRECTORY);
+        this.buildHash = Util_1.Util.generateRandomString(12);
     }
     SiteBuilder.prototype.build = function () {
         if (!Util_1.Util.removeDirectory(this.buildPath)) {
@@ -76,36 +78,41 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.buildDirectory = function (directory, currentDirectoryArray) {
         if (currentDirectoryArray === void 0) { currentDirectoryArray = []; }
-        for (var fileName in directory.files) {
+        var _loop_1 = function(fileName) {
             if (directory.files.hasOwnProperty(fileName)) {
                 var file = directory.files[fileName];
                 var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                var pageUrl_1 = this_1.generateUrl(fileArray, currentDirectoryArray);
                 var processedMenus = {};
-                for (var menuName in this.menus) {
-                    if (this.menus.hasOwnProperty(menuName)) {
-                        var menu = this.menus[menuName];
+                for (var menuName in this_1.menus) {
+                    if (this_1.menus.hasOwnProperty(menuName)) {
+                        var menu = this_1.menus[menuName];
                         var itemCount = menu.length;
                         var processedMenu = [];
                         for (var i = 0; i < itemCount; i++) {
                             var item = menu[i];
-                            var url = item.url();
+                            var url_1 = item.url();
                             if (item.directoryArray !== undefined) {
                                 var array = item.directoryArray;
                                 if (item.fileName !== undefined) {
                                     array = array.concat([item.fileName]);
                                 }
-                                url = this.generateUrl(array, currentDirectoryArray);
+                                url_1 = this_1.generateUrl(array, currentDirectoryArray);
                             }
                             var active = file.url() === item.url();
                             processedMenu.push({
                                 title: item.title,
-                                url: url,
+                                url: url_1,
                                 active: active,
                             });
                         }
                         processedMenus[menuName] = processedMenu;
                     }
                 }
+                var childPages = [];
+                var namedChildPages = {};
+                var childDirectories = [];
+                var namedChildDirectories = {};
                 for (var dataKey in file.blitzData) {
                     if (file.blitzData.hasOwnProperty(dataKey)) {
                         if (dataKey === 'url') {
@@ -120,25 +127,62 @@ var SiteBuilder = (function () {
                                         = file.blitzData[dataKey][i].url(currentDirectoryArray);
                                 }
                             }
+                            if (dataKey !== 'parent') {
+                                childDirectories.push(file.blitzData[dataKey]);
+                                namedChildDirectories[dataKey] = file.blitzData[dataKey];
+                            }
                         }
                         else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
                             if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
                                 file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
                             }
+                            if (dataKey !== 'parent') {
+                                childPages.push(file.blitzData[dataKey]);
+                                namedChildPages[dataKey] = file.blitzData[dataKey];
+                            }
                         }
                     }
                 }
-                var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
+                var indexArray = [];
+                if (this_1.config.explicit_html_extensions) {
+                    indexArray.push('index.html');
+                }
+                var processedPageUrls_1 = {
+                    index: this_1.generateUrl(indexArray, currentDirectoryArray),
+                };
+                for (var pageID in this_1.pageUrls) {
+                    if (this_1.pageUrls.hasOwnProperty(pageID)) {
+                        processedPageUrls_1[pageID] = this_1.pageUrls[pageID](currentDirectoryArray);
+                    }
+                }
+                var url = function (pageID) {
+                    if (pageID === undefined) {
+                        return pageUrl_1;
+                    }
+                    return processedPageUrls_1[pageID];
+                };
+                var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
+                    url: url,
+                    child_pages: childPages,
+                    child_directories: childDirectories,
+                    named_child_pages: namedChildPages,
+                    named_child_directories: namedChildDirectories,
+                    hash: this_1.buildHash,
                     menus: processedMenus,
-                    asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
-                    site_url: this.config.site_url,
-                    site_root: this.config.site_root,
+                    asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),
+                    site_url: this_1.config.site_url,
+                    site_root: this_1.config.site_root,
                 });
-                if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
+                if (!Util_1.Util.writeFileFromArray(this_1.buildPath, fileArray, file.generator(locals))) {
                     Util_1.Util.error('Could not write file from array!');
-                    return false;
+                    return { value: false };
                 }
             }
+        };
+        var this_1 = this;
+        for (var fileName in directory.files) {
+            var state_1 = _loop_1(fileName);
+            if (typeof state_1 === "object") return state_1.value;
         }
         for (var directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
@@ -183,10 +227,44 @@ var SiteBuilder = (function () {
             return undefined;
         }
         var processedPageData = objectAssign({}, pageContent, { url: urlGenerator });
+        if (page.id) {
+            this.pageUrls[page.id] = urlGenerator;
+        }
         var blitzData = {
             url: urlGenerator,
             parent: parent,
         };
+        if (page.menus) {
+            var menuCount = page.menus.length;
+            for (var k = 0; k < menuCount; k++) {
+                var menu = page.menus[k];
+                var menuTitle = fileNameWithoutExtension;
+                if (pageContent.menu_title) {
+                    menuTitle = pageContent.menu_title;
+                }
+                else if (menu.title) {
+                    menuTitle = menu.title;
+                }
+                else if (pageContent.title) {
+                    menuTitle = pageContent.title;
+                }
+                if (this.menus[menu.name] === undefined) {
+                    this.menus[menu.name] = [];
+                }
+                var menuItem = {
+                    title: menuTitle,
+                    url: urlGenerator,
+                    active: false,
+                };
+                if (!this.config.absolute_urls) {
+                    menuItem.directoryArray = directoryArray;
+                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                        menuItem.fileName = fileName;
+                    }
+                }
+                this.menus[menu.name].push(menuItem);
+            }
+        }
         if (page.child_pages && page.child_pages.length > 0) {
             var pageCount = page.child_pages.length;
             for (var i = 0; i < pageCount; i++) {
@@ -219,41 +297,26 @@ var SiteBuilder = (function () {
             generator: pugFunction,
         };
         currentPageDirectory.files[fileData.name] = fileData;
-        if (page.menus) {
-            var menuCount = page.menus.length;
-            for (var k = 0; k < menuCount; k++) {
-                var menu = page.menus[k];
-                var menuTitle = fileNameWithoutExtension;
-                if (pageContent.menu_title) {
-                    menuTitle = pageContent.menu_title;
-                }
-                else if (menu.title) {
-                    menuTitle = menu.title;
-                }
-                else if (pageContent.title) {
-                    menuTitle = pageContent.title;
-                }
-                if (this.menus[menu.name] === undefined) {
-                    this.menus[menu.name] = [];
-                }
-                var menuItem = {
-                    title: menuTitle,
-                    url: urlGenerator,
-                    active: false,
-                };
-                if (!this.config.absolute_urls) {
-                    menuItem.directoryArray = directoryArray;
-                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
-                        menuItem.fileName = fileName;
-                    }
-                }
-                this.menus[menu.name].push(menuItem);
-            }
-        }
         return processedPageData;
     };
     SiteBuilder.prototype.parseConfigDirectory = function (directory, parentDirectory, parentUriComponents, parent) {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
+        var pagesContent = ContentParser_1.ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
+        if (pagesContent === undefined) {
+            Util_1.Util.error('Could not extract content from directory!');
+            return undefined;
+        }
+        var processedPages = [];
+        if (directory.template === undefined) {
+            var pageContentCount_1 = pagesContent.length;
+            for (var i = 0; i < pageContentCount_1; i++) {
+                var pageData = void 0;
+                var pageContent = pagesContent[i];
+                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
+                processedPages.push(pageData);
+            }
+            return processedPages;
+        }
         var ownUriComponents;
         if (directory.uri === undefined) {
             ownUriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
@@ -263,28 +326,28 @@ var SiteBuilder = (function () {
         }
         var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
         var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
-        var pagesContent = ContentParser_1.ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
-        if (pagesContent === undefined) {
-            Util_1.Util.error('Could not extract content from directory!');
-            return undefined;
-        }
-        var processedPages = [];
         var pageContentCount = pagesContent.length;
         for (var i = 0; i < pageContentCount; i++) {
+            var pageData = void 0;
             var pageContent = pagesContent[i];
-            var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
+            if (directory.template) {
+                var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                var pageConfigData = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util_1.Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
             }
-            var pageConfigData = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            var pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util_1.Util.error('Could not parse config page generated for directory!');
-                return undefined;
+            else {
+                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
             }
             processedPages.push(pageData);
         }

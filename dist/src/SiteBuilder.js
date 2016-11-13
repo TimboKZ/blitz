@@ -130,23 +130,28 @@ var SiteBuilder = (function () {
                         }
                     }
                 }
-                var processedPageUrls_1 = {};
+                var indexArray = [];
+                if (this_1.config.explicit_html_extensions) {
+                    indexArray.push('index.html');
+                }
+                var processedPageUrls_1 = {
+                    index: this_1.generateUrl(indexArray, currentDirectoryArray),
+                };
                 for (var pageID in this_1.pageUrls) {
                     if (this_1.pageUrls.hasOwnProperty(pageID)) {
                         processedPageUrls_1[pageID] = this_1.pageUrls[pageID](currentDirectoryArray);
                     }
                 }
+                var pageUrl_1 = this_1.generateUrl(fileArray, currentDirectoryArray);
                 var url = function (pageID) {
+                    if (pageID === undefined) {
+                        return pageUrl_1;
+                    }
                     return processedPageUrls_1[pageID];
                 };
-                var indexArray = [];
-                if (this_1.config.explicit_html_extensions) {
-                    indexArray.push('index.html');
-                }
                 var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
                     url: url,
                     hash: this_1.buildHash,
-                    index: this_1.generateUrl(indexArray, currentDirectoryArray),
                     menus: processedMenus,
                     asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),
                     site_url: this_1.config.site_url,

@@ -330,22 +330,28 @@ export class SiteBuilder {
                     }
                 }
 
-                // Process URL generators assigned to IDs and prepare the `url` function
-                let processedPageUrls: IBlitzProcessedPageURLs = {};
-                for (let pageID in this.pageUrls) {
-                    if (this.pageUrls.hasOwnProperty(pageID)) {
-                        processedPageUrls[pageID] = this.pageUrls[pageID](currentDirectoryArray);
-                    }
-                }
-                let url = (pageID: string) => {
-                    return processedPageUrls[pageID];
-                };
-
                 // URL to index page
                 let indexArray = [];
                 if (this.config.explicit_html_extensions) {
                     indexArray.push('index.html');
                 }
+
+                // Process URL generators assigned to IDs and prepare the `url` function
+                let processedPageUrls: IBlitzProcessedPageURLs = {
+                    index: this.generateUrl(indexArray, currentDirectoryArray),
+                };
+                for (let pageID in this.pageUrls) {
+                    if (this.pageUrls.hasOwnProperty(pageID)) {
+                        processedPageUrls[pageID] = this.pageUrls[pageID](currentDirectoryArray);
+                    }
+                }
+                let pageUrl = this.generateUrl(fileArray, currentDirectoryArray);
+                let url = (pageID?: string) => {
+                    if (pageID === undefined) {
+                        return pageUrl;
+                    }
+                    return processedPageUrls[pageID];
+                };
 
                 let locals = objectAssign(
                     {},
@@ -355,7 +361,6 @@ export class SiteBuilder {
                     {
                         url,
                         hash: this.buildHash,
-                        index: this.generateUrl(indexArray, currentDirectoryArray),
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                         site_url: this.config.site_url,

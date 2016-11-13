@@ -21,6 +21,7 @@ var SiteBuilder = (function () {
         this.assetsPath = path.join(projectPath, ASSETS_DIRECTORY);
         this.contentPath = path.join(projectPath, CONTENT_DIRECTORY);
         this.templatesPath = path.join(projectPath, TEMPLATES_DIRECTORY);
+        this.buildHash = Util_1.Util.generateRandomString(12);
     }
     SiteBuilder.prototype.build = function () {
         if (!Util_1.Util.removeDirectory(this.buildPath)) {
@@ -129,6 +130,7 @@ var SiteBuilder = (function () {
                     }
                 }
                 var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
+                    hash: this.buildHash,
                     menus: processedMenus,
                     asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                     site_url: this.config.site_url,

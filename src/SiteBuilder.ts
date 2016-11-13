@@ -133,6 +133,12 @@ export class SiteBuilder {
     private templatesPath: string;
 
     /**
+     * Randomly generated hash that can be used to bypass browser cache
+     * @since 0.1.0
+     */
+    private buildHash: string;
+
+    /**
      * Site map that will be used to build static files for the website. It will be generated beforehand.
      * @since 0.0.1
      */
@@ -152,6 +158,7 @@ export class SiteBuilder {
 
     /**
      * SiteBuilder constructor.
+     * @since 0.1.0 Now also generates a random string for `buildHash`
      * @since 0.0.1
      */
     public constructor(config: IBlitzConfig, projectPath: string, buildDirectory: string) {
@@ -161,6 +168,7 @@ export class SiteBuilder {
         this.assetsPath = path.join(projectPath, ASSETS_DIRECTORY);
         this.contentPath = path.join(projectPath, CONTENT_DIRECTORY);
         this.templatesPath = path.join(projectPath, TEMPLATES_DIRECTORY);
+        this.buildHash = Util.generateRandomString(12);
     }
 
     /**
@@ -237,6 +245,7 @@ export class SiteBuilder {
      *
      * This function also processes menus, updating relative links (if any) and marking current page as active
      *
+     * @since 0.1.0 Passes `buildHash` as `hash` to locals on every page
      * @since 0.0.1
      */
     private buildDirectory(directory: IBlitzMapDirectory, currentDirectoryArray: string[] = []): boolean {
@@ -304,6 +313,7 @@ export class SiteBuilder {
                     file.contentData,
                     file.blitzData,
                     {
+                        hash: this.buildHash,
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                         site_url: this.config.site_url,

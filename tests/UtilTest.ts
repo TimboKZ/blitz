@@ -11,6 +11,9 @@ import {Util} from '../src/Util';
 
 describe('Util', () => {
     describe('#stripSlashes()', () => {
+        it('should return empty string if the string was initially empty', () => {
+            assert.strictEqual(Util.stripSlashes(''), '');
+        });
         it('should return string unchanged if there are no slashes surrounding it', () => {
             assert.strictEqual(Util.stripSlashes('hello/hello'), 'hello/hello');
         });

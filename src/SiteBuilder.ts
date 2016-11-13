@@ -534,12 +534,33 @@ export class SiteBuilder {
     }
 
     /** Parses a page from the config inserting into the site map
+     * @since 0.1.0 Now only parses child config pages if `directory.template` is set
      * @since 0.0.1
      */
     private parseConfigDirectory(directory: IBlitzChildDirectory,
                                  parentDirectory: IBlitzMapDirectory,
                                  parentUriComponents: string[] = [],
                                  parent?: IBlitzProcessedPage): IBlitzProcessedPage[] {
+
+        let pagesContent = ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
+        if (pagesContent === undefined) {
+            Util.error('Could not extract content from directory!');
+            return undefined;
+        }
+
+        let processedPages: IBlitzProcessedPage[] = [];
+
+        if (directory.template === undefined) {
+            let pageContentCount = pagesContent.length;
+            for (let i = 0; i < pageContentCount; i++) {
+                let pageData: IBlitzProcessedPage;
+                let pageContent = pagesContent[i];
+                pageData = objectAssign({}, pageContent, {url: (locals?: string): string => undefined});
+                processedPages.push(pageData);
+            }
+
+            return processedPages;
+        }
 
         // Generate file and directory arrays and extract filename
         let ownUriComponents;
@@ -554,31 +575,30 @@ export class SiteBuilder {
 
         let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
 
-        let pagesContent = ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
-        if (pagesContent === undefined) {
-            Util.error('Could not extract content from directory!');
-            return undefined;
-        }
-
-        let processedPages: IBlitzProcessedPage[] = [];
-
         let pageContentCount = pagesContent.length;
         for (let i = 0; i < pageContentCount; i++) {
+            let pageData: IBlitzProcessedPage;
             let pageContent = pagesContent[i];
-            let pageUri = '/' + Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
+
+            if (directory.template) {
+                let pageUri = '/' + Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                let pageConfigData: IBlitzPage = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
+            } else {
+                pageData = objectAssign({}, pageContent, {url: (locals?: string): string => undefined});
             }
-            let pageConfigData: IBlitzPage = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            let pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util.error('Could not parse config page generated for directory!');
-                return undefined;
-            }
+
             processedPages.push(pageData);
         }
 

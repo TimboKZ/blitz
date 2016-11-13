@@ -17,13 +17,14 @@ export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
  * Interface for child directories of top level pages
+ * @since 0.1.0 Made `template` optional
  * @since 0.0.1
  */
 export interface IBlitzChildDirectory {
     uri?: string;
     uri_key?: string;
     name: string;
-    template: string;
+    template?: string;
     directory: string;
 }
 

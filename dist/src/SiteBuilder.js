@@ -285,6 +285,22 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.parseConfigDirectory = function (directory, parentDirectory, parentUriComponents, parent) {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
+        var pagesContent = ContentParser_1.ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
+        if (pagesContent === undefined) {
+            Util_1.Util.error('Could not extract content from directory!');
+            return undefined;
+        }
+        var processedPages = [];
+        if (directory.template === undefined) {
+            var pageContentCount_1 = pagesContent.length;
+            for (var i = 0; i < pageContentCount_1; i++) {
+                var pageData = void 0;
+                var pageContent = pagesContent[i];
+                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
+                processedPages.push(pageData);
+            }
+            return processedPages;
+        }
         var ownUriComponents;
         if (directory.uri === undefined) {
             ownUriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
@@ -294,28 +310,28 @@ var SiteBuilder = (function () {
         }
         var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
         var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
-        var pagesContent = ContentParser_1.ContentParser.parseDirectory(path.join(this.contentPath, directory.directory));
-        if (pagesContent === undefined) {
-            Util_1.Util.error('Could not extract content from directory!');
-            return undefined;
-        }
-        var processedPages = [];
         var pageContentCount = pagesContent.length;
         for (var i = 0; i < pageContentCount; i++) {
+            var pageData = void 0;
             var pageContent = pagesContent[i];
-            var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
+            if (directory.template) {
+                var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                var pageConfigData = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util_1.Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
             }
-            var pageConfigData = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            var pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util_1.Util.error('Could not parse config page generated for directory!');
-                return undefined;
+            else {
+                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
             }
             processedPages.push(pageData);
         }

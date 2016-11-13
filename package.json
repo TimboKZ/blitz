@@ -1,6 +1,6 @@
 {
   "name": "blitz-ssg",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dead simple static site generator using Markdown and Pug (formerly Jade).",
   "preferGlobal": true,
   "bin": {
@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/TimboKZ/blitz/issues"
   },
-  "homepage": "https://github.com/TimboKZ/blitz#readme",
+  "homepage": "https://getblitz.io/",
   "devDependencies": {
     "chai": "^3.5.0",
     "gulp": "^3.9.1",

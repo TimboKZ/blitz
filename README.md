@@ -9,7 +9,7 @@ using Pug (previously known as )
 
 ## Documentation and guides
 
-Blitz documentation can be found on [its website](https://hosting.kawaiidesu.me/blitz/). Links to quick start guides
+Blitz documentation can be found on [its website](https://getblitz.io/). Links to quick start guides
 will appear soon.
 
 ## Super quick start

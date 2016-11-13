@@ -82,6 +82,7 @@ var SiteBuilder = (function () {
             if (directory.files.hasOwnProperty(fileName)) {
                 var file = directory.files[fileName];
                 var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                var pageUrl_1 = this_1.generateUrl(fileArray, currentDirectoryArray);
                 var processedMenus = {};
                 for (var menuName in this_1.menus) {
                     if (this_1.menus.hasOwnProperty(menuName)) {
@@ -109,7 +110,9 @@ var SiteBuilder = (function () {
                     }
                 }
                 var childPages = [];
+                var namedChildPages = {};
                 var childDirectories = [];
+                var namedChildDirectories = {};
                 for (var dataKey in file.blitzData) {
                     if (file.blitzData.hasOwnProperty(dataKey)) {
                         if (dataKey === 'url') {
@@ -124,13 +127,19 @@ var SiteBuilder = (function () {
                                         = file.blitzData[dataKey][i].url(currentDirectoryArray);
                                 }
                             }
-                            childDirectories.push(file.blitzData[dataKey]);
+                            if (dataKey !== 'parent') {
+                                childDirectories.push(file.blitzData[dataKey]);
+                                namedChildDirectories[dataKey] = file.blitzData[dataKey];
+                            }
                         }
                         else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
                             if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
                                 file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
                             }
-                            childPages.push(file.blitzData[dataKey]);
+                            if (dataKey !== 'parent') {
+                                childPages.push(file.blitzData[dataKey]);
+                                namedChildPages[dataKey] = file.blitzData[dataKey];
+                            }
                         }
                     }
                 }
@@ -146,7 +155,6 @@ var SiteBuilder = (function () {
                         processedPageUrls_1[pageID] = this_1.pageUrls[pageID](currentDirectoryArray);
                     }
                 }
-                var pageUrl_1 = this_1.generateUrl(fileArray, currentDirectoryArray);
                 var url = function (pageID) {
                     if (pageID === undefined) {
                         return pageUrl_1;
@@ -155,8 +163,10 @@ var SiteBuilder = (function () {
                 };
                 var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
                     url: url,
-                    childPages: childPages,
-                    childDirectories: childDirectories,
+                    child_pages: childPages,
+                    child_directories: childDirectories,
+                    named_child_pages: namedChildPages,
+                    named_child_directories: namedChildDirectories,
                     hash: this_1.buildHash,
                     menus: processedMenus,
                     asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),
@@ -224,6 +234,37 @@ var SiteBuilder = (function () {
             url: urlGenerator,
             parent: parent,
         };
+        if (page.menus) {
+            var menuCount = page.menus.length;
+            for (var k = 0; k < menuCount; k++) {
+                var menu = page.menus[k];
+                var menuTitle = fileNameWithoutExtension;
+                if (pageContent.menu_title) {
+                    menuTitle = pageContent.menu_title;
+                }
+                else if (menu.title) {
+                    menuTitle = menu.title;
+                }
+                else if (pageContent.title) {
+                    menuTitle = pageContent.title;
+                }
+                if (this.menus[menu.name] === undefined) {
+                    this.menus[menu.name] = [];
+                }
+                var menuItem = {
+                    title: menuTitle,
+                    url: urlGenerator,
+                    active: false,
+                };
+                if (!this.config.absolute_urls) {
+                    menuItem.directoryArray = directoryArray;
+                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                        menuItem.fileName = fileName;
+                    }
+                }
+                this.menus[menu.name].push(menuItem);
+            }
+        }
         if (page.child_pages && page.child_pages.length > 0) {
             var pageCount = page.child_pages.length;
             for (var i = 0; i < pageCount; i++) {
@@ -256,37 +297,6 @@ var SiteBuilder = (function () {
             generator: pugFunction,
         };
         currentPageDirectory.files[fileData.name] = fileData;
-        if (page.menus) {
-            var menuCount = page.menus.length;
-            for (var k = 0; k < menuCount; k++) {
-                var menu = page.menus[k];
-                var menuTitle = fileNameWithoutExtension;
-                if (pageContent.menu_title) {
-                    menuTitle = pageContent.menu_title;
-                }
-                else if (menu.title) {
-                    menuTitle = menu.title;
-                }
-                else if (pageContent.title) {
-                    menuTitle = pageContent.title;
-                }
-                if (this.menus[menu.name] === undefined) {
-                    this.menus[menu.name] = [];
-                }
-                var menuItem = {
-                    title: menuTitle,
-                    url: urlGenerator,
-                    active: false,
-                };
-                if (!this.config.absolute_urls) {
-                    menuItem.directoryArray = directoryArray;
-                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
-                        menuItem.fileName = fileName;
-                    }
-                }
-                this.menus[menu.name].push(menuItem);
-            }
-        }
         return processedPageData;
     };
     SiteBuilder.prototype.parseConfigDirectory = function (directory, parentDirectory, parentUriComponents, parent) {

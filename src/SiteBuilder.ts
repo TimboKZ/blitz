@@ -278,6 +278,7 @@ export class SiteBuilder {
             if (directory.files.hasOwnProperty(fileName)) {
                 let file = directory.files[fileName];
                 let fileArray = currentDirectoryArray.slice(0).concat([file.name]);
+                let pageUrl = this.generateUrl(fileArray, currentDirectoryArray);
 
                 // Process menus
                 let processedMenus: IBlitzPageMenus = {};
@@ -309,7 +310,9 @@ export class SiteBuilder {
 
                 // Process URLs in Blitz data, while also packing all children into `childPages` and `childDirectories`
                 let childPages = [];
+                let namedChildPages = {};
                 let childDirectories = [];
+                let namedChildDirectories = {};
                 for (let dataKey in file.blitzData) {
                     if (file.blitzData.hasOwnProperty(dataKey)) {
                         if (dataKey === 'url') {
@@ -324,12 +327,18 @@ export class SiteBuilder {
                                         = file.blitzData[dataKey][i].url(currentDirectoryArray);
                                 }
                             }
-                            childDirectories.push(file.blitzData[dataKey]);
+                            if (dataKey !== 'parent') {
+                                childDirectories.push(file.blitzData[dataKey]);
+                                namedChildDirectories[dataKey] = file.blitzData[dataKey];
+                            }
                         } else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
                             if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
                                 file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
                             }
-                            childPages.push(file.blitzData[dataKey]);
+                            if (dataKey !== 'parent') {
+                                childPages.push(file.blitzData[dataKey]);
+                                namedChildPages[dataKey] = file.blitzData[dataKey];
+                            }
                         }
                     }
                 }
@@ -349,7 +358,6 @@ export class SiteBuilder {
                         processedPageUrls[pageID] = this.pageUrls[pageID](currentDirectoryArray);
                     }
                 }
-                let pageUrl = this.generateUrl(fileArray, currentDirectoryArray);
                 let url = (pageID?: string) => {
                     if (pageID === undefined) {
                         return pageUrl;
@@ -364,8 +372,10 @@ export class SiteBuilder {
                     file.blitzData,
                     {
                         url,
-                        childPages,
-                        childDirectories,
+                        child_pages: childPages,
+                        child_directories: childDirectories,
+                        named_child_pages: namedChildPages,
+                        named_child_directories: namedChildDirectories,
                         hash: this.buildHash,
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
@@ -455,6 +465,37 @@ export class SiteBuilder {
             parent,
         };
 
+        // Append data to menu if needed
+        if (page.menus) {
+            let menuCount = page.menus.length;
+            for (let k = 0; k < menuCount; k++) {
+                let menu = page.menus[k];
+                let menuTitle = fileNameWithoutExtension;
+                if (pageContent.menu_title) {
+                    menuTitle = pageContent.menu_title;
+                } else if (menu.title) {
+                    menuTitle = menu.title;
+                } else if (pageContent.title) {
+                    menuTitle = pageContent.title;
+                }
+                if (this.menus[menu.name] === undefined) {
+                    this.menus[menu.name] = [];
+                }
+                let menuItem: IBlitzMapMenuItem = {
+                    title: menuTitle,
+                    url: urlGenerator,
+                    active: false,
+                };
+                if (!this.config.absolute_urls) {
+                    menuItem.directoryArray = directoryArray;
+                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                        menuItem.fileName = fileName;
+                    }
+                }
+                this.menus[menu.name].push(menuItem);
+            }
+        }
+
         // Parse child pages
         if (page.child_pages && page.child_pages.length > 0) {
             let pageCount = page.child_pages.length;
@@ -502,37 +543,6 @@ export class SiteBuilder {
             generator: pugFunction,
         };
         currentPageDirectory.files[fileData.name] = fileData;
-
-        // Append data to menu if needed
-        if (page.menus) {
-            let menuCount = page.menus.length;
-            for (let k = 0; k < menuCount; k++) {
-                let menu = page.menus[k];
-                let menuTitle = fileNameWithoutExtension;
-                if (pageContent.menu_title) {
-                    menuTitle = pageContent.menu_title;
-                } else if (menu.title) {
-                    menuTitle = menu.title;
-                } else if (pageContent.title) {
-                    menuTitle = pageContent.title;
-                }
-                if (this.menus[menu.name] === undefined) {
-                    this.menus[menu.name] = [];
-                }
-                let menuItem: IBlitzMapMenuItem = {
-                    title: menuTitle,
-                    url: urlGenerator,
-                    active: false,
-                };
-                if (!this.config.absolute_urls) {
-                    menuItem.directoryArray = directoryArray;
-                    if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
-                        menuItem.fileName = fileName;
-                    }
-                }
-                this.menus[menu.name].push(menuItem);
-            }
-        }
 
         // Return page data to parent
         return processedPageData;

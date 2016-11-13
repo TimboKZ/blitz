@@ -13,6 +13,7 @@ var TEMPLATES_DIRECTORY = 'templates';
 var INDEX_FILE_NAME = 'index.html';
 var SiteBuilder = (function () {
     function SiteBuilder(config, projectPath, buildDirectory) {
+        this.pageUrls = {};
         this.menus = {};
         this.pugCache = {};
         this.config = config;
@@ -77,30 +78,30 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.buildDirectory = function (directory, currentDirectoryArray) {
         if (currentDirectoryArray === void 0) { currentDirectoryArray = []; }
-        for (var fileName in directory.files) {
+        var _loop_1 = function(fileName) {
             if (directory.files.hasOwnProperty(fileName)) {
                 var file = directory.files[fileName];
                 var fileArray = currentDirectoryArray.slice(0).concat([file.name]);
                 var processedMenus = {};
-                for (var menuName in this.menus) {
-                    if (this.menus.hasOwnProperty(menuName)) {
-                        var menu = this.menus[menuName];
+                for (var menuName in this_1.menus) {
+                    if (this_1.menus.hasOwnProperty(menuName)) {
+                        var menu = this_1.menus[menuName];
                         var itemCount = menu.length;
                         var processedMenu = [];
                         for (var i = 0; i < itemCount; i++) {
                             var item = menu[i];
-                            var url = item.url();
+                            var url_1 = item.url();
                             if (item.directoryArray !== undefined) {
                                 var array = item.directoryArray;
                                 if (item.fileName !== undefined) {
                                     array = array.concat([item.fileName]);
                                 }
-                                url = this.generateUrl(array, currentDirectoryArray);
+                                url_1 = this_1.generateUrl(array, currentDirectoryArray);
                             }
                             var active = file.url() === item.url();
                             processedMenu.push({
                                 title: item.title,
-                                url: url,
+                                url: url_1,
                                 active: active,
                             });
                         }
@@ -129,23 +130,38 @@ var SiteBuilder = (function () {
                         }
                     }
                 }
+                var processedPageUrls_1 = {};
+                for (var pageID in this_1.pageUrls) {
+                    if (this_1.pageUrls.hasOwnProperty(pageID)) {
+                        processedPageUrls_1[pageID] = this_1.pageUrls[pageID](currentDirectoryArray);
+                    }
+                }
+                var url = function (pageID) {
+                    return processedPageUrls_1[pageID];
+                };
                 var indexArray = [];
-                if (this.config.explicit_html_extensions) {
+                if (this_1.config.explicit_html_extensions) {
                     indexArray.push('index.html');
                 }
-                var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
-                    hash: this.buildHash,
-                    index: this.generateUrl(indexArray, currentDirectoryArray),
+                var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
+                    url: url,
+                    hash: this_1.buildHash,
+                    index: this_1.generateUrl(indexArray, currentDirectoryArray),
                     menus: processedMenus,
-                    asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
-                    site_url: this.config.site_url,
-                    site_root: this.config.site_root,
+                    asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),
+                    site_url: this_1.config.site_url,
+                    site_root: this_1.config.site_root,
                 });
-                if (!Util_1.Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
+                if (!Util_1.Util.writeFileFromArray(this_1.buildPath, fileArray, file.generator(locals))) {
                     Util_1.Util.error('Could not write file from array!');
-                    return false;
+                    return { value: false };
                 }
             }
+        };
+        var this_1 = this;
+        for (var fileName in directory.files) {
+            var state_1 = _loop_1(fileName);
+            if (typeof state_1 === "object") return state_1.value;
         }
         for (var directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
@@ -190,6 +206,9 @@ var SiteBuilder = (function () {
             return undefined;
         }
         var processedPageData = objectAssign({}, pageContent, { url: urlGenerator });
+        if (page.id) {
+            this.pageUrls[page.id] = urlGenerator;
+        }
         var blitzData = {
             url: urlGenerator,
             parent: parent,

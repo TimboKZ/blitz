@@ -84,6 +84,22 @@ interface IBlitzPageMenus {
 }
 
 /**
+ * Interface for URL generators assigned to IDs
+ * @since 0.1.0
+ */
+interface IBlitzPageURLs {
+    [id: string]: (currentDirectoryArray?: string[]) => string;
+}
+
+/**
+ * Interface for processed URLs assigned to IDs
+ * @since 0.1.0
+ */
+interface IBlitzProcessedPageURLs {
+    [id: string]: string;
+}
+
+/**
  * Page content data with inserted URL
  * @since 0.0.1
  */
@@ -143,6 +159,12 @@ export class SiteBuilder {
      * @since 0.0.1
      */
     private siteMap: IBlitzMapDirectory;
+
+    /**
+     * URL generators for pages with IDs specified
+     * @since 0.1.0
+     */
+    private pageUrls: IBlitzPageURLs = {};
 
     /**
      * Object holding all menus generated from the config
@@ -245,6 +267,7 @@ export class SiteBuilder {
      *
      * This function also processes menus, updating relative links (if any) and marking current page as active
      *
+     * @since 0.1.0 Processes URLs in `pageUrls` and passes `url()` to Pug locals
      * @since 0.1.0 Passes `buildHash` as `hash` to locals on every page
      * @since 0.1.0 Passes `index` to locals, the absolute/relative URL to the index page
      * @since 0.0.1
@@ -255,7 +278,6 @@ export class SiteBuilder {
             if (directory.files.hasOwnProperty(fileName)) {
                 let file = directory.files[fileName];
                 let fileArray = currentDirectoryArray.slice(0).concat([file.name]);
-                // TODO: Active menu point?
 
                 // Process menus
                 let processedMenus: IBlitzPageMenus = {};
@@ -308,6 +330,17 @@ export class SiteBuilder {
                     }
                 }
 
+                // Process URL generators assigned to IDs and prepare the `url` function
+                let processedPageUrls: IBlitzProcessedPageURLs = {};
+                for (let pageID in this.pageUrls) {
+                    if (this.pageUrls.hasOwnProperty(pageID)) {
+                        processedPageUrls[pageID] = this.pageUrls[pageID](currentDirectoryArray);
+                    }
+                }
+                let url = (pageID: string) => {
+                    return processedPageUrls[pageID];
+                };
+
                 // URL to index page
                 let indexArray = [];
                 if (this.config.explicit_html_extensions) {
@@ -320,6 +353,7 @@ export class SiteBuilder {
                     file.contentData,
                     file.blitzData,
                     {
+                        url,
                         hash: this.buildHash,
                         index: this.generateUrl(indexArray, currentDirectoryArray),
                         menus: processedMenus,
@@ -353,6 +387,7 @@ export class SiteBuilder {
 
     /**
      * Parses a page from the config inserting into the site map
+     * @since 0.1.0 Saves URL generator for pages with IDs to `pageUrls`
      * @since 0.0.1
      */
     private parseConfigPage(page: IBlitzPage,
@@ -397,6 +432,11 @@ export class SiteBuilder {
 
         // Created a processed page data object
         let processedPageData = objectAssign({}, pageContent, {url: urlGenerator});
+
+        // Record URL generator if the page has an ID
+        if (page.id) {
+            this.pageUrls[page.id] = urlGenerator;
+        }
 
         // Setup Blitz data that will be extracted from children
         let blitzData = {

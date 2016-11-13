@@ -42,6 +42,7 @@ export interface IBlitzMenu {
  */
 export interface IBlitzPage {
     uri?: string;
+    id?: string;
     name?: string;
     template: string;
     content: string|any;

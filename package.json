@@ -1,10 +1,8 @@
 {
   "name": "blitz-ssg",
   "version": "0.0.1",
-  "description": "Dead simple static site generator.",
-  "main": "dist/src/blitz.js",
-  "typings": "dist/src/blitz.d.ts",
-  "preferGlobal": "true",
+  "description": "Dead simple static site generator using Markdown and Pug (formerly Jade).",
+  "preferGlobal": true,
   "bin": {
     "blitz": "./blitz-cli"
   },
@@ -15,7 +13,19 @@
     "type": "git",
     "url": "git+https://github.com/TimboKZ/blitz.git"
   },
-  "author": "Timur Kuzhagaliyev",
+  "author": {
+    "name": "Timur Kuzhagaluyev",
+    "email": "tim.kuzh@gmail.com",
+    "url": "https://foxypanda.me/"
+  },
+  "keywords": [
+    "blitz",
+    "website",
+    "cms",
+    "blog",
+    "static site",
+    "generator"
+  ],
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/TimboKZ/blitz/issues"

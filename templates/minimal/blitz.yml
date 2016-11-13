@@ -10,7 +10,7 @@
 
 # Version of Blitz used to generate this project. Used for
 # migration purposes.
-blitz_version: '0.0.1'
+blitz_version: '0.1.0'
 
 # Site URL without a trailing slash. This is not used in URL
 # generation but is rather available for your own convenience.
@@ -25,7 +25,7 @@ site_root: ''
 # Whether to use absolute URLs (`http://test.org/hello/`) or
 # relative URLs (`./hello/`). Disable this to browse the website
 # offline, on your computer.
-absolute_urls: false
+absolute_urls: true
 
 # Whether to use directories and expect a server to serve
 # `index.html` (`http://test.org/hello/world/`) or add explicit

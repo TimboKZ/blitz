@@ -307,7 +307,9 @@ export class SiteBuilder {
                     }
                 }
 
-                // Process URLs in Blitz data
+                // Process URLs in Blitz data, while also packing all children into `childPages` and `childDirectories`
+                let childPages = [];
+                let childDirectories = [];
                 for (let dataKey in file.blitzData) {
                     if (file.blitzData.hasOwnProperty(dataKey)) {
                         if (dataKey === 'url') {
@@ -322,10 +324,12 @@ export class SiteBuilder {
                                         = file.blitzData[dataKey][i].url(currentDirectoryArray);
                                 }
                             }
+                            childDirectories.push(file.blitzData[dataKey]);
                         } else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
                             if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
                                 file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
                             }
+                            childPages.push(file.blitzData[dataKey]);
                         }
                     }
                 }
@@ -360,6 +364,8 @@ export class SiteBuilder {
                     file.blitzData,
                     {
                         url,
+                        childPages,
+                        childDirectories,
                         hash: this.buildHash,
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),

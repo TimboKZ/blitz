@@ -108,6 +108,8 @@ var SiteBuilder = (function () {
                         processedMenus[menuName] = processedMenu;
                     }
                 }
+                var childPages = [];
+                var childDirectories = [];
                 for (var dataKey in file.blitzData) {
                     if (file.blitzData.hasOwnProperty(dataKey)) {
                         if (dataKey === 'url') {
@@ -122,11 +124,13 @@ var SiteBuilder = (function () {
                                         = file.blitzData[dataKey][i].url(currentDirectoryArray);
                                 }
                             }
+                            childDirectories.push(file.blitzData[dataKey]);
                         }
                         else if (Object.prototype.toString.call(dataValue) === '[object Object]') {
                             if (dataValue.url !== undefined && typeof dataValue.url === 'function') {
                                 file.blitzData[dataKey].url = file.blitzData[dataKey].url(currentDirectoryArray);
                             }
+                            childPages.push(file.blitzData[dataKey]);
                         }
                     }
                 }
@@ -151,6 +155,8 @@ var SiteBuilder = (function () {
                 };
                 var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
                     url: url,
+                    childPages: childPages,
+                    childDirectories: childDirectories,
                     hash: this_1.buildHash,
                     menus: processedMenus,
                     asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),

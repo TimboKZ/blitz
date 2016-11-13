@@ -36,7 +36,7 @@ const INDEX_FILE_NAME = 'index.html';
  */
 interface IBlitzMapFile {
     name: string;
-    url: (currentDirectoryArray: string[] = []) => string;
+    url: (currentDirectoryArray?: string[]) => string;
     contentData: any;
     blitzData: any;
     generator: (locals?: any) => string;
@@ -61,7 +61,7 @@ interface IBlitzMapDirectory {
  */
 interface IBlitzMapMenuItem {
     title: string;
-    url: (currentDirectoryArray: string[] = []) => string;
+    url: (currentDirectoryArray?: string[]) => string;
     fileName?: string;
     directoryArray?: string[];
     active: boolean;
@@ -196,7 +196,7 @@ export class SiteBuilder {
             Util.error('Site building failed!');
             return undefined;
         }
-        Util.debug('Site built successfully!');
+        Util.log('Site built successfully!');
     }
 
     /**
@@ -572,7 +572,7 @@ export class SiteBuilder {
      * Partiall applies `generateUrl()` for easier relative URL generation
      * @since 0.0.1
      */
-    private getUrlGenerator(targetFileArray: string[]): (currentDirectoryArray: string[] = []) => string {
+    private getUrlGenerator(targetFileArray: string[]): (currentDirectoryArray?: string[]) => string {
         return this.generateUrl.bind(this, targetFileArray);
     }
 

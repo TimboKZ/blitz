@@ -1,6 +1,7 @@
 "use strict";
 var nomnom = require('nomnom');
-var fs = require('fs');
+var fse = require('fs-extra');
+var path = require('path');
 var SiteBuilder_1 = require('./SiteBuilder');
 var Util_1 = require('./Util');
 var ConfigParser_1 = require('./ConfigParser');
@@ -10,6 +11,12 @@ function main(argv) {
         action: {
             position: 2,
             help: 'Action to perform. Either `init`, `build` or `preview`',
+        },
+        template: {
+            abbr: 't',
+            default: 'minimal',
+            metavar: 'TEMPLATE',
+            help: 'Template to use for initialisation',
         },
         yes: {
             abbr: 'y',
@@ -32,11 +39,9 @@ function main(argv) {
     switch (action) {
         case 'init':
             init();
-            Util_1.Util.log('Project initiliasation completed!');
             break;
         case 'build':
             build();
-            Util_1.Util.log('Build completed!');
             break;
         case 'preview':
             Util_1.Util.log('This command has not yet been implemented.');
@@ -52,11 +57,29 @@ function main(argv) {
 }
 exports.main = main;
 function init() {
-    Util_1.Util.log('Initialising a new Blitz project...');
-    var files = fs.readdirSync(process.cwd());
-    if (files.length > 0 && !exports.args.yes) {
-        Util_1.Util.log('Directory is not empty! Overwrite files?');
+    var template = exports.args.template;
+    var templateDisplay = template.cyan;
+    Util_1.Util.log('Initialising a new Blitz project using template ' + templateDisplay + '...');
+    try {
+        var blitzTemplatePath = path.join(__dirname, '..', '..', 'templates');
+        var allTemplates = fse.readdirSync(blitzTemplatePath);
+        if (allTemplates.indexOf(template) === -1) {
+            Util_1.Util.error('Template ' + templateDisplay + ' does not exist!');
+            return;
+        }
+        var templateDir = path.join(blitzTemplatePath, template);
+        var currentDirectoryContents = fse.readdirSync(process.cwd());
+        if (currentDirectoryContents.length > 0 && !exports.args.yes) {
+            Util_1.Util.log('Directory is not empty! Overwrite files...');
+        }
+        fse.copySync(templateDir, process.cwd());
     }
+    catch (e) {
+        Util_1.Util.error('Could not initialise a new project!');
+        Util_1.Util.stackTrace(e);
+        return;
+    }
+    Util_1.Util.log('Done! Use ' + 'blitz build'.cyan + ' to build the template.');
 }
 function build() {
     var directory = process.cwd();

@@ -26,7 +26,7 @@ export interface IFileContentCache {
  * Interface for processed data
  * @since 0.0.1
  */
-interface IProcessedFileContent {
+export interface IProcessedFileContent {
     file: string;
     [key: string]: any;
 }

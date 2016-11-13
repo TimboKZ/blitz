@@ -52,7 +52,7 @@ var SiteBuilder = (function () {
             Util_1.Util.error('Site building failed!');
             return undefined;
         }
-        Util_1.Util.debug('Site built successfully!');
+        Util_1.Util.log('Site built successfully!');
     };
     SiteBuilder.prototype.prepareMap = function () {
         var pages = this.config.pages;

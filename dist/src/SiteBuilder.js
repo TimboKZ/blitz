@@ -129,8 +129,13 @@ var SiteBuilder = (function () {
                         }
                     }
                 }
+                var indexArray = [];
+                if (this.config.explicit_html_extensions) {
+                    indexArray.push('index.html');
+                }
                 var locals = objectAssign({}, this.config.globals, file.contentData, file.blitzData, {
                     hash: this.buildHash,
+                    index: this.generateUrl(indexArray, currentDirectoryArray),
                     menus: processedMenus,
                     asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                     site_url: this.config.site_url,

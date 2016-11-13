@@ -246,6 +246,7 @@ export class SiteBuilder {
      * This function also processes menus, updating relative links (if any) and marking current page as active
      *
      * @since 0.1.0 Passes `buildHash` as `hash` to locals on every page
+     * @since 0.1.0 Passes `index` to locals, the absolute/relative URL to the index page
      * @since 0.0.1
      */
     private buildDirectory(directory: IBlitzMapDirectory, currentDirectoryArray: string[] = []): boolean {
@@ -307,6 +308,12 @@ export class SiteBuilder {
                     }
                 }
 
+                // URL to index page
+                let indexArray = [];
+                if (this.config.explicit_html_extensions) {
+                    indexArray.push('index.html');
+                }
+
                 let locals = objectAssign(
                     {},
                     this.config.globals,
@@ -314,6 +321,7 @@ export class SiteBuilder {
                     file.blitzData,
                     {
                         hash: this.buildHash,
+                        index: this.generateUrl(indexArray, currentDirectoryArray),
                         menus: processedMenus,
                         asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
                         site_url: this.config.site_url,

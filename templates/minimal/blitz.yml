@@ -41,6 +41,7 @@ globals:
 # Pages of the website. All non-root pages must have the name
 # specified. For more information check the links in the beginning
 # of this file.
+# NOTE: Separate directories using forward slash '/' symbol.
 pages:
   - uri: '/'
     content: 'index.md'

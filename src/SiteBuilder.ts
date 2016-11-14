@@ -106,7 +106,7 @@ interface IBlitzProcessedPageURLs {
 interface IBlitzProcessedPage {
     url: (currentDirectoryArray?: string[]) => string;
     content: string;
-    [key: string]: string;
+    [key: string]: string|((currentDirectoryArray?: string[]) => string);
 }
 
 /**

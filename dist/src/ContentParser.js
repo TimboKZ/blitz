@@ -2,25 +2,16 @@
 var fs = require('fs');
 var path = require('path');
 var objectAssign = require('object-assign');
+var fm = require('front-matter');
 var Util_1 = require('./Util');
 var ContentParser = (function () {
     function ContentParser() {
     }
     ContentParser.parse = function (content) {
-        var components = content.split(/---\r?\n/);
-        var yamlString = components.shift().replace(/^\s+|\s+$/g, '');
-        var markdownString = components.join('---\n');
-        var htmlContent = Util_1.Util.parseMarkdown(markdownString);
-        if (yamlString === '') {
-            return { content: htmlContent };
-        }
-        var yamlObject = Util_1.Util.parseYaml(yamlString);
-        if (yamlObject === undefined) {
-            Util_1.Util.debug('Could not parse YAML extracted from content!');
-            return undefined;
-        }
-        yamlObject.content = htmlContent;
-        return yamlObject;
+        var parsedPage = fm(content);
+        var result = parsedPage.attributes;
+        result.content = Util_1.Util.parseMarkdown(parsedPage.body);
+        return result;
     };
     ContentParser.parseFile = function (filePath) {
         if (!Util_1.Util.pathExists(filePath)) {

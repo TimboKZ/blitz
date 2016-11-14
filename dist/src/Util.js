@@ -26,6 +26,10 @@ var Util = (function () {
     };
     Util.parseYaml = function (yamlString) {
         Util.debug('Parsing  YAML...');
+        yamlString = yamlString.replace(/^\s+|\s+$/g, '');
+        if (yamlString === '') {
+            return {};
+        }
         var parsedYaml;
         try {
             parsedYaml = yaml.safeLoad(yamlString);

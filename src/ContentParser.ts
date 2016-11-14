@@ -9,6 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as objectAssign from 'object-assign';
+import * as fm from 'front-matter';
 import {Util} from './Util';
 
 /**
@@ -50,26 +51,19 @@ export class ContentParser {
     public static fileCache: IFileContentCache = {};
 
     /**
-     * Creates a YAML object from everything before the line containing `---`. Then, adds a property called `content`
-     * to the newly created object and populates it with everything after `---` line, converted from Markdown into HTML.
+     * Extracts front matter using the `front-matter` package and adds a `content` property
+     * @see https://github.com/jxson/front-matter
+     * @since 0.1.2 Now uses `front-matter` package
      * @since 0.0.1
      */
     public static parse(content: string): any {
-        // TODO: Find a more efficient alternative to the code below.
-        let components = content.split(/---\r?\n/);
-        let yamlString = components.shift().replace(/^\s+|\s+$/g, '');
-        let markdownString = components.join('---\n');
-        let htmlContent = Util.parseMarkdown(markdownString);
-        if (yamlString === '') {
-            return {content: htmlContent};
-        }
-        let yamlObject = Util.parseYaml(yamlString);
-        if (yamlObject === undefined) {
-            Util.debug('Could not parse YAML extracted from content!');
-            return undefined;
-        }
-        yamlObject.content = htmlContent;
-        return yamlObject;
+
+        let parsedPage = fm(content);
+
+        let result = parsedPage.attributes;
+        result.content = Util.parseMarkdown(parsedPage.body);
+
+        return result;
     }
 
     /**

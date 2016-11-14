@@ -1,8 +1,11 @@
 /.idea/
+/dist/test/
 /src/
-/tests/
-/dist/tests/
+/test/
 /typings/
-/tslint.json
-/gulpfile.js
+/.travis.yml
 /blitz-ssg-*
+/gulpfile.js
+/tsconfig.json
+/tslint.json
+/typings.json

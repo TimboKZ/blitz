@@ -7,7 +7,7 @@
     "blitz": "./blitz-cli"
   },
   "scripts": {
-    "test": "mocha ./dist/tests/"
+    "test": "mocha ./dist/test/"
   },
   "repository": {
     "type": "git",

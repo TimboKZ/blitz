@@ -51,15 +51,12 @@ describe('Util', function () {
         });
         it('should remove leading directories string unchanged if it has no extension', function () {
             chai_1.assert.equal(Util_1.Util.extractFileName('test/hello'), 'hello');
-            chai_1.assert.equal(Util_1.Util.extractFileName('test\\hello'), 'hello');
         });
         it('should remove leading directories string and extension', function () {
             chai_1.assert.equal(Util_1.Util.extractFileName('test/hello.test'), 'hello');
-            chai_1.assert.equal(Util_1.Util.extractFileName('test\\hello.jpg'), 'hello');
         });
         it('should remove only one extension', function () {
             chai_1.assert.equal(Util_1.Util.extractFileName('test/hello.qwe.test'), 'hello.qwe');
-            chai_1.assert.equal(Util_1.Util.extractFileName('test\\hello.123.jpg'), 'hello.123');
         });
     });
 });

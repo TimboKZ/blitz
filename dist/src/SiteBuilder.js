@@ -309,11 +309,11 @@ var SiteBuilder = (function () {
         var processedPages = [];
         if (directory.template === undefined) {
             var pageContentCount_1 = pagesContent.length;
+            var urlGenerator = function (currentDirectoryArray) { return undefined; };
             for (var i = 0; i < pageContentCount_1; i++) {
-                var pageData = void 0;
                 var pageContent = pagesContent[i];
-                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
-                processedPages.push(pageData);
+                var processedPageData = objectAssign({}, pageContent, { url: urlGenerator });
+                processedPages.push(processedPageData);
             }
             return processedPages;
         }
@@ -330,24 +330,19 @@ var SiteBuilder = (function () {
         for (var i = 0; i < pageContentCount; i++) {
             var pageData = void 0;
             var pageContent = pagesContent[i];
-            if (directory.template) {
-                var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
-                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                    pageUri = '/' + pageContent[directory.uri_key];
-                }
-                var pageConfigData = {
-                    uri: pageUri,
-                    template: directory.template,
-                    content: pageContent,
-                };
-                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-                if (pageData === undefined) {
-                    Util_1.Util.error('Could not parse config page generated for directory!');
-                    return undefined;
-                }
+            var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
+            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                pageUri = '/' + pageContent[directory.uri_key];
             }
-            else {
-                pageData = objectAssign({}, pageContent, { url: function (locals) { return undefined; } });
+            var pageConfigData = {
+                uri: pageUri,
+                template: directory.template,
+                content: pageContent,
+            };
+            pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+            if (pageData === undefined) {
+                Util_1.Util.error('Could not parse config page generated for directory!');
+                return undefined;
             }
             processedPages.push(pageData);
         }

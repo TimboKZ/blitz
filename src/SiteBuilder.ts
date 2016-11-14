@@ -104,7 +104,7 @@ interface IBlitzProcessedPageURLs {
  * @since 0.0.1
  */
 interface IBlitzProcessedPage {
-    url: string;
+    url: (currentDirectoryArray?: string[]) => string;
     content: string;
     [key: string]: string;
 }
@@ -452,7 +452,7 @@ export class SiteBuilder {
         }
 
         // Created a processed page data object
-        let processedPageData = objectAssign({}, pageContent, {url: urlGenerator});
+        let processedPageData: IBlitzProcessedPage = objectAssign({}, pageContent, {url: urlGenerator});
 
         // Record URL generator if the page has an ID
         if (page.id) {
@@ -568,11 +568,11 @@ export class SiteBuilder {
 
         if (directory.template === undefined) {
             let pageContentCount = pagesContent.length;
+            let urlGenerator = (currentDirectoryArray?: string[]): string => undefined;
             for (let i = 0; i < pageContentCount; i++) {
-                let pageData: IBlitzProcessedPage;
                 let pageContent = pagesContent[i];
-                pageData = objectAssign({}, pageContent, {url: (locals?: string): string => undefined});
-                processedPages.push(pageData);
+                let processedPageData: IBlitzProcessedPage = objectAssign({}, pageContent, {url: urlGenerator});
+                processedPages.push(processedPageData);
             }
 
             return processedPages;
@@ -596,23 +596,19 @@ export class SiteBuilder {
             let pageData: IBlitzProcessedPage;
             let pageContent = pagesContent[i];
 
-            if (directory.template) {
-                let pageUri = '/' + Util.extractFileName(pageContent.file);
-                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                    pageUri = '/' + pageContent[directory.uri_key];
-                }
-                let pageConfigData: IBlitzPage = {
-                    uri: pageUri,
-                    template: directory.template,
-                    content: pageContent,
-                };
-                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-                if (pageData === undefined) {
-                    Util.error('Could not parse config page generated for directory!');
-                    return undefined;
-                }
-            } else {
-                pageData = objectAssign({}, pageContent, {url: (locals?: string): string => undefined});
+            let pageUri = '/' + Util.extractFileName(pageContent.file);
+            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                pageUri = '/' + pageContent[directory.uri_key];
+            }
+            let pageConfigData: IBlitzPage = {
+                uri: pageUri,
+                template: directory.template,
+                content: pageContent,
+            };
+            pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+            if (pageData === undefined) {
+                Util.error('Could not parse config page generated for directory!');
+                return undefined;
             }
 
             processedPages.push(pageData);

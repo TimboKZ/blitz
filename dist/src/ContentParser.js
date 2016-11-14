@@ -8,10 +8,13 @@ var ContentParser = (function () {
     }
     ContentParser.parse = function (content) {
         var components = content.split(/---\r?\n/);
-        var yamlString = components.shift();
+        var yamlString = components.shift().replace(/^\s+|\s+$/g, '');
         var markdownString = components.join('---\n');
-        var yamlObject = Util_1.Util.parseYaml(yamlString);
         var htmlContent = Util_1.Util.parseMarkdown(markdownString);
+        if (yamlString === '') {
+            return { content: htmlContent };
+        }
+        var yamlObject = Util_1.Util.parseYaml(yamlString);
         if (yamlObject === undefined) {
             Util_1.Util.debug('Could not parse YAML extracted from content!');
             return undefined;
@@ -31,6 +34,10 @@ var ContentParser = (function () {
                 return undefined;
             }
             var rawData = ContentParser.parse(fileContents);
+            if (rawData === undefined) {
+                Util_1.Util.error('Could not parse file contents!');
+                return undefined;
+            }
             this.fileCache[filePath] = objectAssign({}, rawData, { file: path.basename(filePath) });
         }
         return this.fileCache[filePath];

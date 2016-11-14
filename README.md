@@ -1,4 +1,6 @@
-# Blitz
+# ![Blitz Static Site Generator](https://getblitz.io/assets/img/blitz-logo-small.png)
+
+[![Build Status](https://travis-ci.org/TimboKZ/blitz.svg?branch=master)](https://travis-ci.org/TimboKZ/blitz)
 
 Blitz is a dead simple yet powerful static site generator using Node, Pug and bits of YAML here and there.
 
@@ -9,7 +11,7 @@ using Pug (previously known as )
 
 ## Documentation and guides
 
-Blitz documentation can be found on [its website](https://hosting.kawaiidesu.me/blitz/). Links to quick start guides
+Blitz documentation can be found on [its website](https://getblitz.io/). Links to quick start guides
 will appear soon.
 
 ## Super quick start

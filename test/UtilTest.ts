@@ -59,15 +59,12 @@ describe('Util', () => {
         });
         it('should remove leading directories string unchanged if it has no extension', () => {
             assert.equal(Util.extractFileName('test/hello'), 'hello');
-            assert.equal(Util.extractFileName('test\\hello'), 'hello');
         });
         it('should remove leading directories string and extension', () => {
             assert.equal(Util.extractFileName('test/hello.test'), 'hello');
-            assert.equal(Util.extractFileName('test\\hello.jpg'), 'hello');
         });
         it('should remove only one extension', () => {
             assert.equal(Util.extractFileName('test/hello.qwe.test'), 'hello.qwe');
-            assert.equal(Util.extractFileName('test\\hello.123.jpg'), 'hello.123');
         });
     });
 });

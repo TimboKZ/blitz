@@ -28,6 +28,7 @@ export interface IFileContentCache {
  */
 export interface IProcessedFileContent {
     file: string;
+    content: string;
     [key: string]: any;
 }
 
@@ -56,10 +57,13 @@ export class ContentParser {
     public static parse(content: string): any {
         // TODO: Find a more efficient alternative to the code below.
         let components = content.split(/---\r?\n/);
-        let yamlString = components.shift();
+        let yamlString = components.shift().replace(/^\s+|\s+$/g, '');
         let markdownString = components.join('---\n');
-        let yamlObject = Util.parseYaml(yamlString);
         let htmlContent = Util.parseMarkdown(markdownString);
+        if (yamlString === '') {
+            return {content: htmlContent};
+        }
+        let yamlObject = Util.parseYaml(yamlString);
         if (yamlObject === undefined) {
             Util.debug('Could not parse YAML extracted from content!');
             return undefined;
@@ -87,7 +91,11 @@ export class ContentParser {
                 return undefined;
             }
             let rawData = ContentParser.parse(fileContents);
-            this.fileCache[filePath] = objectAssign({}, rawData, { file: path.basename(filePath) });
+            if (rawData === undefined) {
+                Util.error('Could not parse file contents!');
+                return undefined;
+            }
+            this.fileCache[filePath] = objectAssign({}, rawData, {file: path.basename(filePath)});
         }
         return this.fileCache[filePath];
     }

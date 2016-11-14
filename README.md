@@ -2,29 +2,22 @@
 
 [![Build Status](https://travis-ci.org/TimboKZ/blitz.svg?branch=master)](https://travis-ci.org/TimboKZ/blitz)
 
-Blitz is a dead simple yet powerful static site generator using Node, Pug and bits of YAML here and there.
+Blitz is a dead simple yet powerful static site generator using Node.js, Pug and bits of YAML here and there.
 
-As mentioned above, Blitz uses Node and NPM. Check out [this page](https://docs.npmjs.com/getting-started/installing-node)
-to find out how to install them. The content files consist of YAML and Markdown, while the page templates are written
-using Pug (previously known as )
-
-
-## Documentation and guides
-
-Blitz documentation can be found on [its website](https://getblitz.io/). Links to quick start guides
-will appear soon.
+Documentation can be found on [Blitz's website](https://getblitz.io/). You might also be interested in the
+[quick start guide.](https://getblitz.io/docs/0.1/getting-started-template/).
 
 ## Super quick start
 
-Install Blitz once you have NPM ready:
+Install Blitz once you have [Node.js and npm](https://docs.npmjs.com/getting-started/installing-node) ready:
 
-```
+```bash
 npm install -g blitz-ssg
 ```
 
 Create a new directory, enter it and initialise a Blitz project using the `mininmal` template:
 
-```
+```bash
 mkdir blitz-example
 cd blitz-example
 blitz init -t minimal
@@ -32,19 +25,15 @@ blitz init -t minimal
 
 Build the static site using Blitz:
 
-```
+```bash
 blitz build
 ```
 
-And you're done! Open the newly generated `build` directory inside `blitz-example` to find your generate static site.
+And you're done! Open `index.html` from the newly generated `build` directory in your favourite browsers to view the
+website you've just generated.
 
-> As the name implies, `minimal` template has the minimum configuration needed to show Blitz in action. There are 2
-important things to note:
->
-> First of all, a whole bunch of features of Blitz are not displayed in this template. This was done on purpose, to
-> show how simple Blitz can be when it matters.
->
-> Secondly, Blitz only needs `blitz.yml` to function, so even the `minimal` template has a lot of redundancy.
+As the name implies, the minimal template only shows off the basic features of Blitz. To find out more about it, head to
+[the docs](https://getblitz.io/docs/) or read [the quick start guide](https://getblitz.io/docs/0.1/getting-started-template/).
 
 ## Developers
 

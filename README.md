@@ -9,7 +9,7 @@
 Blitz is a dead simple yet powerful static site generator using Node.js, Pug and bits of YAML here and there.
 
 Documentation can be found on [Blitz's website](https://getblitz.io/). You might also be interested in the
-[quick start guide.](https://getblitz.io/docs/0.1/getting-started-template/).
+[quick start guide](https://getblitz.io/docs/0.1/getting-started-template/).
 
 ## Super quick start
 
@@ -33,7 +33,7 @@ Build the static site using Blitz:
 blitz build
 ```
 
-And you're done! Open `index.html` from the newly generated `build` directory in your favourite browsers to view the
+And you're done! Open `index.html` from the newly generated `build` directory in your favourite browser to view the
 website you've just generated.
 
 As the name implies, the minimal template only shows off the basic features of Blitz. To find out more about it, head to
@@ -41,8 +41,8 @@ As the name implies, the minimal template only shows off the basic features of B
 
 ## Developers
 
-This repository is only used for development of the actual Blitz program, it was not meant to be cloned if you're
-planning to use Blitz for static site generation. For that, either use the `Super quick start` section on this page or 
-refer to the *quick start guide* links above.
+This repository contains the source code of Blitz app, do **not** clone it if you want to use Blitz as opposed to
+helping developing it. For an example website built using Blitz, consider [the source code](https://github.com/TimboKZ/blitz-website)
+of Blitz's official website.
 
 I suggest you make use of `tslint.json` provided in this repository to ensure consistent coding style.

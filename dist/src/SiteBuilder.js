@@ -33,12 +33,17 @@ var SiteBuilder = (function () {
             Util_1.Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        try {
-            fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+        if (Util_1.Util.pathExists(this.assetsPath)) {
+            try {
+                fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+            }
+            catch (err) {
+                Util_1.Util.error('Could not copy assets into the build folder!');
+                return undefined;
+            }
         }
-        catch (err) {
-            Util_1.Util.error('Could not copy assets into the build folder!');
-            return undefined;
+        else {
+            Util_1.Util.debug('Assets folder does not exist, not copying any assets.');
         }
         Util_1.Util.debug('Generating site map . . . ');
         if (!this.prepareMap()) {

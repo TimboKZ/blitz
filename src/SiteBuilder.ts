@@ -197,6 +197,7 @@ export class SiteBuilder {
 
     /**
      * Creates the target directory if it doesn't exist and begins the building process
+     * @since 0.1.4 Now ignores assets if `assets` folder doesn't exist
      * @since 0.0.1
      */
     public build() {
@@ -208,11 +209,15 @@ export class SiteBuilder {
             Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        try {
-            fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
-        } catch (err) {
-            Util.error('Could not copy assets into the build folder!');
-            return undefined;
+        if (Util.pathExists(this.assetsPath)) {
+            try {
+                fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+            } catch (err) {
+                Util.error('Could not copy assets into the build folder!');
+                return undefined;
+            }
+        } else {
+            Util.debug('Assets folder does not exist, not copying any assets.')
         }
         Util.debug('Generating site map . . . ');
         if (!this.prepareMap()) {

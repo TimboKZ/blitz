@@ -3,7 +3,7 @@ var chai_1 = require('chai');
 var SiteBuilder_1 = require('../src/SiteBuilder');
 describe('SiteBuilder', function () {
     describe('#generateUrl()', function () {
-        it('should work when absolute URLs => ENABLED and explicit HTML extensions => DISABLED, no site root', function () {
+        it('should work with absolute URLs => ENABLED, explicit .html => DISABLED, no site root, no site url', function () {
             var configMock = {
                 absolute_urls: true,
                 explicit_html_extensions: false,
@@ -15,7 +15,7 @@ describe('SiteBuilder', function () {
             chai_1.assert.equal(builder.generateUrl(['hello', 'test', 'test.html'], []), '/hello/test/test.html');
             chai_1.assert.equal(builder.generateUrl(['test.html'], []), '/test.html');
         });
-        it('should work when absolute URLs => ENABLED and explicit HTML extensions => DISABLED, with site root', function () {
+        it('should work with absolute URLs => ENABLED, explicit .html => DISABLED, site root, no site url', function () {
             var configMock = {
                 site_root: 'test/root',
                 absolute_urls: true,
@@ -27,6 +27,20 @@ describe('SiteBuilder', function () {
             chai_1.assert.equal(builder.generateUrl(['hello', 'test.html'], []), '/test/root/hello/test.html');
             chai_1.assert.equal(builder.generateUrl(['hello', 'test', 'test.html'], []), '/test/root/hello/test/test.html');
             chai_1.assert.equal(builder.generateUrl(['test.html'], []), '/test/root/test.html');
+        });
+        it('should work with absolute URLs => ENABLED, explicit .html => DISABLED, site root, site url', function () {
+            var configMock = {
+                site_url: 'http://test.com',
+                site_root: 'test/root',
+                absolute_urls: true,
+                explicit_html_extensions: false,
+            };
+            var builder = new SiteBuilder_1.SiteBuilder(configMock, '', '');
+            chai_1.assert.equal(builder.generateUrl(['index.html'], []), 'http://test.com/test/root');
+            chai_1.assert.equal(builder.generateUrl(['hello', 'index.html'], []), 'http://test.com/test/root/hello');
+            chai_1.assert.equal(builder.generateUrl(['hello', 'test.html'], []), 'http://test.com/test/root/hello/test.html');
+            chai_1.assert.equal(builder.generateUrl(['hello', 'test', 'test.html'], []), 'http://test.com/test/root/hello/test/test.html');
+            chai_1.assert.equal(builder.generateUrl(['test.html'], []), 'http://test.com/test/root/test.html');
         });
         it('should work when absolute URLs => ENABLED and explicit HTML extensions => ENABLED, with site root', function () {
             var configMock = {

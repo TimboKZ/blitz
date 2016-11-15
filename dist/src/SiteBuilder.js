@@ -420,7 +420,7 @@ var SiteBuilder = (function () {
             if (absoluteUrl === '') {
                 absoluteUrl = '/';
             }
-            if (this.config.site_url !== '') {
+            if (this.config.site_url !== undefined && this.config.site_url !== '') {
                 absoluteUrl = this.config.site_url + absoluteUrl;
             }
             return absoluteUrl;

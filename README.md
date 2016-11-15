@@ -1,6 +1,6 @@
 # ![Blitz Static Site Generator](https://getblitz.io/assets/img/blitz-logo-small.png)
 
-[![Build Status](https://travis-ci.org/TimboKZ/blitz.svg?branch=master)](https://travis-ci.org/TimboKZ/blitz)
+[![Build Status](https://travis-ci.org/TimboKZ/blitz.svg?branch=master)](https://travis-ci.org/TimboKZ/blitz) [![Coverage Status](https://coveralls.io/repos/github/TimboKZ/blitz/badge.svg?branch=development)](https://coveralls.io/github/TimboKZ/blitz?branch=development)
 
 Blitz is a dead simple yet powerful static site generator using Node.js, Pug and bits of YAML here and there.
 

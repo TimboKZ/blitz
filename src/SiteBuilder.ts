@@ -217,7 +217,7 @@ export class SiteBuilder {
                 return undefined;
             }
         } else {
-            Util.debug('Assets folder does not exist, not copying any assets.')
+            Util.debug('Assets folder does not exist, not copying any assets.');
         }
         Util.debug('Generating site map . . . ');
         if (!this.prepareMap()) {
@@ -274,6 +274,7 @@ export class SiteBuilder {
      *
      * This function also processes menus, updating relative links (if any) and marking current page as active
      *
+     * @since 0.1.4 Now does not create directories if they have no children
      * @since 0.1.0 Processes URLs in `pageUrls` and passes `url()` to Pug locals
      * @since 0.1.0 Passes `buildHash` as `hash` to locals on every page
      * @since 0.1.0 Passes `index` to locals, the absolute/relative URL to the index page
@@ -400,6 +401,9 @@ export class SiteBuilder {
         for (let directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
                 let directoryData = directory.directories[directoryName];
+                if(directoryData.files === {} && directoryData.directories === {}) {
+                    continue;
+                }
                 let directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);
                 let directoryPath = path.join.apply(undefined, directoryArray);
                 if (!Util.createDirectory(path.join(this.buildPath, directoryPath))) {

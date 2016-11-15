@@ -192,6 +192,9 @@ var SiteBuilder = (function () {
         for (var directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
                 var directoryData = directory.directories[directoryName];
+                if (directoryData.files === {} && directoryData.directories === {}) {
+                    continue;
+                }
                 var directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);
                 var directoryPath = path.join.apply(undefined, directoryArray);
                 if (!Util_1.Util.createDirectory(path.join(this.buildPath, directoryPath))) {

@@ -78,17 +78,8 @@ var Util = (function () {
         return true;
     };
     Util.getFileContents = function (filePath) {
-        var fileContents;
         Util.debug('Reading contents of `' + filePath + '`...');
-        try {
-            fileContents = fs.readFileSync(filePath, 'utf8');
-        }
-        catch (e) {
-            Util.error('Error reading `' + filePath + '`. Are you sure it exists?');
-            Util.stackTrace(e);
-            return undefined;
-        }
-        return fileContents;
+        return fs.readFileSync(filePath, 'utf8');
     };
     Util.createDirectory = function (directoryPath) {
         try {

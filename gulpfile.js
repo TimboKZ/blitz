@@ -3,7 +3,8 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @version 0.0.1
+ * @since 0.1.2 Change test directory from `tests` to `test`
+ * @since 0.0.1
  */
 
 var gulp = require('gulp');
@@ -18,5 +19,5 @@ gulp.task('ts', function() {
 
 gulp.task('watch', ['ts'], function() {
     gulp.watch('src/*.ts', ['ts']);
-    gulp.watch('tests/*.ts', ['ts']);
+    gulp.watch('test/*.ts', ['ts']);
 });

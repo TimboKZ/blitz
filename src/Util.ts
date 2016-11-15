@@ -61,6 +61,7 @@ export class Util {
 
     /**
      * Produces an object from YAML string if possible, returns undefined otherwise.
+     * @deprecated
      * @since 0.1.2 Returns empty object for files that only have whitespace
      * @since 0.0.1
      */
@@ -134,19 +135,12 @@ export class Util {
 
     /**
      * Loads file from the specified path if possible, returns undefined otherwise
+     * @since 0.1.2 Removed try/catch block
      * @since 0.0.1
      */
     public static getFileContents(filePath: string): string {
-        let fileContents: string;
         Util.debug('Reading contents of `' + filePath + '`...');
-        try {
-            fileContents = fs.readFileSync(filePath, 'utf8');
-        } catch (e) {
-            Util.error('Error reading `' + filePath + '`. Are you sure it exists?');
-            Util.stackTrace(e);
-            return undefined;
-        }
-        return fileContents;
+        return fs.readFileSync(filePath, 'utf8');
     }
 
     /**
@@ -237,4 +231,3 @@ export class Util {
         return result;
     }
 }
-

@@ -8,8 +8,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as objectAssign from 'object-assign';
 import * as fm from 'front-matter';
+import * as nodeUtil from 'util';
 import {Util} from './Util';
 
 /**
@@ -24,13 +24,17 @@ export interface IFileContentCache {
 }
 
 /**
- * Interface for processed data
+ * Interfaces for processed data
+ * @since 0.1.2 Added `IProcessedContent`
  * @since 0.0.1
  */
-export interface IProcessedFileContent {
-    file: string;
+export interface IProcessedContent {
+    title?: string;
     content: string;
     [key: string]: any;
+}
+export interface IProcessedFileContent extends IProcessedContent {
+    file: string;
 }
 
 /**
@@ -42,27 +46,34 @@ export class ContentParser {
      * Cache for the contents of a directory
      * @since 0.0.1
      */
-    public static directoryCache: IDirectoryContentCache = {};
+    private static directoryCache: IDirectoryContentCache = {};
 
     /**
      * Cache for the contents of a file
      * @since 0.0.1
      */
-    public static fileCache: IFileContentCache = {};
+    private static fileCache: IFileContentCache = {};
 
     /**
      * Extracts front matter using the `front-matter` package and adds a `content` property
+     *
+     * If YAML extracted from front matter is a string, make it the `title`.
+     *
      * @see https://github.com/jxson/front-matter
      * @since 0.1.2 Now uses `front-matter` package
      * @since 0.0.1
      */
-    public static parse(content: string): any {
-
-        let parsedPage = fm(content);
-
-        let result = parsedPage.attributes;
-        result.content = Util.parseMarkdown(parsedPage.body);
-
+    public static parse(content: string): IProcessedContent {
+        let result;
+        let parsedFrontMatter = fm(content);
+        if (typeof parsedFrontMatter.attributes === 'string') {
+            result = {
+                title: parsedFrontMatter.attributes,
+            };
+        } else {
+            result = parsedFrontMatter.attributes;
+        }
+        result.content = Util.parseMarkdown(parsedFrontMatter.body);
         return result;
     }
 
@@ -71,25 +82,15 @@ export class ContentParser {
      *
      * Adds a property called `file` to the raw data.
      *
+     * @since 0.1.2 Removed try/catch blocks
      * @since 0.0.1
      */
     public static parseFile(filePath: string): IProcessedFileContent {
-        if (!Util.pathExists(filePath)) {
-            Util.error('Could not access `' + filePath + '`! Are you sure it exists?');
-            return undefined;
-        }
         if (this.fileCache[filePath] === undefined) {
             let fileContents = Util.getFileContents(filePath);
-            if (!fileContents) {
-                Util.error('Could not load the specified file for parsing!');
-                return undefined;
-            }
             let rawData = ContentParser.parse(fileContents);
-            if (rawData === undefined) {
-                Util.error('Could not parse file contents!');
-                return undefined;
-            }
-            this.fileCache[filePath] = objectAssign({}, rawData, {file: path.basename(filePath)});
+            (rawData as IProcessedFileContent).file = path.basename(filePath);
+            this.fileCache[filePath] = (rawData as IProcessedFileContent);
         }
         return this.fileCache[filePath];
     }
@@ -97,37 +98,26 @@ export class ContentParser {
     /**
      * Loads content of a directory, as an array with an element for each file, or returns from cache if possible.
      *
-     * This function is NOT recursive, i.e. it will parse nested directories.
+     * This function is NOT recursive, i.e. it will NOT parse nested directories.
      *
+     * @since 0.1.2 Removed try/catch blocks
      * @since 0.0.1
      */
     public static parseDirectory(directoryPath: string): IProcessedFileContent[] {
-        if (!Util.pathExists(directoryPath)) {
-            Util.error('Could not access `' + path + '`! Are you sure it exists?');
-            return undefined;
-        }
-        let files = fs.readdirSync(directoryPath);
-        let fileCount = files.length;
-        let directoryData: any[] = [];
-        for (let i = 0; i < fileCount; i++) {
-            let filePath = path.join(directoryPath, files[i]);
-            let fileStats;
-            try {
-                fileStats = fs.lstatSync(filePath);
-            } catch (e) {
-                Util.error('Could not fetch stats for `' + filePath + '`!');
-                Util.stackTrace(e);
-                return undefined;
-            }
-            if (fileStats.isFile()) {
-                let fileData = ContentParser.parseFile(filePath);
-                if (fileData === undefined) {
-                    Util.error('Could not parse content of one of the files in `' + directoryPath + '`!');
-                    return undefined;
+        if (this.directoryCache[directoryPath] === undefined) {
+            let files = fs.readdirSync(directoryPath);
+            let fileCount = files.length;
+            let directoryData: any[] = [];
+            for (let i = 0; i < fileCount; i++) {
+                let filePath = path.join(directoryPath, files[i]);
+                let fileStats = fs.lstatSync(filePath);
+                if (fileStats.isFile()) {
+                    let fileData = ContentParser.parseFile(filePath);
+                    directoryData.push(fileData);
                 }
-                directoryData.push(fileData);
             }
+            this.directoryCache[directoryPath] = directoryData;
         }
-        return directoryData;
+        return this.directoryCache[directoryPath];
     }
 }

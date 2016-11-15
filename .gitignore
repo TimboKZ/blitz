@@ -1,8 +1,8 @@
 # JetBrains IDE files
-.idea
+/.idea
 
 # TypeScript typings
-typings
+/typings
 
 # TGZ files
 *.tgz

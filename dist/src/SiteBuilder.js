@@ -202,7 +202,14 @@ var SiteBuilder = (function () {
         if (parentUriComponents === void 0) { parentUriComponents = []; }
         var ownUriComponents;
         if (page.uri === undefined) {
-            ownUriComponents = [Util_1.Util.extractFileName(page.content)];
+            var fileNameSource = void 0;
+            if (page.content === undefined) {
+                fileNameSource = page.template;
+            }
+            else {
+                fileNameSource = page.content;
+            }
+            ownUriComponents = [Util_1.Util.extractFileName(fileNameSource)];
         }
         else {
             ownUriComponents = Util_1.Util.getUriComponents(page.uri);
@@ -218,7 +225,10 @@ var SiteBuilder = (function () {
         var currentPageDirectory = this.descendToDirectory(parentDirectory, partialDirectoryArray);
         var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
         var pageContent = page.content;
-        if (typeof page.content === 'string') {
+        if (pageContent === undefined) {
+            pageContent = {};
+        }
+        else if (typeof page.content === 'string') {
             pageContent = ContentParser_1.ContentParser.parseFile(path.join(this.contentPath, page.content));
         }
         var pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
@@ -448,14 +458,7 @@ var SiteBuilder = (function () {
     };
     SiteBuilder.prototype.compilePug = function (path) {
         if (!this.pugCache[path]) {
-            try {
-                this.pugCache[path] = pug.compileFile(path);
-            }
-            catch (e) {
-                Util_1.Util.error('Error compiling `' + path + '`!');
-                Util_1.Util.stackTrace(e);
-                return undefined;
-            }
+            this.pugCache[path] = pug.compileFile(path);
         }
         return this.pugCache[path];
     };

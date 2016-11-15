@@ -45,7 +45,7 @@ export interface IBlitzPage {
     id?: string;
     name?: string;
     template: string;
-    content: string|any;
+    content?: string|any;
     menus?: IBlitzMenu[];
     child_pages?: IBlitzPage[];
     child_directories?: IBlitzChildDirectory[];
@@ -128,8 +128,8 @@ export const CONFIG_PROPERTIES: IConfigValidatorProperty[] = [
         name: 'pages',
         message: 'Assuming there are no pages',
         defaultValue: {},
-        typeChecker: (object) => typeof object === 'object' && !(object instanceof Array),
-        typeError: 'Pages must be an object (and not an array)!',
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'Pages must be an array!',
     },
 ];
 

@@ -48,8 +48,8 @@ exports.CONFIG_PROPERTIES = [
         name: 'pages',
         message: 'Assuming there are no pages',
         defaultValue: {},
-        typeChecker: function (object) { return typeof object === 'object' && !(object instanceof Array); },
-        typeError: 'Pages must be an object (and not an array)!',
+        typeChecker: function (object) { return typeof object === 'object' && object instanceof Array; },
+        typeError: 'Pages must be an array!',
     },
 ];
 var ConfigParser = (function () {

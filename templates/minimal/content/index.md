@@ -1,3 +1,4 @@
+---
 title: 'Minimal Blitz Template'
 ---
 # Welcome!

@@ -101,12 +101,14 @@ interface IBlitzProcessedPageURLs {
 
 /**
  * Page content data with inserted URL
+ * @since 0.1.2 Added `file`, changed type of values from `string` to `any`
  * @since 0.0.1
  */
 interface IBlitzProcessedPage {
     url: (currentDirectoryArray?: string[]) => string;
+    file: string;
     content: string;
-    [key: string]: string;
+    [key: string]: any;
 }
 
 /**

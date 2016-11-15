@@ -421,7 +421,13 @@ export class SiteBuilder {
         // Generate file and directory arrays and extract filename
         let ownUriComponents;
         if (page.uri === undefined) {
-            ownUriComponents = [Util.extractFileName(page.content)];
+            let fileNameSource;
+            if (page.content === undefined) {
+                fileNameSource = page.template;
+            } else {
+                fileNameSource = page.content;
+            }
+            ownUriComponents = [Util.extractFileName(fileNameSource)];
         } else {
             ownUriComponents = Util.getUriComponents(page.uri);
         }
@@ -443,8 +449,10 @@ export class SiteBuilder {
 
         // Extract content and prepare pug
         // If passed `content` is a string, use it as path to compile Pug, otherwise use `content` object as is
-        let pageContent = page.content;
-        if (typeof page.content === 'string') {
+        let pageContent: any = page.content;
+        if (pageContent === undefined) {
+            pageContent = {};
+        } else if (typeof page.content === 'string') {
             pageContent = ContentParser.parseFile(path.join(this.contentPath, page.content));
         }
         let pugFunction = this.compilePug(path.join(this.templatesPath, page.template));
@@ -746,17 +754,12 @@ export class SiteBuilder {
 
     /**
      * Compiles Pug file or returns compiled function from cache if the file has been compiled before
+     * @since 0.1.3  Remove try/catch block
      * @since 0.0.1
      */
     private compilePug(path: string): (locals?: any) => string {
         if (!this.pugCache[path]) {
-            try {
-                this.pugCache[path] = pug.compileFile(path);
-            } catch (e) {
-                Util.error('Error compiling `' + path + '`!');
-                Util.stackTrace(e);
-                return undefined;
-            }
+            this.pugCache[path] = pug.compileFile(path);
         }
         return this.pugCache[path];
     }

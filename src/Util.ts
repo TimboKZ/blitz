@@ -18,6 +18,23 @@ import * as colors from 'colors';
  */
 export class Util {
     /**
+     * Cache for package info
+     * @since 0.1.3
+     */
+    private static packageInfoCache: any;
+
+    /**
+     * Returns package info from `package.json`
+     * @since 0.1.3
+     */
+    public static getPackageInfo() {
+        if (this.packageInfoCache === undefined) {
+            this.packageInfoCache = require('../../package.json');
+        }
+        return this.packageInfoCache;
+    }
+
+    /**
      * Logs an object to console prefixing it with the specified string.
      * @since 0.0.1
      */
@@ -31,6 +48,14 @@ export class Util {
      */
     public static log(object: any) {
         Util.logWithPrefix(colors.cyan('[Blitz LOG]'), object);
+    }
+
+    /**
+     * Logs a warning into console
+     * @since 0.1.3
+     */
+    public static warn(object: any) {
+        Util.logWithPrefix(colors.yellow('[Blitz WARN]'), object);
     }
 
     /**
@@ -61,8 +86,8 @@ export class Util {
 
     /**
      * Produces an object from YAML string if possible, returns undefined otherwise.
-     * @deprecated
      * @since 0.1.2 Returns empty object for files that only have whitespace
+     * @since 0.1.2 Removed try/catch block
      * @since 0.0.1
      */
     public static parseYaml(yamlString: string): any {
@@ -71,15 +96,7 @@ export class Util {
         if (yamlString === '') {
             return {};
         }
-        let parsedYaml: any;
-        try {
-            parsedYaml = yaml.safeLoad(yamlString);
-        } catch (e) {
-            Util.error('Error parsing YAML!');
-            Util.stackTrace(e);
-            return undefined;
-        }
-        return parsedYaml;
+        return yaml.safeLoad(yamlString);
     }
 
     /**

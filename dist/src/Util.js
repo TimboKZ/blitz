@@ -7,11 +7,20 @@ var colors = require('colors');
 var Util = (function () {
     function Util() {
     }
+    Util.getPackageInfo = function () {
+        if (this.packageInfoCache === undefined) {
+            this.packageInfoCache = require('../../package.json');
+        }
+        return this.packageInfoCache;
+    };
     Util.logWithPrefix = function (prefix, object) {
         console.log(prefix + ' ' + object.toString());
     };
     Util.log = function (object) {
         Util.logWithPrefix(colors.cyan('[Blitz LOG]'), object);
+    };
+    Util.warn = function (object) {
+        Util.logWithPrefix(colors.yellow('[Blitz WARN]'), object);
     };
     Util.error = function (object) {
         Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
@@ -30,16 +39,7 @@ var Util = (function () {
         if (yamlString === '') {
             return {};
         }
-        var parsedYaml;
-        try {
-            parsedYaml = yaml.safeLoad(yamlString);
-        }
-        catch (e) {
-            Util.error('Error parsing YAML!');
-            Util.stackTrace(e);
-            return undefined;
-        }
-        return parsedYaml;
+        return yaml.safeLoad(yamlString);
     };
     Util.parseMarkdown = function (markdown) {
         return marked(markdown);

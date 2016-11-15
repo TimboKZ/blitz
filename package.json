@@ -7,7 +7,9 @@
     "blitz": "./blitz-cli"
   },
   "scripts": {
-    "test": "mocha ./dist/test/"
+    "test": "mocha ./dist/test/",
+    "cover": "istanbul cover _mocha ./dist/test/",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -33,9 +35,12 @@
   "homepage": "https://getblitz.io/",
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.11.15",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.1.2",
+    "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
+    "mocha-lcov-reporter": "^1.2.0",
     "mock-fs": "^3.12.1",
     "typescript": "^2.0.9"
   },

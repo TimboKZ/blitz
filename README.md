@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/blitz-ssg.svg)](https://badge.fury.io/js/blitz-ssg)
 [![npm](https://img.shields.io/npm/dm/blitz-ssg.svg)](https://www.npmjs.com/package/blitz-ssg)
+[![David](https://img.shields.io/david/TimboKZ/blitz.svg)](https://www.npmjs.com/package/blitz-ssg)
 [![Build Status](https://travis-ci.org/TimboKZ/blitz.svg?branch=master)](https://travis-ci.org/TimboKZ/blitz)
 [![Coverage Status](https://coveralls.io/repos/github/TimboKZ/blitz/badge.svg?branch=development)](https://coveralls.io/github/TimboKZ/blitz?branch=development)
 

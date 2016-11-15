@@ -52,10 +52,15 @@ describe('ConfigParser', () => {
                     hello: 'world',
                     integer: 123,
                 },
-                pages: {
-                    uri: '/',
-                    template: 'index.pug',
-                },
+                pages: [
+                    {
+                        uri: '/',
+                        template: 'index.pug',
+                    },
+                    {
+                        template: 'help.pug',
+                    },
+                ],
             };
             mock({
                 'blitz.yml': mock.file({

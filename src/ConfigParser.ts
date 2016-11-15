@@ -127,7 +127,7 @@ export const CONFIG_PROPERTIES: IConfigValidatorProperty[] = [
     {
         name: 'pages',
         message: 'Assuming there are no pages',
-        defaultValue: {},
+        defaultValue: [],
         typeChecker: (object) => typeof object === 'object' && object instanceof Array,
         typeError: 'Pages must be an array!',
     },

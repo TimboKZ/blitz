@@ -192,7 +192,7 @@ var SiteBuilder = (function () {
         for (var directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
                 var directoryData = directory.directories[directoryName];
-                if (directoryData.files === {} && directoryData.directories === {}) {
+                if (Util_1.Util.isEmpty(directoryData.files) && Util_1.Util.isEmpty(directoryData.directories)) {
                     continue;
                 }
                 var directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);

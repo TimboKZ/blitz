@@ -401,7 +401,7 @@ export class SiteBuilder {
         for (let directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
                 let directoryData = directory.directories[directoryName];
-                if(directoryData.files === {} && directoryData.directories === {}) {
+                if (Util.isEmpty(directoryData.files) && Util.isEmpty(directoryData.directories)) {
                     continue;
                 }
                 let directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);

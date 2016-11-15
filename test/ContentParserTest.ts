@@ -1,5 +1,5 @@
 /**
- * @file ConfigParser class tests
+ * @file ContentParser class tests
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0

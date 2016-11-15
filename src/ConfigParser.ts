@@ -121,15 +121,15 @@ export const CONFIG_PROPERTIES: IConfigValidatorProperty[] = [
         name: 'globals',
         message: 'Assuming there are no globals',
         defaultValue: {},
-        typeChecker: (object) => true,
-        typeError: '',
+        typeChecker: (object) => typeof object === 'object' && !(object instanceof Array),
+        typeError: 'Globals must be an object (and not an array)!',
     },
     {
         name: 'pages',
         message: 'Assuming there are no pages',
         defaultValue: {},
-        typeChecker: (object) => true,
-        typeError: '',
+        typeChecker: (object) => typeof object === 'object' && !(object instanceof Array),
+        typeError: 'Pages must be an object (and not an array)!',
     },
 ];
 
@@ -172,7 +172,7 @@ export class ConfigParser {
                 Util.warn('`' + expected.name.cyan + '` is not defined: ' + actionString);
                 config[expected.name] = expected.defaultValue;
             } else if (!expected.typeChecker(property)) {
-                let errorString = 'Invalid `' + expected.name + ' type: '`` + expected.typeError;
+                let errorString = 'Invalid type for `' + expected.name + '`: ' + expected.typeError;
                 throw new Error(errorString);
             }
         }

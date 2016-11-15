@@ -41,15 +41,15 @@ exports.CONFIG_PROPERTIES = [
         name: 'globals',
         message: 'Assuming there are no globals',
         defaultValue: {},
-        typeChecker: function (object) { return true; },
-        typeError: '',
+        typeChecker: function (object) { return typeof object === 'object' && !(object instanceof Array); },
+        typeError: 'Globals must be an object (and not an array)!',
     },
     {
         name: 'pages',
         message: 'Assuming there are no pages',
         defaultValue: {},
-        typeChecker: function (object) { return true; },
-        typeError: '',
+        typeChecker: function (object) { return typeof object === 'object' && !(object instanceof Array); },
+        typeError: 'Pages must be an object (and not an array)!',
     },
 ];
 var ConfigParser = (function () {
@@ -81,13 +81,12 @@ var ConfigParser = (function () {
                 config[expected.name] = expected.defaultValue;
             }
             else if (!expected.typeChecker(property)) {
-                var errorString = 'Invalid `' + expected.name + (_a = [""], _a.raw = [""], (' type: ')(_a)) + expected.typeError;
+                var errorString = 'Invalid type for `' + expected.name + '`: ' + expected.typeError;
                 throw new Error(errorString);
             }
         }
         Util_1.Util.debug('Successfully validated Blitz config!');
         return config;
-        var _a;
     };
     return ConfigParser;
 }());

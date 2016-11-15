@@ -84,13 +84,7 @@ function init() {
 function build() {
     var directory = process.cwd();
     Util_1.Util.log('Building static site files in ' + directory + '...');
-    var config = ConfigParser_1.ConfigParser.load();
-    if (!config) {
-        return Util_1.Util.error('Could not load the config!');
-    }
-    if (!ConfigParser_1.ConfigParser.verify(config)) {
-        return Util_1.Util.error('ConfigParser is invalid!');
-    }
+    var config = ConfigParser_1.ConfigParser.load(path.join(process.cwd(), ConfigParser_1.DEFAULT_CONFIG_NAME));
     Util_1.Util.debug('Starting building process...');
     var builder = new SiteBuilder_1.SiteBuilder(config, directory, 'build');
     builder.build();

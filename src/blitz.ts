@@ -11,7 +11,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import {SiteBuilder} from './SiteBuilder';
 import {Util} from './Util';
-import {ConfigParser} from './ConfigParser';
+import {ConfigParser, DEFAULT_CONFIG_NAME} from './ConfigParser';
 
 /**
  * Command line arguments passed to Blitz
@@ -114,13 +114,7 @@ function init() {
 function build() {
     let directory = process.cwd();
     Util.log('Building static site files in ' + directory + '...');
-    let config = ConfigParser.load();
-    if (!config) {
-        return Util.error('Could not load the config!');
-    }
-    if (!ConfigParser.verify(config)) {
-        return Util.error('ConfigParser is invalid!');
-    }
+    let config = ConfigParser.load(path.join(process.cwd(), DEFAULT_CONFIG_NAME));
     Util.debug('Starting building process...');
     let builder = new SiteBuilder(config, directory, 'build');
     builder.build();

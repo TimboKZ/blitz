@@ -33,9 +33,11 @@
   "homepage": "https://getblitz.io/",
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.11.15",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.1.2",
     "mocha": "^3.1.2",
+    "mocha-lcov-reporter": "^1.2.0",
     "mock-fs": "^3.12.1",
     "typescript": "^2.0.9"
   },

@@ -7,3 +7,6 @@ os:
 cache:
   directories:
   - node_modules
+after_success:
+  - ./node_modules/.bin/jscoverage lib lib-cov
+  - ./node_modules/.bin/mocha ./dist/test/*.js -R mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js

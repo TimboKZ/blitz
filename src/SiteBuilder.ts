@@ -594,43 +594,83 @@ export class SiteBuilder {
                 processedPages.push(processedPageData);
             }
 
-            return processedPages;
-        }
-
-        // Generate file and directory arrays and extract filename
-        let ownUriComponents;
-        if (directory.uri === undefined) {
-            ownUriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
         } else {
-            ownUriComponents = Util.getUriComponents(directory.uri);
-        }
 
-        // URI Components with the parent
-        let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
-
-        let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
-
-        let pageContentCount = pagesContent.length;
-        for (let i = 0; i < pageContentCount; i++) {
-            let pageData: IBlitzProcessedPage;
-            let pageContent = pagesContent[i];
-
-            let pageUri = '/' + Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
-            }
-            let pageConfigData: IBlitzPage = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util.error('Could not parse config page generated for directory!');
-                return undefined;
+            // Generate file and directory arrays and extract filename
+            let ownUriComponents;
+            if (directory.uri === undefined) {
+                ownUriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
+            } else {
+                ownUriComponents = Util.getUriComponents(directory.uri);
             }
 
-            processedPages.push(pageData);
+            // URI Components with the parent
+            let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+
+            let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
+
+            let pageContentCount = pagesContent.length;
+            for (let i = 0; i < pageContentCount; i++) {
+                let pageData: IBlitzProcessedPage;
+                let pageContent = pagesContent[i];
+
+                let pageUri = '/' + Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                let pageConfigData: IBlitzPage = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
+
+                processedPages.push(pageData);
+            }
+
+            // Add pages to menus
+            if (directory.menus) {
+                let menuCount = directory.menus.length;
+                for (let k = 0; k < menuCount; k++) {
+                    let menu = directory.menus[k];
+                    let pageCount = processedPages.length;
+                    for (let j = 0; j < pageCount; j++) {
+                        let pageContent: any = processedPages[j];
+                        let menuTitle = Util.extractFileName(pageContent.file);
+                        if (pageContent.menu_title) {
+                            menuTitle = pageContent.menu_title;
+                        } else if (menu.title) {
+                            menuTitle = menu.title;
+                        } else if (pageContent.title) {
+                            menuTitle = pageContent.title;
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        let menuItem: IBlitzMapMenuItem = {
+                            title: menuTitle,
+                            url: pageContent.url,
+                            active: false,
+                        };
+                        if (!this.config.absolute_urls) {
+                            menuItem.directoryArray = fullUriComponents;
+                            let fileName = Util.extractFileName(pageContent.file) + '.html';
+                            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                                menuItem.fileName = fileName;
+                            }
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        this.menus[menu.name].push(menuItem);
+                    }
+                }
+            }
+
         }
 
         return processedPages;

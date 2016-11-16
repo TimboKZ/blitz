@@ -326,43 +326,83 @@ var SiteBuilder = (function () {
         }
         var processedPages = [];
         if (directory.template === undefined) {
-            var pageContentCount_1 = pagesContent.length;
+            var pageContentCount = pagesContent.length;
             var urlGenerator = function (currentDirectoryArray) { return undefined; };
-            for (var i = 0; i < pageContentCount_1; i++) {
+            for (var i = 0; i < pageContentCount; i++) {
                 var pageContent = pagesContent[i];
                 var processedPageData = objectAssign({}, pageContent, { url: urlGenerator });
                 processedPages.push(processedPageData);
             }
-            return processedPages;
-        }
-        var ownUriComponents;
-        if (directory.uri === undefined) {
-            ownUriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
         }
         else {
-            ownUriComponents = Util_1.Util.getUriComponents(directory.uri);
-        }
-        var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
-        var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
-        var pageContentCount = pagesContent.length;
-        for (var i = 0; i < pageContentCount; i++) {
-            var pageData = void 0;
-            var pageContent = pagesContent[i];
-            var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
+            var ownUriComponents = void 0;
+            if (directory.uri === undefined) {
+                ownUriComponents = [Util_1.Util.getUriComponents(directory.directory).slice(-1)];
             }
-            var pageConfigData = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util_1.Util.error('Could not parse config page generated for directory!');
-                return undefined;
+            else {
+                ownUriComponents = Util_1.Util.getUriComponents(directory.uri);
             }
-            processedPages.push(pageData);
+            var fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+            var childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
+            var pageContentCount = pagesContent.length;
+            for (var i = 0; i < pageContentCount; i++) {
+                var pageData = void 0;
+                var pageContent = pagesContent[i];
+                var pageUri = '/' + Util_1.Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                var pageConfigData = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util_1.Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
+                processedPages.push(pageData);
+            }
+            if (directory.menus) {
+                var menuCount = directory.menus.length;
+                for (var k = 0; k < menuCount; k++) {
+                    var menu = directory.menus[k];
+                    var pageCount = processedPages.length;
+                    for (var j = 0; j < pageCount; j++) {
+                        var pageContent = processedPages[j];
+                        var menuTitle = Util_1.Util.extractFileName(pageContent.file);
+                        if (pageContent.menu_title) {
+                            menuTitle = pageContent.menu_title;
+                        }
+                        else if (menu.title) {
+                            menuTitle = menu.title;
+                        }
+                        else if (pageContent.title) {
+                            menuTitle = pageContent.title;
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        var menuItem = {
+                            title: menuTitle,
+                            url: pageContent.url,
+                            active: false,
+                        };
+                        if (!this.config.absolute_urls) {
+                            menuItem.directoryArray = fullUriComponents;
+                            var fileName = Util_1.Util.extractFileName(pageContent.file) + '.html';
+                            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                                menuItem.fileName = fileName;
+                            }
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        this.menus[menu.name].push(menuItem);
+                    }
+                }
+            }
         }
         return processedPages;
     };

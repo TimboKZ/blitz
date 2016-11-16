@@ -16,6 +16,7 @@ export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 
 /**
  * Interface for child directories of top level pages
+ * @since 0.1.4 Added `menus`
  * @since 0.1.0 Made `template` optional
  * @since 0.0.1
  */
@@ -23,12 +24,13 @@ export interface IBlitzChildDirectory {
     uri?: string;
     uri_key?: string;
     name: string;
+    menus: IBlitzMenu[];
     template?: string;
     directory: string;
 }
 
 /**
- * Page config as represented in the Blitz YAML config
+ * Menu as show in the config
  * @since 0.0.1
  */
 export interface IBlitzMenu {

@@ -657,8 +657,14 @@ export class SiteBuilder {
                             active: false,
                         };
                         if (!this.config.absolute_urls) {
-                            menuItem.directoryArray = fullUriComponents;
-                            let fileName = Util.extractFileName(pageContent.file) + '.html';
+                            menuItem.directoryArray = fullUriComponents.slice(0);
+                            let fileName;
+                            if (this.config.explicit_html_extensions) {
+                                fileName = Util.extractFileName(pageContent.file) + '.html';
+                            } else {
+                                menuItem.directoryArray.push(Util.extractFileName(pageContent.file));
+                                fileName = 'index.html';
+                            }
                             if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
                                 menuItem.fileName = fileName;
                             }

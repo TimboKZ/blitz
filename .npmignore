@@ -1,6 +1,8 @@
 /.idea/
+/coverage/
 /dist/test/
 /src/
+/templates/*/build/
 /test/
 /typings/
 /.travis.yml

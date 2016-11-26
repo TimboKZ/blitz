@@ -1,0 +1,18 @@
+extends page
+
+block content
+    != content
+    .row
+        .col-lg-12
+            h1 Projects
+            hr
+    // /.row
+    // Projects Row
+    .row
+        each project in projects
+            .col-md-4.portfolio-item
+                a(href=project.url)
+                    img.img-responsive(src=asset('img/' + project.image), alt=project.title)
+                h3
+                    a(href=project.url)= project.title
+                p= project.description

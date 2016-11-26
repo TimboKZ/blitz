@@ -1,0 +1,21 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        meta(name='description', content=site_description)
+        meta(name='author', content=site_author)
+
+        block title
+            title= (title ? title + ' | ' + site_name : site_name)
+
+        link(href=asset('css/bootstrap.min.css'), rel='stylesheet')
+        link(href=asset('css/3-col-portfolio.css'), rel='stylesheet')
+
+    body
+
+        block body
+
+        script(src=asset('js/jquery.js'))
+        script(src=asset('js/bootstrap.min.js'))

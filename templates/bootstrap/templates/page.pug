@@ -1,0 +1,38 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+        // The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags
+        meta(name='description', content=site_author)
+        meta(name='author', content=site_descriptions)
+        link(rel='icon', href='../../favicon.ico')
+        title
+        // Bootstrap core CSS
+        link(href=asset('css/bootstrap.min.css'), rel='stylesheet')
+        // Custom styles for this template
+        link(href=asset('css/style.css'), rel='stylesheet')
+    body
+        nav.navbar.navbar-fixed-top.navbar-dark.bg-inverse
+            .container
+                a.navbar-brand(href=url('index'))= site_name
+                ul.nav.navbar-nav.right
+                    li.nav-item.active
+                        a.nav-link(href='#')
+                            | Home
+                            span.sr-only (current)
+                    li.nav-item
+                        a.nav-link(href='#') About
+                    li.nav-item
+                        a.nav-link(href='#') Contact
+        .container
+            .starter-template
+                h1 Bootstrap starter template
+                p.lead
+                    | Use this document as a way to quickly start any new project.
+                    br
+                    |  All you get is this text and a mostly barebones HTML document.
+
+        script(src=asset('js/jquery.min.js'))
+        script(src=asset('js/bootstrap.min.js'))

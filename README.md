@@ -19,12 +19,12 @@ Install Blitz once you have [Node.js and npm](https://docs.npmjs.com/getting-sta
 npm install -g blitz-ssg
 ```
 
-Create a new directory, enter it and initialise a Blitz project using the `mininmal` template:
+Create a new directory, enter it and initialise a Blitz project using the `portfolio` template:
 
 ```bash
 mkdir blitz-example
 cd blitz-example
-blitz init -t minimal
+blitz init -t portfolio
 ```
 
 Build the static site using Blitz:
@@ -34,10 +34,7 @@ blitz build
 ```
 
 And you're done! Open `index.html` from the newly generated `build` directory in your favourite browser to view the
-website you've just generated.
-
-As the name implies, the minimal template only shows off the basic features of Blitz. To find out more about it, head to
-[the docs](https://getblitz.io/docs/) or read [the quick start guide](https://getblitz.io/docs/0.1/getting-started-template/).
+website you've just generated. For more templates, check out [this page](https://getblitz.io/docs/0.1/getting-started-template/).
 
 ## Developers
 

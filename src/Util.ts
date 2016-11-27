@@ -247,4 +247,12 @@ export class Util {
         }
         return result;
     }
+
+    /**
+     * Checks if an object is empty, i.e. is `{}`
+     * @since 0.1.4
+     */
+    public static isEmpty(object: any): boolean {
+        return Object.keys(object).length === 0;
+    }
 }

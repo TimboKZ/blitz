@@ -142,6 +142,9 @@ var Util = (function () {
         }
         return result;
     };
+    Util.isEmpty = function (object) {
+        return Object.keys(object).length === 0;
+    };
     return Util;
 }());
 exports.Util = Util;

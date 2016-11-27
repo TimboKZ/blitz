@@ -68,7 +68,7 @@ var ConfigParser = (function () {
         for (var i = 0; i < propertyCount; i++) {
             var expected = exports.CONFIG_PROPERTIES[i];
             var property = config[expected.name];
-            if (property === undefined) {
+            if (property === undefined || property === null) {
                 var displayValue = void 0;
                 if (typeof expected.defaultValue === 'string') {
                     displayValue = '`' + expected.defaultValue + '`';

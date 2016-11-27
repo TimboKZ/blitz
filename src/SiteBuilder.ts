@@ -197,6 +197,7 @@ export class SiteBuilder {
 
     /**
      * Creates the target directory if it doesn't exist and begins the building process
+     * @since 0.1.4 Now ignores assets if `assets` folder doesn't exist
      * @since 0.0.1
      */
     public build() {
@@ -208,11 +209,15 @@ export class SiteBuilder {
             Util.error('Could not create the directory for the build!');
             return undefined;
         }
-        try {
-            fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
-        } catch (err) {
-            Util.error('Could not copy assets into the build folder!');
-            return undefined;
+        if (Util.pathExists(this.assetsPath)) {
+            try {
+                fse.copySync(this.assetsPath, path.join(this.buildPath, BUILD_ASSETS_DIRECTORY));
+            } catch (err) {
+                Util.error('Could not copy assets into the build folder!');
+                return undefined;
+            }
+        } else {
+            Util.debug('Assets folder does not exist, not copying any assets.');
         }
         Util.debug('Generating site map . . . ');
         if (!this.prepareMap()) {
@@ -269,6 +274,7 @@ export class SiteBuilder {
      *
      * This function also processes menus, updating relative links (if any) and marking current page as active
      *
+     * @since 0.1.4 Now does not create directories if they have no children
      * @since 0.1.0 Processes URLs in `pageUrls` and passes `url()` to Pug locals
      * @since 0.1.0 Passes `buildHash` as `hash` to locals on every page
      * @since 0.1.0 Passes `index` to locals, the absolute/relative URL to the index page
@@ -395,6 +401,9 @@ export class SiteBuilder {
         for (let directoryName in directory.directories) {
             if (directory.directories.hasOwnProperty(directoryName)) {
                 let directoryData = directory.directories[directoryName];
+                if (Util.isEmpty(directoryData.files) && Util.isEmpty(directoryData.directories)) {
+                    continue;
+                }
                 let directoryArray = currentDirectoryArray.slice(0).concat([directoryName]);
                 let directoryPath = path.join.apply(undefined, directoryArray);
                 if (!Util.createDirectory(path.join(this.buildPath, directoryPath))) {
@@ -585,43 +594,89 @@ export class SiteBuilder {
                 processedPages.push(processedPageData);
             }
 
-            return processedPages;
-        }
-
-        // Generate file and directory arrays and extract filename
-        let ownUriComponents;
-        if (directory.uri === undefined) {
-            ownUriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
         } else {
-            ownUriComponents = Util.getUriComponents(directory.uri);
-        }
 
-        // URI Components with the parent
-        let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
-
-        let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
-
-        let pageContentCount = pagesContent.length;
-        for (let i = 0; i < pageContentCount; i++) {
-            let pageData: IBlitzProcessedPage;
-            let pageContent = pagesContent[i];
-
-            let pageUri = '/' + Util.extractFileName(pageContent.file);
-            if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
-                pageUri = '/' + pageContent[directory.uri_key];
-            }
-            let pageConfigData: IBlitzPage = {
-                uri: pageUri,
-                template: directory.template,
-                content: pageContent,
-            };
-            pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
-            if (pageData === undefined) {
-                Util.error('Could not parse config page generated for directory!');
-                return undefined;
+            // Generate file and directory arrays and extract filename
+            let ownUriComponents;
+            if (directory.uri === undefined) {
+                ownUriComponents = [Util.getUriComponents(directory.directory).slice(-1)];
+            } else {
+                ownUriComponents = Util.getUriComponents(directory.uri);
             }
 
-            processedPages.push(pageData);
+            // URI Components with the parent
+            let fullUriComponents = parentUriComponents.slice(0).concat(ownUriComponents);
+
+            let childrenDirectory = this.descendToDirectory(parentDirectory, ownUriComponents);
+
+            let pageContentCount = pagesContent.length;
+            for (let i = 0; i < pageContentCount; i++) {
+                let pageData: IBlitzProcessedPage;
+                let pageContent = pagesContent[i];
+
+                let pageUri = '/' + Util.extractFileName(pageContent.file);
+                if (directory.uri_key !== undefined && pageContent[directory.uri_key] !== undefined) {
+                    pageUri = '/' + pageContent[directory.uri_key];
+                }
+                let pageConfigData: IBlitzPage = {
+                    uri: pageUri,
+                    template: directory.template,
+                    content: pageContent,
+                };
+                pageData = this.parseConfigPage(pageConfigData, childrenDirectory, fullUriComponents, parent);
+                if (pageData === undefined) {
+                    Util.error('Could not parse config page generated for directory!');
+                    return undefined;
+                }
+
+                processedPages.push(pageData);
+            }
+
+            // Add pages to menus
+            if (directory.menus) {
+                let menuCount = directory.menus.length;
+                for (let k = 0; k < menuCount; k++) {
+                    let menu = directory.menus[k];
+                    let pageCount = processedPages.length;
+                    for (let j = 0; j < pageCount; j++) {
+                        let pageContent: any = processedPages[j];
+                        let menuTitle = Util.extractFileName(pageContent.file);
+                        if (pageContent.menu_title) {
+                            menuTitle = pageContent.menu_title;
+                        } else if (menu.title) {
+                            menuTitle = menu.title;
+                        } else if (pageContent.title) {
+                            menuTitle = pageContent.title;
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        let menuItem: IBlitzMapMenuItem = {
+                            title: menuTitle,
+                            url: pageContent.url,
+                            active: false,
+                        };
+                        if (!this.config.absolute_urls) {
+                            menuItem.directoryArray = fullUriComponents.slice(0);
+                            let fileName;
+                            if (this.config.explicit_html_extensions) {
+                                fileName = Util.extractFileName(pageContent.file) + '.html';
+                            } else {
+                                menuItem.directoryArray.push(Util.extractFileName(pageContent.file));
+                                fileName = 'index.html';
+                            }
+                            if (this.config.explicit_html_extensions || fileName !== INDEX_FILE_NAME) {
+                                menuItem.fileName = fileName;
+                            }
+                        }
+                        if (this.menus[menu.name] === undefined) {
+                            this.menus[menu.name] = [];
+                        }
+                        this.menus[menu.name].push(menuItem);
+                    }
+                }
+            }
+
         }
 
         return processedPages;
@@ -709,6 +764,9 @@ export class SiteBuilder {
             }
             if (absoluteUrl === '') {
                 absoluteUrl = '/';
+            }
+            if (this.config.site_url !== undefined && this.config.site_url !== '') {
+                absoluteUrl = this.config.site_url + absoluteUrl;
             }
             return absoluteUrl;
         } else {

@@ -73,6 +73,7 @@ function init() {
             Util_1.Util.log('Directory is not empty! Overwrite files...');
         }
         fse.copySync(templateDir, process.cwd());
+        fse.removeSync(path.join(process.cwd(), 'build'));
     }
     catch (e) {
         Util_1.Util.error('Could not initialise a new project!');

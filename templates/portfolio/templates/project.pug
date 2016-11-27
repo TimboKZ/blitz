@@ -1,0 +1,8 @@
+extends layouts/main
+
+block title
+    title= title + ' | Projects | ' + site_name
+
+block content
+    a.btn.btn-lg.btn-primary(href=parent.url) Back to Projects
+    != content

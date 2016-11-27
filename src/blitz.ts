@@ -32,7 +32,7 @@ export function main(argv: string[]) {
             },
             template: {
                 abbr: 't',
-                default: 'minimal',
+                default: 'portfolio',
                 metavar: 'TEMPLATE',
                 help: 'Template to use for initialisation',
             },

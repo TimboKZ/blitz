@@ -7,7 +7,7 @@
  */
 
 import {assert} from 'chai';
-import {Util} from '../src/Util';
+import {Util} from '../../src/Util';
 
 describe('Util', () => {
     describe('#stripSlashes()', () => {

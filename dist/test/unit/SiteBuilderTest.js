@@ -1,6 +1,6 @@
 "use strict";
 var chai_1 = require('chai');
-var SiteBuilder_1 = require('../src/SiteBuilder');
+var SiteBuilder_1 = require('../../src/SiteBuilder');
 describe('SiteBuilder', function () {
     describe('#generateUrl()', function () {
         it('should work with absolute URLs => ENABLED, explicit .html => DISABLED, no site root, no site url', function () {

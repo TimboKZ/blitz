@@ -1,6 +1,6 @@
 "use strict";
 var chai_1 = require('chai');
-var Util_1 = require('../src/Util');
+var Util_1 = require('../../src/Util');
 describe('Util', function () {
     describe('#stripSlashes()', function () {
         it('should return empty string if the string was initially empty', function () {

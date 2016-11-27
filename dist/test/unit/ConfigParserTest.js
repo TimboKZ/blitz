@@ -2,7 +2,7 @@
 var mock = require('mock-fs');
 var yaml = require('js-yaml');
 var chai_1 = require('chai');
-var ConfigParser_1 = require('../src/ConfigParser');
+var ConfigParser_1 = require('../../src/ConfigParser');
 describe('ConfigParser', function () {
     describe('#load()', function () {
         it('should throw an error when file either does not exist or is not readable', function () {

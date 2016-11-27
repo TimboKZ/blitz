@@ -7,8 +7,8 @@
  */
 
 import {assert} from 'chai';
-import {SiteBuilder} from '../src/SiteBuilder';
-import {IBlitzConfig} from '../src/ConfigParser';
+import {SiteBuilder} from '../../src/SiteBuilder';
+import {IBlitzConfig} from '../../src/ConfigParser';
 
 describe('SiteBuilder', () => {
     describe('#generateUrl()', () => {

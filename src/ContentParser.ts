@@ -9,7 +9,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as fm from 'front-matter';
-import * as nodeUtil from 'util';
 import {Util} from './Util';
 
 /**

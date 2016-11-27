@@ -155,6 +155,7 @@ export class ConfigParser {
 
     /**
      * Validates Blitz config, creating required properties from default values where possible
+     * @since 0.1.4 Now also checks for `null` as well as `undefined`
      * @since 0.1.3
      */
     private static validate(config: any): IBlitzConfig {
@@ -163,7 +164,7 @@ export class ConfigParser {
         for (let i = 0; i < propertyCount; i++) {
             let expected = CONFIG_PROPERTIES[i];
             let property = config[expected.name];
-            if (property === undefined) {
+            if (property === undefined || property === null) {
                 let displayValue;
                 if (typeof expected.defaultValue === 'string') {
                     displayValue = '`' + expected.defaultValue + '`';

@@ -1,6 +1,9 @@
 # JetBrains IDE files
 /.idea
 
+# Temporary files for integration tests, etc.
+/temp/
+
 # TypeScript typings
 /typings
 

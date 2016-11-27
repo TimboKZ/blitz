@@ -98,6 +98,7 @@ function init() {
             // TODO: Ask for confirmation
         }
         fse.copySync(templateDir, process.cwd());
+        fse.removeSync(path.join(process.cwd(), 'build'));
     } catch (e) {
         Util.error('Could not initialise a new project!');
         Util.stackTrace(e);

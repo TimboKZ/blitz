@@ -2,6 +2,7 @@
 /coverage/
 /dist/test/
 /src/
+/temp/
 /templates/*/build/
 /test/
 /typings/

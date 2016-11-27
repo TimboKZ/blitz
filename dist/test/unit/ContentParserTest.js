@@ -1,8 +1,8 @@
 "use strict";
 var mock = require('mock-fs');
 var chai_1 = require('chai');
-var Util_1 = require('../src/Util');
-var ContentParser_1 = require('../src/ContentParser');
+var Util_1 = require('../../src/Util');
+var ContentParser_1 = require('../../src/ContentParser');
 describe('ContentParser', function () {
     describe('#parse()', function () {
         var lfCases = [

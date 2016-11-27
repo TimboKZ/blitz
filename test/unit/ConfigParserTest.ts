@@ -9,7 +9,7 @@
 import * as mock from 'mock-fs';
 import * as yaml from 'js-yaml';
 import {assert} from 'chai';
-import {ConfigParser, CONFIG_PROPERTIES} from '../src/ConfigParser';
+import {ConfigParser, CONFIG_PROPERTIES} from '../../src/ConfigParser';
 
 describe('ConfigParser', () => {
 

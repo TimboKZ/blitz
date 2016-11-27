@@ -7,12 +7,10 @@
     "outDir": "dist/",
     "removeComments": true
   },
-  "files": [],
   "include": [
     "**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "typings"
+    "node_modules"
   ]
 }

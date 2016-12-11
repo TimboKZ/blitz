@@ -166,6 +166,11 @@ var SiteBuilder = (function () {
                     }
                     return processedPageUrls_1[pageID];
                 };
+                var assetUrlGenerator_1 = this_1.generateAssetUrl.bind(this_1, currentDirectoryArray);
+                file.contentData.content = file.contentData.content.replace(/%%assets%%.*?%%/g, function (match) {
+                    var strippedString = match.replace(/^%%assets%%/, '').replace(/%%$/, '');
+                    return assetUrlGenerator_1(strippedString);
+                });
                 var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {
                     url: url,
                     child_pages: childPages,
@@ -174,7 +179,7 @@ var SiteBuilder = (function () {
                     named_child_directories: namedChildDirectories,
                     hash: this_1.buildHash,
                     menus: processedMenus,
-                    asset: this_1.generateAssetUrl.bind(this_1, currentDirectoryArray),
+                    asset: assetUrlGenerator_1,
                     site_url: this_1.config.site_url,
                     site_root: this_1.config.site_root,
                 });

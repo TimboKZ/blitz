@@ -373,6 +373,13 @@ export class SiteBuilder {
                     return processedPageUrls[pageID];
                 };
 
+                // TODO: Remove this code
+                let assetUrlGenerator = this.generateAssetUrl.bind(this, currentDirectoryArray);
+                file.contentData.content = file.contentData.content.replace(/%%assets%%.*?%%/g, (match) => {
+                    let strippedString = match.replace(/^%%assets%%/, '').replace(/%%$/, '');
+                    return assetUrlGenerator(strippedString);
+                });
+
                 let locals = objectAssign(
                     {},
                     this.config.globals,
@@ -386,11 +393,12 @@ export class SiteBuilder {
                         named_child_directories: namedChildDirectories,
                         hash: this.buildHash,
                         menus: processedMenus,
-                        asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                        asset: assetUrlGenerator,
                         site_url: this.config.site_url,
                         site_root: this.config.site_root,
                     }
                 );
+
                 if (!Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
                     Util.error('Could not write file from array!');
                     return false;

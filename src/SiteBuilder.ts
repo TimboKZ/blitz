@@ -375,8 +375,8 @@ export class SiteBuilder {
 
                 // TODO: Remove this code
                 let assetUrlGenerator = this.generateAssetUrl.bind(this, currentDirectoryArray);
-                file.contentData.content = file.contentData.content.replace(/%%assets%%.*?%%/g, (match) => {
-                    let strippedString = match.replace(/^%%assets%%/, '').replace(/%%$/, '');
+                file.contentData.content = file.contentData.content.replace(/%%asset%%.*?%%/g, (match) => {
+                    let strippedString = match.replace(/^%%asset%%/, '').replace(/%%$/, '');
                     return assetUrlGenerator(strippedString);
                 });
 

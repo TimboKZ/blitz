@@ -167,8 +167,8 @@ var SiteBuilder = (function () {
                     return processedPageUrls_1[pageID];
                 };
                 var assetUrlGenerator_1 = this_1.generateAssetUrl.bind(this_1, currentDirectoryArray);
-                file.contentData.content = file.contentData.content.replace(/%%assets%%.*?%%/g, function (match) {
-                    var strippedString = match.replace(/^%%assets%%/, '').replace(/%%$/, '');
+                file.contentData.content = file.contentData.content.replace(/%%asset%%.*?%%/g, function (match) {
+                    var strippedString = match.replace(/^%%asset%%/, '').replace(/%%$/, '');
                     return assetUrlGenerator_1(strippedString);
                 });
                 var locals = objectAssign({}, this_1.config.globals, file.contentData, file.blitzData, {

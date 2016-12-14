@@ -102,9 +102,13 @@ export class CLI {
         let templatesPath = path.join(__dirname, '..', '..', 'templates');
         let projectInitialiser = new ProjectInitialiser(projectPath, templatesPath);
         projectInitialiser.initialise(templateName, (error) => {
-
+            if (error) {
+                Logger.log(error, LogLevel.Error);
+                process.exit(1);
+            }
+            Logger.log('Project initialised!');
+            process.exit(0);
         });
-        Logger.log('test', LogLevel.Debug);
     }
 
     /**

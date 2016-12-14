@@ -7,8 +7,10 @@
  */
 
 import * as fse from 'fs-extra';
-import {Logger} from './Logger';
-import {ensureDirSync} from 'fs-extra';
+import * as path from 'path';
+import * as yesNo from 'yesno';
+import {Logger, LogLevel} from './Logger';
+import {Util} from './Util';
 
 /**
  * Template used for project initialisation by default
@@ -43,20 +45,75 @@ export class ProjectInitialiser {
     }
 
     /**
+     * Returns the path to the template if it exists, throws an error otherwise
+     * @since 0.2.0
+     */
+    private findTemplate(templateName: string): string {
+        let allTemplates = fse.readdirSync(this.templatesPath);
+        if (allTemplates.indexOf(templateName) === -1) {
+            throw new Error('Template `' + Logger.brand(templateName) + '` does not exist!');
+        }
+        return path.join(this.templatesPath, templateName);
+    }
+
+    /**
+     * Replaces various keywords in the config
+     * @since 0.2.0
+     */
+    private prepareConfig(configPath: string) {
+        let configContents = fse.readFileSync(configPath, 'utf8');
+        configContents = configContents.replace(/\$\{BLITZ_VERSION}/g, Util.getPackageInfo().version);
+        fse.writeFileSync(configPath, configContents);
+    }
+
+    /**
+     * Copies files from one directory into another, adjust contents of files where necessary
+     * @since 0.2.0
+     */
+    private copyTemplate(templatePath: string, targetPath: string) {
+        let templateContents = fse.readdirSync(templatePath);
+        for (let i = 0; i < templateContents.length; i++) {
+            let templatePart = templateContents[i];
+            switch (templatePart) {
+                case 'build':
+                    continue;
+                case 'blitz.yml':
+                    let configPath = path.join(targetPath, templatePart);
+                    fse.copySync(path.join(templatePath, templatePart), configPath);
+                    this.prepareConfig(configPath);
+                    break;
+                default:
+                    fse.copySync(path.join(templatePath, templatePart), path.join(targetPath, templatePart));
+            }
+        }
+    }
+
+    /**
      * Initialises project in the specified directory using the specified template (if it exists)
      * @since 0.2.0
      */
     public initialise(templateName: string, callback: (error?: string) => void) {
-        let allTemplates;
         try {
-            allTemplates = fse.readdirSync(this.templatesPath);
-            if (allTemplates.indexOf(templateName) === -1) {
-                return callback('Template ' + Logger.brand(templateName) + ' does not exist!');
-            }
+            let templatePath = this.findTemplate(templateName);
             fse.ensureDirSync(this.projectPath);
             let projectPathContents = fse.readdirSync(this.projectPath);
             if (projectPathContents.length > 0) {
-
+                let question = Logger.log(
+                    'Target path is not empty. Overwrite files? [y/N]',
+                    LogLevel.Warn,
+                    false
+                ) as string;
+                yesNo.ask(question, false, (answer) => {
+                    if (answer) {
+                        this.copyTemplate(templatePath, this.projectPath);
+                        return callback();
+                    } else {
+                        return callback('Initialisation aborted, project path is not empty.');
+                    }
+                }, ['y'], ['N']);
+            } else {
+                this.copyTemplate(templatePath, this.projectPath);
+                return callback();
             }
         } catch (exception) {
             return callback('Could not initialise project: ' + exception.message);

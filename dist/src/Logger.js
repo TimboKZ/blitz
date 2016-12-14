@@ -14,11 +14,17 @@ var Logger = (function () {
     Logger.brand = function (text) {
         return colors.cyan(text);
     };
-    Logger.logWithPrefix = function (prefix, object) {
-        console.log(prefix + ' ' + object.toString());
+    Logger.logWithPrefix = function (prefix, object, print) {
+        if (print === void 0) { print = true; }
+        var logString = prefix + ' ' + object.toString();
+        if (print) {
+            return console.log(logString);
+        }
+        return logString;
     };
-    Logger.log = function (object, level) {
+    Logger.log = function (object, level, print) {
         if (level === void 0) { level = LogLevel.Log; }
+        if (print === void 0) { print = true; }
         if (level === LogLevel.Debug && !global.debug) {
             return;
         }
@@ -39,7 +45,7 @@ var Logger = (function () {
         if (Util_1.Util.isString(object)) {
             object = object.replace(/\n/g, '\n' + (new Array(colors.strip(prefix).length + 2)).join(' '));
         }
-        Logger.logWithPrefix(prefix, object);
+        return Logger.logWithPrefix(prefix, object, print);
     };
     Logger.logMany = function (objects, level) {
         if (level === void 0) { level = LogLevel.Log; }

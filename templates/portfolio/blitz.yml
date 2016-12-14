@@ -10,7 +10,7 @@
 
 # Version of Blitz used to generate this project. Used for
 # migration purposes.
-blitz_version: '0.1.6'
+blitz_version: '${BLITZ_VERSION}'
 
 # Site URL without a trailing slash. Added in front of every
 # absolute URL. If you want to have URLs that look like

@@ -53,6 +53,7 @@
     "marked": "^0.3.6",
     "nomnom": "^1.8.1",
     "object-assign": "^4.1.0",
-    "pug": "^2.0.0-beta6"
+    "pug": "^2.0.0-beta6",
+    "yesno": "0.0.1"
   }
 }

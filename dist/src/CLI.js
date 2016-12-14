@@ -64,8 +64,13 @@ var CLI = (function () {
         var templatesPath = path.join(__dirname, '..', '..', 'templates');
         var projectInitialiser = new ProjectInitialiser_1.ProjectInitialiser(projectPath, templatesPath);
         projectInitialiser.initialise(templateName, function (error) {
+            if (error) {
+                Logger_1.Logger.log(error, Logger_1.LogLevel.Error);
+                process.exit(1);
+            }
+            Logger_1.Logger.log('Project initialised!');
+            process.exit(0);
         });
-        Logger_1.Logger.log('test', Logger_1.LogLevel.Debug);
     };
     CLI.build = function () {
     };

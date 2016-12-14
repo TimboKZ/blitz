@@ -36,8 +36,12 @@ export class Logger {
      * Logs an object to console prefixing it with the specified string.
      * @since 0.2.0
      */
-    public static logWithPrefix(prefix: string, object: any) {
-        console.log(prefix + ' ' + object.toString());
+    public static logWithPrefix(prefix: string, object: any, print: boolean = true): string|void {
+        let logString = prefix + ' ' + object.toString();
+        if (print) {
+            return console.log(logString);
+        }
+        return logString;
     }
 
     /**
@@ -45,7 +49,7 @@ export class Logger {
      * of the prefix.
      * @since 0.2.0
      */
-    public static log(object: any, level: LogLevel = LogLevel.Log) {
+    public static log(object: any, level: LogLevel = LogLevel.Log, print: boolean = true): string|void {
         if (level === LogLevel.Debug && !global.debug) {
             return;
         }
@@ -66,7 +70,7 @@ export class Logger {
         if (Util.isString(object)) {
             object = object.replace(/\n/g, '\n' + (new Array(colors.strip(prefix).length + 2)).join(' '));
         }
-        Logger.logWithPrefix(prefix, object);
+        return Logger.logWithPrefix(prefix, object, print);
     }
 
     /**

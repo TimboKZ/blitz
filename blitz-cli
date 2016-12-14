@@ -1,2 +1,3 @@
 #!/usr/bin/env node
+
 require('./dist/src/CLI.js').CLI.run(process.argv);

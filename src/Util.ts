@@ -36,6 +36,7 @@ export class Util {
 
     /**
      * Logs an object to console prefixing it with the specified string.
+     * @deprecated Use Logger.logWithPrefix() instead
      * @since 0.0.1
      */
     public static logWithPrefix(prefix: string, object: any) {
@@ -44,6 +45,7 @@ export class Util {
 
     /**
      * Logs data into console
+     * @deprecated Use Logger.log() instead
      * @since 0.0.1
      */
     public static log(object: any) {
@@ -52,18 +54,20 @@ export class Util {
 
     /**
      * Logs a warning into console
+     * @deprecated Use Logger.warn() instead
      * @since 0.1.3
      */
     public static warn(object: any) {
-        Util.logWithPrefix(colors.yellow('[Blitz WARN]'), object);
+        Util.logWithPrefix(colors.yellow('[Blitz WRN]'), object);
     }
 
     /**
      * Logs error data into console
+     * @deprecated Use Logger.error() instead
      * @since 0.0.1
      */
     public static error(object: any) {
-        Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
+        Util.logWithPrefix(colors.red('[Blitz ERR]'), object);
     }
 
     /**
@@ -76,6 +80,7 @@ export class Util {
 
     /**
      * Logs debug data into console
+     * @deprecated Use Logger.debug() instead
      * @since 0.0.1
      */
     public static debug(object: any) {
@@ -254,5 +259,13 @@ export class Util {
      */
     public static isEmpty(object: any): boolean {
         return Object.keys(object).length === 0;
+    }
+
+    /**
+     * Returns if object is a string and false otherwise
+     * @since 0.2.0
+     */
+    public static isString(object: any): boolean {
+        return typeof object === 'string';
     }
 }

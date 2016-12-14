@@ -20,10 +20,10 @@ var Util = (function () {
         Util.logWithPrefix(colors.cyan('[Blitz LOG]'), object);
     };
     Util.warn = function (object) {
-        Util.logWithPrefix(colors.yellow('[Blitz WARN]'), object);
+        Util.logWithPrefix(colors.yellow('[Blitz WRN]'), object);
     };
     Util.error = function (object) {
-        Util.logWithPrefix(colors.red('[Blitz ERROR]'), object);
+        Util.logWithPrefix(colors.red('[Blitz ERR]'), object);
     };
     Util.stackTrace = function (object) {
         console.log(object);
@@ -144,6 +144,9 @@ var Util = (function () {
     };
     Util.isEmpty = function (object) {
         return Object.keys(object).length === 0;
+    };
+    Util.isString = function (object) {
+        return typeof object === 'string';
     };
     return Util;
 }());

@@ -1,2 +1,2 @@
 # Make JS build treated like binary
-*.js binary
+dist/**/*.js binary

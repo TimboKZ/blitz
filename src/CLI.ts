@@ -8,9 +8,12 @@
 
 import * as nomnom from 'nomnom';
 import * as path from 'path';
-import {DEFAULT_TEMPLATE, ProjectInitialiser} from './ProjectInitialiser';
+import {DEFAULT_TEMPLATE} from './ProjectInitialiser';
+import {Logger} from './Logger';
+import {Blitz} from './Blitz';
+import {DEFAULT_CONFIG_NAME} from './Config';
+import {DEFAULT_BUILD_DIRECTORY_NAME} from './SiteGenerator';
 import {Util} from './Util';
-import {Logger, LogLevel} from './Logger';
 
 /**
  * Name of the CLI command used to run Blitz
@@ -67,16 +70,26 @@ export class CLI {
                 help: 'path to project folder',
             })
             .help('initialise a project from template')
-            .callback((opts) => CLI.init(opts.template, opts.path));
+            .callback((opts) => Blitz.init(opts.template, opts.path));
         parser.command('build')
+            .option('config', {
+                abbr: 'c',
+                default: path.join(process.cwd(), DEFAULT_CONFIG_NAME),
+                help: 'path to Blitz config',
+            })
+            .option('build', {
+                abbr: 'b',
+                default: path.join(process.cwd(), DEFAULT_BUILD_DIRECTORY_NAME),
+                help: 'path to target build directory',
+            })
             .help('builds site using `blitz.yml`')
-            .callback(() => CLI.build());
+            .callback((opts) => Blitz.build(opts.config, opts.build));
         parser.command('watch')
             .help('watches source code and rebuilds the website when necessary')
-            .callback(() => CLI.watch());
+            .callback(() => Blitz.watch());
         parser.command('preview')
             .help('starts a web server for real-time change preview')
-            .callback(() => CLI.preview());
+            .callback(() => Blitz.preview());
 
         let normalisedArgv = argv.slice(2);
         args = parser.parse(normalisedArgv);
@@ -87,51 +100,7 @@ export class CLI {
      * @since 0.2.0
      */
     public static version() {
-        Logger.log('Blitz v' + Util.getPackageInfo().version + ', use ' + Logger.brand('blitz -h') + ' for help');
+        Logger.log('Blitz v' + Util.getPackageInfo().version + ', use `' + Logger.brand('blitz -h') + '` for help');
         Logger.log('For documentation, refer to ' + Logger.brand('https://getblitz.io/'));
-    }
-
-    /**
-     * Initialises a Blitz project from a template
-     * @since 0.2.0
-     */
-    public static init(templateName: string, projectPath: string) {
-        Logger.log('Initialising a new project in ' +
-            Logger.brand(projectPath) + ' using the template ' +
-            Logger.brand(templateName) + '...', LogLevel.Debug);
-        let templatesPath = path.join(__dirname, '..', '..', 'templates');
-        let projectInitialiser = new ProjectInitialiser(projectPath, templatesPath);
-        projectInitialiser.initialise(templateName, (error) => {
-            if (error) {
-                Logger.log(error, LogLevel.Error);
-                process.exit(1);
-            }
-            Logger.log('Project initialised!');
-            process.exit(0);
-        });
-    }
-
-    /**
-     * Builds the website using `blitz.yml`
-     * @since 0.2.0
-     */
-    public static build() {
-
-    }
-
-    /**
-     * Watches the current directory and rebuilds certain parts of the website when necessary
-     * @since 0.2.0
-     */
-    public static watch() {
-
-    }
-
-    /**
-     * Runs a web server with the preview of the website
-     * @since 0.2.0
-     */
-    public static preview() {
-
     }
 }

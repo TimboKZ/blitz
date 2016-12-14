@@ -60,7 +60,7 @@ export class ProjectInitialiser {
      * Replaces various keywords in the config
      * @since 0.2.0
      */
-    private prepareConfig(configPath: string) {
+    private static prepareConfig(configPath: string) {
         let configContents = fse.readFileSync(configPath, 'utf8');
         configContents = configContents.replace(/\$\{BLITZ_VERSION}/g, Util.getPackageInfo().version);
         fse.writeFileSync(configPath, configContents);
@@ -70,7 +70,7 @@ export class ProjectInitialiser {
      * Copies files from one directory into another, adjust contents of files where necessary
      * @since 0.2.0
      */
-    private copyTemplate(templatePath: string, targetPath: string) {
+    private static copyTemplate(templatePath: string, targetPath: string) {
         let templateContents = fse.readdirSync(templatePath);
         for (let i = 0; i < templateContents.length; i++) {
             let templatePart = templateContents[i];
@@ -80,7 +80,7 @@ export class ProjectInitialiser {
                 case 'blitz.yml':
                     let configPath = path.join(targetPath, templatePart);
                     fse.copySync(path.join(templatePath, templatePart), configPath);
-                    this.prepareConfig(configPath);
+                    ProjectInitialiser.prepareConfig(configPath);
                     break;
                 default:
                     fse.copySync(path.join(templatePath, templatePart), path.join(targetPath, templatePart));
@@ -105,14 +105,14 @@ export class ProjectInitialiser {
                 ) as string;
                 yesNo.ask(question, false, (answer) => {
                     if (answer) {
-                        this.copyTemplate(templatePath, this.projectPath);
+                        ProjectInitialiser.copyTemplate(templatePath, this.projectPath);
                         return callback();
                     } else {
                         return callback('Initialisation aborted, project path is not empty.');
                     }
                 }, ['y'], ['N']);
             } else {
-                this.copyTemplate(templatePath, this.projectPath);
+                ProjectInitialiser.copyTemplate(templatePath, this.projectPath);
                 return callback();
             }
         } catch (exception) {

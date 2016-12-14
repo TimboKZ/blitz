@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "Dead simple static site generator using Markdown and Pug.",
   "preferGlobal": true,
+  "main": "./dist/src/Blitz.js",
   "bin": {
     "blitz": "./blitz-cli"
   },

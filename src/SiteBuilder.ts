@@ -13,7 +13,6 @@ import * as fse from 'fs-extra';
 import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
 import {Util} from './Util';
-import {args} from './blitz';
 
 /**
  * Constants indicating the locations of assets, content and templates
@@ -225,9 +224,6 @@ export class SiteBuilder {
             return undefined;
         }
         Util.debug('Site map generated!');
-        if (args.map) {
-            Util.log(JSON.stringify(this.siteMap));
-        }
         Util.debug('Building site . . . ');
         if (!this.buildSite()) {
             Util.error('Site building failed!');

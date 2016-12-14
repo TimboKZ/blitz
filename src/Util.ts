@@ -157,6 +157,7 @@ export class Util {
 
     /**
      * Loads file from the specified path if possible, returns undefined otherwise
+     * @deprecated Use `fs.readFileSync()` directly
      * @since 0.1.2 Removed try/catch block
      * @since 0.0.1
      */

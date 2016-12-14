@@ -1,2 +1,2 @@
 # Make JS build treated like binary
-dist/**/*.js binary
+dist/**/*.js linguist-language=TypeScript

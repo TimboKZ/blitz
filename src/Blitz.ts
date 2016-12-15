@@ -29,7 +29,7 @@ export class Blitz {
         let projectInitialiser = new ProjectInitialiser(projectPath, templatesPath);
         projectInitialiser.initialise(templateName, (error) => {
             if (error) {
-                Logger.log(error, LogLevel.Error);
+                Logger.logMany(Logger.split(error), LogLevel.Error);
                 process.exit(1);
             }
             Logger.log('Project initialised!');
@@ -48,8 +48,13 @@ export class Blitz {
             Logger.brand(configPath) + '` in directory `' +
             Logger.brand(buildDirectory) + '`...', LogLevel.Debug);
         let config = new Config(configPath);
-        config.load();
-        config.validate();
+        try {
+            config.load();
+            config.validate();
+        } catch (exception) {
+            Logger.logMany(Logger.split(exception.message), LogLevel.Error);
+            process.exit(1);
+        }
         console.log(config.get());
     }
 

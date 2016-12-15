@@ -9,7 +9,8 @@
 import * as fse from 'fs-extra';
 import * as yaml from 'js-yaml';
 import {Util} from './Util';
-import {Logger} from './Logger';
+import {Logger, LogLevel} from './Logger';
+import {StringHelper} from './helpers/StringHelper';
 
 /**
  * Menu interface as seen in the config
@@ -28,6 +29,7 @@ export interface IConfigMenu {
 export interface IConfigDirectory {
     uri?: string;
     uri_key?: string;
+    id_key?: string;
     name?: string;
     menus?: IConfigMenu[];
     template_directory?: string;
@@ -70,12 +72,23 @@ export interface IConfig {
  * Interface for an object used to validate a certain property of the config
  * @since 0.2.0
  */
-export interface IConfigValidatorProperty {
+export interface IConfigPropertyValidator {
     name: string;
     message: string;
     defaultValue: any;
     typeChecker: (object: any) => boolean;
     typeError: string;
+}
+
+/**
+ * Interface for page/directory validators, doesn't have default values
+ * @since 0.2.0
+ */
+export interface IConfigPagePropertyValidators {
+    [name: string]: {
+        typeChecker: (object: any) => boolean,
+        typeError: string,
+    };
 }
 
 /**
@@ -88,7 +101,7 @@ export const DEFAULT_CONFIG_NAME = 'blitz.yml';
  * Array of validation objects for the config
  * @since 0.2.0
  */
-export const CONFIG_PROPERTIES: IConfigValidatorProperty[] = [
+export const CONFIG_PROPERTIES: IConfigPropertyValidator[] = [
     {
         name: 'blitz_version',
         message: 'Using current Blitz version',
@@ -158,6 +171,45 @@ export const CONFIG_PROPERTIES: IConfigValidatorProperty[] = [
 ];
 
 /**
+ * Array of validation objects for a config page
+ * @since 0.2.0
+ */
+export const CONFIG_PAGE_PROPERTIES: IConfigPagePropertyValidators = {
+    uri: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If URI is set, it must be a string!',
+    },
+    id: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If ID is set, it must be a string!',
+    },
+    name: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If name is set, it must be a string!',
+    },
+    template: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If template is set, it must be a non-empty string!',
+    },
+    content: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If content is set, it must be a non-empty string!',
+    },
+    menus: {
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'If menus are set, it must be an array!',
+    },
+    child_pages: {
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'If menus are set, it must be an array!',
+    },
+    child_directories: {
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'If menus are set, it must be an array!',
+    },
+};
+
+/**
  * @class Class responsible for loading and validating the config
  * @since 0.2.0
  */
@@ -206,21 +258,16 @@ export class Config {
      * @since 0.2.0
      */
     public validate() {
-        let validatedConfig = {};
+        let validatedConfig: any = {};
 
         let propertyCount = CONFIG_PROPERTIES.length;
         for (let i = 0; i < propertyCount; i++) {
             let validator = CONFIG_PROPERTIES[i];
             let property = this.rawConfig[validator.name];
             if (property === undefined || property === null) { // tslint:disable-line:no-null-keyword
-                let displayValue;
-                if (typeof validator.defaultValue === 'string') {
-                    displayValue = '\'' + validator.defaultValue + '\'';
-                } else {
-                    displayValue = JSON.stringify(validator.defaultValue);
-                }
-                let actionString = validator.message + ' (' + Logger.brand(displayValue) + ')';
-                Logger.log('`' + Logger.brand(validator.name) + '` is not defined: ' + actionString);
+                let displayValue = '`' + StringHelper.stringify(validator.defaultValue) + '`';
+                let actionString = validator.message + ', ' + Logger.brand(displayValue);
+                Logger.log('`' + Logger.brand(validator.name) + '` is not defined: ' + actionString, LogLevel.Warn);
                 validatedConfig[validator.name] = validator.defaultValue;
             } else if (!validator.typeChecker(property)) {
                 let errorString = 'Invalid type for `' + Logger.brand(validator.name) + '`: ' + validator.typeError;
@@ -230,7 +277,101 @@ export class Config {
             }
         }
 
+        validatedConfig.pages = this.validatePages(validatedConfig.pages);
+
         this.validatedConfig = validatedConfig as IConfig;
+    }
+
+    /**
+     * Validates multiple pages extracted from the config
+     * @since 0.2.0
+     */
+    private validatePages(rawPages: any[]): IConfigPage[] {
+        let validatedPages: IConfigPage[] = [];
+        for (let i = 0; i < rawPages.length; i++) {
+            validatedPages.push(this.validatePage(rawPages[i]));
+        }
+        return validatedPages;
+    }
+
+    /**
+     * Validates a single page extracted from the config
+     * @since 0.2.0
+     */
+    private validatePage(rawPage: any): IConfigPage {
+        let validatedPage: any = {};
+        for (let propertyName in CONFIG_PAGE_PROPERTIES) {
+            if (CONFIG_PAGE_PROPERTIES.hasOwnProperty(propertyName)) {
+                let rawProperty = rawPage[propertyName];
+                let propertyValidator = CONFIG_PAGE_PROPERTIES[propertyName];
+                if (rawProperty !== undefined && rawProperty !== null) { // tslint:disable-line:no-null-keyword
+                    if (!propertyValidator.typeChecker(rawProperty)) {
+                        let errorString = 'Error parsing page property from the config:';
+                        errorString += '\n';
+                        errorString += 'Property `' + Logger.brand(StringHelper.stringify(propertyName)) + '`';
+                        errorString += ' with value `' + Logger.brand(StringHelper.stringify(rawProperty)) + '`:';
+                        errorString += '\n';
+                        errorString += propertyValidator.typeError;
+                        throw new Error(errorString);
+                    } else {
+                        validatedPage[propertyName] = rawProperty;
+                    }
+                }
+            }
+        }
+
+        // TODO: Check for various combinations of optional properties.
+
+        if (validatedPage.menus) {
+            validatedPage.menus = this.validateMenus(validatedPage.menus);
+        }
+        if (validatedPage.child_pages) {
+            validatedPage.child_pages = this.validatePages(validatedPage.child_pages);
+        }
+        if (validatedPage.child_directories) {
+            validatedPage.child_directories = this.validateDirectories(validatedPage.child_directories);
+        }
+        return validatedPage as IConfigPage;
+    }
+
+    /**
+     * Validates a single directory extracted from the config
+     * @since 0.2.0
+     */
+    private validateDirectories(rawDirectories: any[]): IConfigDirectory[] {
+        let validatedDirectories: IConfigDirectory[] = [];
+        for (let i = 0; i < rawDirectories.length; i++) {
+            validatedDirectories.push(this.validateDirectory(rawDirectories[i]));
+        }
+        return validatedDirectories;
+    }
+
+    /**
+     * Validates a single directory extracted from the config
+     * @since 0.2.0
+     */
+    private validateDirectory(rawDirectory: any): IConfigDirectory {
+
+    }
+
+    /**
+     * Validates a single menu extracted from the
+     * @since 0.2.0
+     */
+    private validateMenus(rawMenus: any[]): IConfigMenu[] {
+        let validatedMenus: IConfigMenu[] = [];
+        for (let i = 0; i < rawMenus.length; i++) {
+            validatedMenus.push(this.validateMenu(rawMenus[i]));
+        }
+        return validatedMenus;
+    }
+
+    /**
+     * Validates a single menu extracted from the
+     * @since 0.2.0
+     */
+    private validateMenu(rawMenu: any): IConfigMenu {
+
     }
 
     /**

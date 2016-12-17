@@ -6,9 +6,21 @@
  * @since 0.2.0
  */
 
+import {Config} from './Config';
+
+
+
 /**
- * @class A class.
+ * @class Class responsible for building of the map relating the config and the file system to the site
  * @since 0.2.0
  */
 export class MapBuilder {
+    /**
+     * And instance of the config used to generate the site
+     */
+    private config: Config;
+
+    public constructor(config: Config) {
+        this.config = config;
+    }
 }

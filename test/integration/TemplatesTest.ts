@@ -59,51 +59,51 @@ describe('Blitz project initialiser', () => {
         done();
     }).timeout(6000);
 
-    it('should create a `build` folder on build', (done) => {
-        // Build all projects
-        for (let i = 0; i < templateTestCount; i++) {
-            let templateTestInfo = templatesTestInfo[i];
-            execSync(blitzCli + ' build', {cwd: templateTestInfo.projectPath});
-        }
-        for (let i = 0; i < templateTestCount; i++) {
-            let templateTestInfo = templatesTestInfo[i];
-            assert.isTrue(Util.pathExists(templateTestInfo.projectBuild), templateTestInfo.name + ' template');
-        }
-        done();
-    }).timeout(6000);
-
-    it('should generate valid build', (done) => {
-        for (let i = 0; i < templateTestCount; i++) {
-            let templateTestInfo = templatesTestInfo[i];
-            if (!Util.pathExists(templateTestInfo.templateBuild)) {
-                assert.equal(fs.walkSync(templateTestInfo.projectBuild).length, 0);
-                continue;
-            }
-            let templateBuildFiles = fs.walkSync(templateTestInfo.templateBuild);
-            let projectBuildFiles = fs.walkSync(templateTestInfo.projectBuild);
-            assert.equal(projectBuildFiles.length, templateBuildFiles.length);
-            let count = templateBuildFiles.length;
-            for (let k = 0; k < count; k++) {
-                assert.deepEqual(path.relative(
-                    templateTestInfo.templatePath,
-                    templateBuildFiles[k]
-                ), path.relative(
-                    templateTestInfo.projectPath,
-                    projectBuildFiles[k]
-                ));
-            }
-            for (let k = 0; k < count; k++) {
-                let templateFile = templateBuildFiles[k];
-                let projectFile = projectBuildFiles[k];
-                assert.equal(Util.getFileContents(projectFile), Util.getFileContents(templateFile));
-            }
-
-        }
-
-        // Remove temp folder
-        fs.removeSync(tempPath);
-
-        done();
-    }).timeout(6000);
+    // it('should create a `build` folder on build', (done) => {
+    //     // Build all projects
+    //     for (let i = 0; i < templateTestCount; i++) {
+    //         let templateTestInfo = templatesTestInfo[i];
+    //         execSync(blitzCli + ' build', {cwd: templateTestInfo.projectPath});
+    //     }
+    //     for (let i = 0; i < templateTestCount; i++) {
+    //         let templateTestInfo = templatesTestInfo[i];
+    //         assert.isTrue(Util.pathExists(templateTestInfo.projectBuild), templateTestInfo.name + ' template');
+    //     }
+    //     done();
+    // }).timeout(6000);
+    //
+    // it('should generate valid build', (done) => {
+    //     for (let i = 0; i < templateTestCount; i++) {
+    //         let templateTestInfo = templatesTestInfo[i];
+    //         if (!Util.pathExists(templateTestInfo.templateBuild)) {
+    //             assert.equal(fs.walkSync(templateTestInfo.projectBuild).length, 0);
+    //             continue;
+    //         }
+    //         let templateBuildFiles = fs.walkSync(templateTestInfo.templateBuild);
+    //         let projectBuildFiles = fs.walkSync(templateTestInfo.projectBuild);
+    //         assert.equal(projectBuildFiles.length, templateBuildFiles.length);
+    //         let count = templateBuildFiles.length;
+    //         for (let k = 0; k < count; k++) {
+    //             assert.deepEqual(path.relative(
+    //                 templateTestInfo.templatePath,
+    //                 templateBuildFiles[k]
+    //             ), path.relative(
+    //                 templateTestInfo.projectPath,
+    //                 projectBuildFiles[k]
+    //             ));
+    //         }
+    //         for (let k = 0; k < count; k++) {
+    //             let templateFile = templateBuildFiles[k];
+    //             let projectFile = projectBuildFiles[k];
+    //             assert.equal(Util.getFileContents(projectFile), Util.getFileContents(templateFile));
+    //         }
+    //
+    //     }
+    //
+    //     // Remove temp folder
+    //     fs.removeSync(tempPath);
+    //
+    //     done();
+    // }).timeout(6000);
 
 });

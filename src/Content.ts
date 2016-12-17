@@ -13,7 +13,7 @@ import {StringHelper} from './helpers/StringHelper';
  * Interface for functions in the content
  * @since 0.2.0
  */
-export interface ContentFunctionMap {
+export interface IContentFunctionMap {
     [token: string]: string;
 }
 
@@ -32,8 +32,8 @@ export class Content {
      * Maps of URL and Asset functions with their parameters
      * @since 0.2.0
      */
-    private urlFunctionMap: ContentFunctionMap;
-    private assetFunctionMap: ContentFunctionMap;
+    private urlFunctionMap: IContentFunctionMap;
+    private assetFunctionMap: IContentFunctionMap;
 
     /**
      * Arrays of IDs and assets referenced in the content
@@ -62,7 +62,7 @@ export class Content {
      * Extracts function from a content string
      * @since 0.2.0
      */
-    public parseFunction(content: string, functionName: string, map: ContentFunctionMap, values: string[]): string {
+    public parseFunction(content: string, functionName: string, map: IContentFunctionMap, values: string[]): string {
         let regex = new RegExp('\\\\?\\$\{' + functionName + '(\|((?!}).)*)?}', 'gi');
         return content.replace(regex, (match) => {
             if (match.substr(0, 1) === '\\') {

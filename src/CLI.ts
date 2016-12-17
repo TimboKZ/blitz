@@ -40,18 +40,30 @@ export class CLI {
         let parser = nomnom();
 
         global.debug = false;
+        global.verbose = false;
 
         parser.script(CLI_NAME);
         parser.printer((message) => {
             let strings = Logger.split(message);
+            let verboseState = global.verbose;
+            if (strings[0].substr(0, 5) === 'Usage' || strings[0].substr(0, 5) === 'blitz') {
+                global.verbose = true;
+            }
             for (let i = 0; i < strings.length; i++) {
                 if (strings[i].match(/^command/)) {
                     strings[i] = 'Commands:';
                 }
             }
             Logger.logMany(strings);
+            global.verbose = verboseState;
         });
         parser.nocommand().callback(() => CLI.version());
+        parser.option('verbose', {
+            abbr: 'v',
+            flag: true,
+            help: 'displays warnings and log output',
+            callback: (flagSet) => global.verbose = flagSet,
+        });
         parser.option('debug', {
             abbr: 'd',
             flag: true,
@@ -100,7 +112,10 @@ export class CLI {
      * @since 0.2.0
      */
     public static version() {
+        let verboseState = global.verbose;
+        global.verbose = true;
         Logger.log('Blitz v' + Util.getPackageInfo().version + ', use `' + Logger.brand('blitz -h') + '` for help');
         Logger.log('For documentation, refer to ' + Logger.brand('https://getblitz.io/'));
+        global.verbose = verboseState;
     }
 }

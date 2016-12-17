@@ -53,6 +53,9 @@ export class Logger {
         if (level === LogLevel.Debug && !global.debug) {
             return;
         }
+        if ((level === LogLevel.Log || level === LogLevel.Warn) && !global.verbose) {
+            return;
+        }
         let prefix;
         switch (level) {
             case LogLevel.Warn:

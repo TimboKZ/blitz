@@ -7,8 +7,9 @@
  */
 
 import * as path from 'path';
+import * as fse from 'fs-extra';
+import * as yaml from 'js-yaml';
 import {ProjectInitialiser} from './ProjectInitialiser';
-import {Util} from './Util';
 import {Logger, LogLevel} from './Logger';
 import {Config} from './Config';
 
@@ -47,11 +48,17 @@ export class Blitz {
         Logger.log('Building site using `' +
             Logger.brand(configPath) + '` in directory `' +
             Logger.brand(buildDirectory) + '`...', LogLevel.Debug);
-        let config = new Config(configPath);
+        let configContents = fse.readFileSync(configPath, 'utf8');
+        let rawConfig = yaml.safeLoad(configContents);
+        if (!rawConfig || typeof rawConfig !== 'object') {
+            rawConfig = {};
+        }
+        let config = new Config();
+        config.load(rawConfig);
         try {
-            config.load();
             config.validate();
         } catch (exception) {
+            Logger.log('Error validating the config:' , LogLevel.Error);
             Logger.logMany(Logger.split(exception.message), LogLevel.Error);
             process.exit(1);
         }

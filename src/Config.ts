@@ -6,8 +6,6 @@
  * @since 0.2.0
  */
 
-import * as fse from 'fs-extra';
-import * as yaml from 'js-yaml';
 import {Util} from './Util';
 import {Logger, LogLevel} from './Logger';
 import {StringHelper} from './helpers/StringHelper';
@@ -31,11 +29,11 @@ export interface IConfigDirectory {
     uri_key?: string;
     id_key?: string;
     name?: string;
-    menus?: IConfigMenu[];
     template_directory?: string;
     template?: string;
     content_directory?: string;
     content?: string;
+    menus?: IConfigMenu[];
 }
 
 /**
@@ -84,7 +82,7 @@ export interface IConfigPropertyValidator {
  * Interface for page/directory validators, doesn't have default values
  * @since 0.2.0
  */
-export interface IConfigPagePropertyValidators {
+export interface IConfigNamedPropertyValidators {
     [name: string]: {
         typeChecker: (object: any) => boolean,
         typeError: string,
@@ -174,7 +172,7 @@ export const CONFIG_PROPERTIES: IConfigPropertyValidator[] = [
  * Array of validation objects for a config page
  * @since 0.2.0
  */
-export const CONFIG_PAGE_PROPERTIES: IConfigPagePropertyValidators = {
+export const CONFIG_PAGE_PROPERTIES: IConfigNamedPropertyValidators = {
     uri: {
         typeChecker: (object) => typeof object === 'string',
         typeError: 'If URI is set, it must be a string!',
@@ -210,16 +208,72 @@ export const CONFIG_PAGE_PROPERTIES: IConfigPagePropertyValidators = {
 };
 
 /**
+ * Array of validation objects for a config directory
+ * @since 0.2.0
+ */
+export const CONFIG_DIRECTORY_PROPERTIES: IConfigNamedPropertyValidators = {
+    uri: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If URI is set, it must be a string!',
+    },
+    uri_key: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If URI key is set, it must be a non-empty string!',
+    },
+    id_key: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If ID key is set, it must be a string!',
+    },
+    name: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If name is set, it must be a string!',
+    },
+    template_directory: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If template is set, it must be a non-empty string!',
+    },
+    template: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If template is set, it must be a non-empty string!',
+    },
+    content_directory: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If content is set, it must be a non-empty string!',
+    },
+    content: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If content is set, it must be a non-empty string!',
+    },
+    menus: {
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'If menus are set, it must be an array!',
+    },
+};
+
+/**
+ * Array of validation objects for a config directory
+ * @since 0.2.0
+ */
+export const CONFIG_MENU_PROPERTIES: IConfigNamedPropertyValidators = {
+    name: {
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeError: 'If name is set, it must be a non-empty string!',
+    },
+    title: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If title is set, it must be a non-empty string!',
+    },
+    keys: {
+        typeChecker: (object) => typeof object === 'object' && object instanceof Array,
+        typeError: 'If keys is set, it must be an array!',
+    },
+};
+
+/**
  * @class Class responsible for loading and validating the config
  * @since 0.2.0
  */
 export class Config {
-    /**
-     * Path to the config file
-     * @since 0.2.0
-     */
-    private configPath: string;
-
     /**
      * Raw JavaScript object generated from YAML found in the config
      * @since 0.2.0
@@ -233,23 +287,10 @@ export class Config {
     private validatedConfig: IConfig;
 
     /**
-     * Config constructor
+     * Loads a raw config for validation
      * @since 0.2.0
      */
-    constructor(configPath: string) {
-        this.configPath = configPath;
-    }
-
-    /**
-     * Loads the config from the injected path and parses YAML inside it
-     * @since 0.2.0
-     */
-    public load() {
-        let configContents = fse.readFileSync(this.configPath, 'utf8');
-        let rawConfig = yaml.safeLoad(configContents);
-        if (!rawConfig || typeof rawConfig !== 'object') {
-            rawConfig = {};
-        }
+    public load(rawConfig: any) {
         this.rawConfig = rawConfig;
     }
 
@@ -258,6 +299,15 @@ export class Config {
      * @since 0.2.0
      */
     public validate() {
+
+        if (this.rawConfig === undefined) {
+            throw new Error('No config was loaded!');
+        }
+
+        if (typeof this.rawConfig !== 'object') {
+            throw new Error('Supplied config is not an object!');
+        }
+
         let validatedConfig: any = {};
 
         let propertyCount = CONFIG_PROPERTIES.length;
@@ -299,28 +349,11 @@ export class Config {
      * @since 0.2.0
      */
     private validatePage(rawPage: any): IConfigPage {
-        let validatedPage: any = {};
-        for (let propertyName in CONFIG_PAGE_PROPERTIES) {
-            if (CONFIG_PAGE_PROPERTIES.hasOwnProperty(propertyName)) {
-                let rawProperty = rawPage[propertyName];
-                let propertyValidator = CONFIG_PAGE_PROPERTIES[propertyName];
-                if (rawProperty !== undefined && rawProperty !== null) { // tslint:disable-line:no-null-keyword
-                    if (!propertyValidator.typeChecker(rawProperty)) {
-                        let errorString = 'Error parsing page property from the config:';
-                        errorString += '\n';
-                        errorString += 'Property `' + Logger.brand(StringHelper.stringify(propertyName)) + '`';
-                        errorString += ' with value `' + Logger.brand(StringHelper.stringify(rawProperty)) + '`:';
-                        errorString += '\n';
-                        errorString += propertyValidator.typeError;
-                        throw new Error(errorString);
-                    } else {
-                        validatedPage[propertyName] = rawProperty;
-                    }
-                }
-            }
-        }
-
-        // TODO: Check for various combinations of optional properties.
+        let validatedPage: IConfigPage = Config.validateNamedProperties(
+            rawPage,
+            CONFIG_PAGE_PROPERTIES,
+            'page'
+        );
 
         if (validatedPage.menus) {
             validatedPage.menus = this.validateMenus(validatedPage.menus);
@@ -351,7 +384,38 @@ export class Config {
      * @since 0.2.0
      */
     private validateDirectory(rawDirectory: any): IConfigDirectory {
+        let validatedDirectory: IConfigDirectory = Config.validateNamedProperties(
+            rawDirectory,
+            CONFIG_DIRECTORY_PROPERTIES,
+            'directory'
+        );
 
+        if (validatedDirectory.template && validatedDirectory.template_directory) {
+            let errorString = 'Error parsing directory property from the config:';
+            errorString += '\n';
+            errorString += 'You cannot have both `' + Logger.brand('template') + '` and ';
+            errorString += '`' + Logger.brand('template_directory') + '` specified!';
+            throw new Error(errorString);
+        }
+        if (validatedDirectory.content && validatedDirectory.content_directory) {
+            let errorString = 'Error parsing directory property from the config:';
+            errorString += '\n';
+            errorString += 'You cannot have both `' + Logger.brand('content') + '` and ';
+            errorString += '`' + Logger.brand('content_directory') + '` specified!';
+            throw new Error(errorString);
+        }
+        if (validatedDirectory.template_directory && validatedDirectory.content_directory) {
+            let errorString = 'Error parsing directory property from the config:';
+            errorString += '\n';
+            errorString += 'You cannot have both `' + Logger.brand('template_directory') + '` and ';
+            errorString += '`' + Logger.brand('content_directory') + '` specified!';
+            throw new Error(errorString);
+        }
+
+        if (validatedDirectory.menus) {
+            validatedDirectory.menus = this.validateMenus(validatedDirectory.menus);
+        }
+        return validatedDirectory as IConfigDirectory;
     }
 
     /**
@@ -361,7 +425,7 @@ export class Config {
     private validateMenus(rawMenus: any[]): IConfigMenu[] {
         let validatedMenus: IConfigMenu[] = [];
         for (let i = 0; i < rawMenus.length; i++) {
-            validatedMenus.push(this.validateMenu(rawMenus[i]));
+            validatedMenus.push(Config.validateMenu(rawMenus[i]));
         }
         return validatedMenus;
     }
@@ -370,8 +434,38 @@ export class Config {
      * Validates a single menu extracted from the
      * @since 0.2.0
      */
-    private validateMenu(rawMenu: any): IConfigMenu {
+    private static validateMenu(rawMenu: any): IConfigMenu {
+        return Config.validateNamedProperties(rawMenu, CONFIG_MENU_PROPERTIES, 'menu');
+    }
 
+    /**
+     * Validates an object using provided named property validators
+     * @since 0.2.0
+     */
+    private static validateNamedProperties(sourceObject: any,
+                                           validators: IConfigNamedPropertyValidators,
+                                           propertyType: string): any {
+        let validatedObject: any = {};
+        for (let propertyName in validators) {
+            if (validators.hasOwnProperty(propertyName)) {
+                let rawProperty = sourceObject[propertyName];
+                let propertyValidator = validators[propertyName];
+                if (rawProperty !== undefined && rawProperty !== null) { // tslint:disable-line:no-null-keyword
+                    if (!propertyValidator.typeChecker(rawProperty)) {
+                        let errorString = 'Error parsing ' + propertyType + ' property from the config:';
+                        errorString += '\n';
+                        errorString += 'Property `' + Logger.brand(StringHelper.stringify(propertyName)) + '`';
+                        errorString += ' with value `' + Logger.brand(StringHelper.stringify(rawProperty)) + '`:';
+                        errorString += '\n';
+                        errorString += propertyValidator.typeError;
+                        throw new Error(errorString);
+                    } else {
+                        validatedObject[propertyName] = rawProperty;
+                    }
+                }
+            }
+        }
+        return validatedObject;
     }
 
     /**

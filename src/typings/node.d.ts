@@ -5,5 +5,6 @@
 declare namespace NodeJS  {
     interface Global {
         debug: boolean;
+        verbose: boolean;
     }
 }

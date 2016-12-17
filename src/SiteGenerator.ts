@@ -13,8 +13,27 @@
 export const DEFAULT_BUILD_DIRECTORY_NAME = 'build';
 
 /**
+ * Interfaces for partially applied URL and asset path generators
+ * @since 0.2.0
+ */
+export interface IUrlGenerator {
+    (id: string): string;
+}
+export interface IAssetPathGenerator {
+    (assetPath: string): string;
+}
+
+/**
+ * Interface for a function that parses content extracted from a content file
+ * @since 0.2.0
+ */
+export interface ContentParser {
+    (contentString: string): string;
+}
+
+/**
  * @class A class.
- * @since 0.0.1
+ * @since 0.2.0
  */
 class SiteGenerator {
 }

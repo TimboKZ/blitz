@@ -6,8 +6,8 @@
  * @since 0.2.0
  */
 
-import {IAssetPathGenerator, IUrlGenerator, ContentParser} from './SiteGenerator';
-import {StringHelper} from './helpers/StringHelper';
+import {IAssetPathGenerator, IUrlGenerator, ContentParser} from '../SiteGenerator';
+import {StringHelper} from '../helpers/StringHelper';
 
 /**
  * Interface for functions in the content
@@ -47,7 +47,6 @@ export class Content {
      * @since 0.2.0
      */
     public prepare(rawContent: string) {
-
         this.urlFunctionMap = {};
         this.assetFunctionMap = {};
         this.ids = [];

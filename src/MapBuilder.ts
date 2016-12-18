@@ -8,8 +8,6 @@
 
 import {Config} from './Config';
 
-
-
 /**
  * @class Class responsible for building of the map relating the config and the file system to the site
  * @since 0.2.0
@@ -20,6 +18,10 @@ export class MapBuilder {
      */
     private config: Config;
 
+    /**
+     * MapBuilder constructor
+     * @since 0.2.0
+     */
     public constructor(config: Config) {
         this.config = config;
     }

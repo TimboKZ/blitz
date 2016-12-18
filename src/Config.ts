@@ -90,7 +90,7 @@ export interface IConfigNamedPropertyValidators {
 }
 
 /**
- * File that is treated as the Blitz config by default
+ * GenericFile that is treated as the Blitz config by default
  * @since 0.2.0
  */
 export const DEFAULT_CONFIG_NAME = 'blitz.yml';

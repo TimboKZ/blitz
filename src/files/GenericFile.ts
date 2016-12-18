@@ -1,5 +1,5 @@
 /**
- * @file File containing all generic File classes and interfaces
+ * @file Contains all generic File classes and interfaces
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
@@ -10,36 +10,44 @@ import * as path from 'path';
 import * as fse from 'fs-extra';
 
 /**
+ * Specifies that the file is able to reload itself
+ * @since 0.2.0
+ */
+export interface IReloadable {
+    reload: () => void;
+}
+
+/**
  * @class A class.
  * @since 0.2.0
  */
-export class File {
+export class GenericFile {
     /**
      * Path in a file system that will be appended to the relative path
      * @since 0.2.0
      */
-    private rootPath: string;
+    protected rootPath: string;
 
     /**
      * Path relative to the root path specified above
      * @since 0.2.0
      */
-    private relativePath: string[];
+    protected relativePath: string[];
 
     /**
      * Name of the file, including extension
      * @since 0.2.0
      */
-    private name: string;
+    protected name: string;
 
     /**
      * The contents of the file
      * @since 0.2.0
      */
-    private contents: string;
+    protected contents: string;
 
     /**
-     * File constructor
+     * GenericFile constructor
      * @since 0.2.0
      */
     constructor(rootPath: string, relativePath: string[], name: string) {

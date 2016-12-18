@@ -1,5 +1,5 @@
 /**
- * @file File tests
+ * @file GenericFile tests
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
@@ -10,13 +10,13 @@ import * as mock from 'mock-fs';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import {assert} from 'chai';
-import {File} from '../../../src/files/File';
+import {GenericFile} from '../../../src/files/GenericFile';
 
-describe('File', () => {
+describe('GenericFile', () => {
     describe('#getFullPath()', () => {
         it('combines paths correctly', () => {
             assert.equal(
-                new File('first', ['second', 'third'], 'fourth.txt').getFullPath(),
+                new GenericFile('first', ['second', 'third'], 'fourth.txt').getFullPath(),
                 path.join('first', 'second', 'third', 'fourth.txt')
             );
         });
@@ -31,7 +31,7 @@ describe('File', () => {
                 }),
             };
             mock(mockConfig);
-            let file = new File('', [], 'test.txt');
+            let file = new GenericFile('', [], 'test.txt');
             file.read();
             assert.equal(file.getContents(), fileContents);
             mock.restore();
@@ -47,7 +47,7 @@ describe('File', () => {
                 }),
             };
             mock(mockConfig);
-            let file = new File('/', [], 'test.txt');
+            let file = new GenericFile('/', [], 'test.txt');
             file.setContents(fileContents);
             file.write();
             assert.equal(fse.readFileSync('/test.txt', 'utf8'), fileContents);

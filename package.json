@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "mocha --recursive ./dist/test/unit/ ./dist/test/integration/",
-    "cover": "istanbul cover _mocha ./dist/test/unit/ ./dist/test/integration/",
+    "cover": "istanbul cover _mocha --recursive ./dist/test/unit/ ./dist/test/integration/",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {

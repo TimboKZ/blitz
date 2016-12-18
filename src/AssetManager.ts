@@ -11,6 +11,7 @@ import * as path from 'path';
 import {EventEmitter} from 'events';
 import {BUILD_CHANGE_EVENT} from './ProjectWatcher';
 import {ListenerContainer} from './ListenerContainer';
+import {Logger} from './Logger';
 
 /**
  * Event triggered when an asset is changed or created
@@ -51,11 +52,17 @@ export class AssetManager extends ListenerContainer {
             super(eventEmitter, eventListenerPairs);
             eventListenerPairs.push({
                 event: ASSET_CHANGE_EVENT,
-                listener: this.copyAsset.bind(this),
+                listener: (assetPath) => {
+                    Logger.log('Updating `' + Logger.brand(path.join('assets', assetPath)) + '`...');
+                    this.copyAsset(assetPath);
+                },
             });
             eventListenerPairs.push({
                 event: ASSET_REMOVE_EVENT,
-                listener: this.removeAsset.bind(this),
+                listener: (assetPath) => {
+                    Logger.log('Removing `' + Logger.brand(path.join('assets', assetPath)) + '`...');
+                    this.removeAsset(assetPath);
+                },
             });
         } else {
             super();

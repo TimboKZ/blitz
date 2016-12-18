@@ -1,0 +1,9 @@
+"use strict";
+var File = (function () {
+    function File() {
+    }
+    return File;
+}());
+exports.File = File;
+
+//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9maWxlcy9GaWxlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFZQTtJQUFBO0lBS0EsQ0FBQztJQUFELFdBQUM7QUFBRCxDQUxBLEFBS0MsSUFBQTtBQUxZLFlBQUksT0FLaEIsQ0FBQSIsImZpbGUiOiJzcmMvZmlsZXMvRmlsZS5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGZpbGUgQSBUeXBlU2NyaXB0IGZpbGUuXG4gKiBAYXV0aG9yIFRpbXVyIEt1emhhZ2FsaXlldiA8dGltLmt1emhAZ21haWwuY29tPlxuICogQGNvcHlyaWdodCAyMDE2XG4gKiBAbGljZW5zZSBHUEwtMy4wXG4gKiBAc2luY2UgMC4yLjBcbiAqL1xuXG4vKipcbiAqIEBjbGFzcyBBIGNsYXNzLlxuICogQHNpbmNlIDAuMi4wXG4gKi9cbmV4cG9ydCBjbGFzcyBGaWxlIHtcbiAgICAvKipcbiAgICAgKlxuICAgICAqL1xuXG59XG4iXX0=

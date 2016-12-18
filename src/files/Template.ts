@@ -3,7 +3,7 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @since 0.0.1
+ * @since 0.2.0
  */
 
 import * as pug from 'pug';
@@ -15,7 +15,6 @@ import {ISiteMenuMap} from '../Menu';
  * @since 0.2.0
  */
 export class Template {
-
     /**
      * Compiled Pug template
      * @since 0.2.0

@@ -24,8 +24,11 @@ describe('EventHelper', () => {
                     listener: () => true,
                 },
             ];
+            assert.equal(eventEmitter.listenerCount('hello'), 0);
+            assert.equal(eventEmitter.listenerCount('world'), 0);
             EventHelper.addListeners(eventEmitter, pairs);
-            assert.deepEqual(eventEmitter.eventNames(), ['hello', 'world']);
+            assert.equal(eventEmitter.listenerCount('hello'), 1);
+            assert.equal(eventEmitter.listenerCount('world'), 1);
         });
     });
     describe('#removeListeners()', () => {
@@ -42,9 +45,11 @@ describe('EventHelper', () => {
                 },
             ];
             EventHelper.addListeners(eventEmitter, pairs);
-            assert.deepEqual(eventEmitter.eventNames(), ['hello', 'world']);
+            assert.equal(eventEmitter.listenerCount('hello'), 1);
+            assert.equal(eventEmitter.listenerCount('world'), 1);
             EventHelper.removeListeners(eventEmitter, pairs);
-            assert.equal(eventEmitter.eventNames().length, 0);
+            assert.equal(eventEmitter.listenerCount('hello'), 0);
+            assert.equal(eventEmitter.listenerCount('world'), 0);
         });
     });
 });

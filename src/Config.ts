@@ -17,7 +17,8 @@ import {StringHelper} from './helpers/StringHelper';
 export interface IConfigMenu {
     name: string;
     title?: string;
-    keys: string[];
+    title_key?: string;
+    keys?: string[];
 }
 
 /**
@@ -261,7 +262,11 @@ export const CONFIG_MENU_PROPERTIES: IConfigNamedPropertyValidators = {
     },
     title: {
         typeChecker: (object) => typeof object === 'string',
-        typeError: 'If title is set, it must be a non-empty string!',
+        typeError: 'If title is set, it must be a string!',
+    },
+    title_key: {
+        typeChecker: (object) => typeof object === 'string',
+        typeError: 'If title is set, it must be a string!',
     },
     keys: {
         typeChecker: (object) => typeof object === 'object' && object instanceof Array,

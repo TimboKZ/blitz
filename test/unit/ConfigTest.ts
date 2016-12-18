@@ -33,6 +33,7 @@ describe('Config', () => {
                 globals: {
                     hello: 'World',
                 },
+                plugins: ['pagination'],
                 pages: [
                     {
                         uri: '/',
@@ -57,6 +58,12 @@ describe('Config', () => {
                             {
                                 name: 'projects',
                                 template_directory: 'projects',
+                                menus: [
+                                    {
+                                        name: 'main',
+                                        title_key: 'special_key',
+                                    },
+                                ],
                             },
                         ],
                     },

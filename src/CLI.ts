@@ -97,8 +97,18 @@ export class CLI {
             .help('builds site using `blitz.yml`')
             .callback((opts) => Blitz.build(opts.config, opts.build));
         parser.command('watch')
+            .option('config', {
+                abbr: 'c',
+                default: path.join(process.cwd(), DEFAULT_CONFIG_NAME),
+                help: 'path to Blitz config',
+            })
+            .option('build', {
+                abbr: 'b',
+                default: path.join(process.cwd(), DEFAULT_BUILD_DIRECTORY_NAME),
+                help: 'path to target build directory',
+            })
             .help('watches source code and rebuilds the website when necessary')
-            .callback(() => Blitz.watch());
+            .callback((opts) => Blitz.watch(opts.config, opts.build));
         parser.command('preview')
             .help('starts a web server for real-time change preview')
             .callback(() => Blitz.preview());

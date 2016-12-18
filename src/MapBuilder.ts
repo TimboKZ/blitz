@@ -14,15 +14,34 @@ import {Config} from './Config';
  */
 export class MapBuilder {
     /**
-     * And instance of the config used to generate the site
+     * Instance of the config used to generate the site
+     * @since 0.2.0
      */
     private config: Config;
+
+    /**
+     * Folder in which `assets`, `content`, `templates`, etc. are located
+     * @since 0.2.0
+     */
+    private projectRoot: string;
+
+    /**
+     * Folder in which the site will be generated
+     * @since 0.2.0
+     */
+    private buildPath: string;
 
     /**
      * MapBuilder constructor
      * @since 0.2.0
      */
-    public constructor(config: Config) {
+    public constructor(config: Config, projectRoot: string, buildPath: string) {
         this.config = config;
+        this.projectRoot = projectRoot;
+        this.buildPath = buildPath;
+    }
+
+    public build() {
+
     }
 }

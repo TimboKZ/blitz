@@ -47,6 +47,7 @@
     "typescript": "^2.0.9"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "browser-sync": "^2.18.5",
     "chokidar": "^1.6.1",
     "colors": "^1.1.2",

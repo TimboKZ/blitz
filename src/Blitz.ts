@@ -12,10 +12,12 @@ import * as yaml from 'js-yaml';
 import {ProjectInitialiser} from './ProjectInitialiser';
 import {Logger, LogLevel} from './Logger';
 import {Config} from './Config';
+import {ProjectWatcher} from './ProjectWatcher';
+import {EventEmitter} from 'events';
 
 /**
  * @class Main class of Blitz, exposes the API for external modules to use
- * @since 0.0.1
+ * @since 0.2.0
  */
 export class Blitz {
     /**
@@ -50,7 +52,7 @@ export class Blitz {
             Logger.brand(buildDirectory) + '`...', LogLevel.Debug);
         let configContents = fse.readFileSync(configPath, 'utf8');
         let rawConfig = yaml.safeLoad(configContents);
-        if (!rawConfig || typeof rawConfig !== 'object') {
+        if (!rawConfig) {
             rawConfig = {};
         }
         let config = new Config();
@@ -58,7 +60,7 @@ export class Blitz {
         try {
             config.validate();
         } catch (exception) {
-            Logger.log('Error validating the config:' , LogLevel.Error);
+            Logger.log('Error validating the config:', LogLevel.Error);
             Logger.logMany(Logger.split(exception.message), LogLevel.Error);
             process.exit(1);
         }
@@ -69,8 +71,10 @@ export class Blitz {
      * Watches the current directory and rebuilds certain parts of the website when necessary
      * @since 0.2.0
      */
-    public static watch() {
-
+    public static watch(configPath: string, buildPath: string) {
+        let eventEmitter = new EventEmitter();
+        let projectWatcher = new ProjectWatcher(configPath, buildPath, eventEmitter);
+        projectWatcher.watch();
     }
 
     /**

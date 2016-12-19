@@ -6,12 +6,13 @@
  * @since 0.2.0
  */
 
-import {ListenerContainer} from '../ListenerContainer';
+import {GenericDirectory} from './GenericDirectory';
+import {DirectoryGenerator} from './DirectoryGenerator';
+
 /**
  * @class Representation of a site directory
  * @since 0.2.0
  */
-export class SiteDirectory extends ListenerContainer {
-    private relativePath: string[];
-
+export class SiteDirectory extends GenericDirectory {
+    private directoryGenerators: DirectoryGenerator[];
 }

@@ -8,12 +8,34 @@
 
 import * as fm from 'front-matter';
 import * as deepEqual from 'deep-equal';
+import * as deepDiff from 'deep-diff';
 import {Logger} from '../Logger';
 import {GenericFile, IReloadable} from './GenericFile';
 import {Content} from './Content';
+import {ContentParser} from '../ContentParser';
+import {IAssetPathGenerator, IUrlGenerator} from '../SiteGenerator';
 
+/**
+ * Attributes defined in the front matter of a content file
+ * @since 0.2.0
+ */
 export interface IContentFileAttributes {
     [key: string]: any;
+}
+
+/**
+ *
+ * @since 0.2.0
+ */
+export interface IContentFileChanges {
+    attributes: deepDiff.IDiff[];
+    content: {
+        ids: string[],
+        assets: string[],
+        generator: (urlGenerator: IUrlGenerator,
+                    assetPathGenerator: IAssetPathGenerator,
+                    contentParser: ContentParser) => string,
+    };
 }
 
 /**
@@ -53,21 +75,27 @@ export class ContentFile extends GenericFile implements IReloadable {
      * Reloads the contents of the file and processes any changes
      * @since 0.2.0
      */
-    public reload() {
+    public reload(): IContentFileChanges {
+        let changes: any = {};
         let tempContents = this.contents;
         this.read();
         if (tempContents === this.contents) {
-            return;
+            return changes;
         }
         let contentsObject = fm(this.contents);
         if (!deepEqual(this.attributes, contentsObject.attributes)) {
-            // TODO: Process changes
+            changes.attributes = deepDiff.diff(this.attributes, contentsObject.attributes);
+            this.attributes = contentsObject.attributes;
         }
         if (this.rawContent !== contentsObject.body) {
             this.rawContent = contentsObject.body;
-            this.content.prepare(contentsObject.body);
-            // TODO: Process changes
+            this.content.prepare(this.rawContent);
+            changes.content = {};
+            changes.content.ids = this.content.getIds();
+            changes.content.assets = this.content.getAssets();
+            changes.content.generator = this.content.generate;
         }
+        return changes as IContentFileChanges;
     }
 
     /**

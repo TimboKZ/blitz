@@ -14,8 +14,8 @@ describe('GenericDirectory', () => {
     describe('#getFullPath()', () => {
         it('combines paths correctly', () => {
             assert.equal(
-                new GenericDirectory('first', ['second', 'third']).getFullPath(),
-                path.join('first', 'second', 'third')
+                new GenericDirectory('first', ['second', 'third'], 'fourth').getFullPath(),
+                path.join('first', 'second', 'third', 'fourth')
             );
         });
     });

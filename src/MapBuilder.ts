@@ -7,6 +7,7 @@
  */
 
 import {Config} from './Config';
+import {SiteDirectory} from './files/SiteDirectory';
 
 /**
  * @class Class responsible for building of the map relating the config and the file system to the site
@@ -42,6 +43,6 @@ export class MapBuilder {
     }
 
     public build() {
-
+        let rootDirectory = new SiteDirectory(this.buildPath);
     }
 }

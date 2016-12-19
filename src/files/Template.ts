@@ -13,6 +13,7 @@ import {ISiteMenuMap} from '../Menu';
 /**
  * @class Wrapper around a specific templating engine, currently only Pug
  * @since 0.2.0
+ *
  */
 export class Template {
     /**

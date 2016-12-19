@@ -36,7 +36,7 @@ export class ProjectPreviewer {
     private eventEmitter: EventEmitter;
 
     /**
-     *
+     * @since 0.2.0
      */
     private server: BrowserSyncInstance;
 
@@ -60,6 +60,7 @@ export class ProjectPreviewer {
         projectWatcher.watch();
         this.server.init({
             server: this.buildPath,
+            logPrefix: '> Preview',
         });
         this.eventEmitter.on(BUILD_CHANGE_EVENT, (filePath) => {
             this.server.reload(path.join(this.buildPath, filePath));

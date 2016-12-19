@@ -35,16 +35,16 @@ export class GenericFile {
     protected relativePath: string[];
 
     /**
-     * Full path to the file
-     * @since 0.2.0
-     */
-    protected fullPath: string;
-
-    /**
      * Name of the file, including extension
      * @since 0.2.0
      */
     protected name: string;
+
+    /**
+     * Full path to the file
+     * @since 0.2.0
+     */
+    protected fullPath: string;
 
     /**
      * The contents of the file
@@ -86,6 +86,13 @@ export class GenericFile {
      */
     public getFullPath(): string {
         return this.fullPath;
+    }
+
+    /**
+     * @since 0.2.0
+     */
+    public getName(): string {
+        return this.name;
     }
 
     /**

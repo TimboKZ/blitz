@@ -51,6 +51,7 @@
     "browser-sync": "^2.18.5",
     "chokidar": "^1.6.1",
     "colors": "^1.1.2",
+    "deep-diff": "^0.3.4",
     "deep-equal": "^1.0.1",
     "front-matter": "^2.1.0",
     "fs-extra": "^1.0.0",

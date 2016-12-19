@@ -35,6 +35,12 @@ export class GenericFile {
     protected relativePath: string[];
 
     /**
+     * Full path to the file
+     * @since 0.2.0
+     */
+    protected fullPath: string;
+
+    /**
      * Name of the file, including extension
      * @since 0.2.0
      */
@@ -54,6 +60,8 @@ export class GenericFile {
         this.rootPath = rootPath;
         this.relativePath = relativePath;
         this.name = name;
+        let relativePathString = path.join.apply(undefined, this.relativePath);
+        this.fullPath = path.join(this.rootPath, relativePathString, this.name);
     }
 
     /**
@@ -77,8 +85,7 @@ export class GenericFile {
      * @since 0.2.0
      */
     public getFullPath(): string {
-        let relativePathString = path.join.apply(undefined, this.relativePath);
-        return path.join(this.rootPath, relativePathString, this.name);
+        return this.fullPath;
     }
 
     /**

@@ -242,7 +242,7 @@ export class Util {
     }
 
     /**
-     * @deprecated
+     * @deprecated Use StringHelper.random() instead
      * @since 0.1.0
      */
     public static generateRandomString(length: number): string {

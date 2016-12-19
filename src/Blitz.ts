@@ -14,6 +14,7 @@ import {Logger, LogLevel} from './Logger';
 import {Config} from './Config';
 import {ProjectWatcher} from './ProjectWatcher';
 import {EventEmitter} from 'events';
+import {ProjectPreviewer} from './ProjectPreviewer';
 
 /**
  * @class Main class of Blitz, exposes the API for external modules to use
@@ -46,10 +47,11 @@ export class Blitz {
      * specified build directory.
      * @since 0.2.0
      */
-    public static build(configPath: string, buildDirectory: string) {
+    public static build(configPath: string, buildPath: string) {
+        Logger.log('Building site...');
         Logger.log('Building site using `' +
             Logger.brand(configPath) + '` in directory `' +
-            Logger.brand(buildDirectory) + '`...', LogLevel.Debug);
+            Logger.brand(buildPath) + '`...', LogLevel.Debug);
         let configContents = fse.readFileSync(configPath, 'utf8');
         let rawConfig = yaml.safeLoad(configContents);
         if (!rawConfig) {
@@ -72,6 +74,10 @@ export class Blitz {
      * @since 0.2.0
      */
     public static watch(configPath: string, buildPath: string) {
+        Logger.log('Starting project watcher...');
+        Logger.log('Watching the project using `' +
+            Logger.brand(configPath) + '` with build located in `' +
+            Logger.brand(buildPath) + '`...', LogLevel.Debug);
         let eventEmitter = new EventEmitter();
         let projectWatcher = new ProjectWatcher(configPath, buildPath, eventEmitter);
         projectWatcher.watch();
@@ -81,7 +87,13 @@ export class Blitz {
      * Runs a web server with the preview of the website
      * @since 0.2.0
      */
-    public static preview() {
-
+    public static preview(configPath: string, buildPath: string) {
+        Logger.log('Starting preview server...');
+        Logger.log('Previewing the project using `' +
+            Logger.brand(configPath) + '` with build located in `' +
+            Logger.brand(buildPath) + '`...', LogLevel.Debug);
+        let eventEmitter = new EventEmitter();
+        let projectPreviewer = new ProjectPreviewer(configPath, buildPath, eventEmitter);
+        projectPreviewer.startServer();
     }
 }

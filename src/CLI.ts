@@ -43,20 +43,6 @@ export class CLI {
         global.verbose = false;
 
         parser.script(CLI_NAME);
-        parser.printer((message) => {
-            let strings = Logger.split(message);
-            let verboseState = global.verbose;
-            if (strings[0].substr(0, 5) === 'Usage' || strings[0].substr(0, 5) === 'blitz') {
-                global.verbose = true;
-            }
-            for (let i = 0; i < strings.length; i++) {
-                if (strings[i].match(/^command/)) {
-                    strings[i] = 'Commands:';
-                }
-            }
-            Logger.logMany(strings);
-            global.verbose = verboseState;
-        });
         parser.nocommand().callback(() => CLI.version());
         parser.option('verbose', {
             abbr: 'v',

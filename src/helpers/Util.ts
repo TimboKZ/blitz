@@ -29,7 +29,7 @@ export class Util {
      */
     public static getPackageInfo() {
         if (this.packageInfoCache === undefined) {
-            this.packageInfoCache = require('../../package.json');
+            this.packageInfoCache = require('../../../package.json');
         }
         return this.packageInfoCache;
     }

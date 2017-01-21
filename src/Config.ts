@@ -187,11 +187,11 @@ export const CONFIG_PAGE_PROPERTIES: IConfigNamedPropertyValidators = {
         typeError: 'If name is set, it must be a string!',
     },
     template: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If template is set, it must be a non-empty string!',
     },
     content: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If content is set, it must be a non-empty string!',
     },
     menus: {
@@ -218,7 +218,7 @@ export const CONFIG_DIRECTORY_PROPERTIES: IConfigNamedPropertyValidators = {
         typeError: 'If URI is set, it must be a string!',
     },
     uri_key: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If URI key is set, it must be a non-empty string!',
     },
     id_key: {
@@ -230,19 +230,19 @@ export const CONFIG_DIRECTORY_PROPERTIES: IConfigNamedPropertyValidators = {
         typeError: 'If name is set, it must be a string!',
     },
     template_directory: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If template is set, it must be a non-empty string!',
     },
     template: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If template is set, it must be a non-empty string!',
     },
     content_directory: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If content is set, it must be a non-empty string!',
     },
     content: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If content is set, it must be a non-empty string!',
     },
     menus: {
@@ -257,7 +257,7 @@ export const CONFIG_DIRECTORY_PROPERTIES: IConfigNamedPropertyValidators = {
  */
 export const CONFIG_MENU_PROPERTIES: IConfigNamedPropertyValidators = {
     name: {
-        typeChecker: (object) => typeof object === 'string' && !StringHelper.isEmpty(object),
+        typeChecker: (object) => typeof object === 'string' && !StringHelper.empty(object),
         typeError: 'If name is set, it must be a non-empty string!',
     },
     title: {

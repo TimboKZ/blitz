@@ -34,14 +34,16 @@ export class Template {
      * Extracts list of referenced IDs, assets and menus from the template after compiling it
      * @since 0.2.0
      */
-    public prepare(templateString: string, locals: any, menus: ISiteMenuMap) {
+    public prepare(templateString: string, locals?: any, menus?: ISiteMenuMap) {
         this.ids = [];
         this.assets = [];
         this.menus = [];
 
         this.compiledTemplate = pug.compile(templateString);
-        this.extractIdsAndAssets(objectAssign({}, locals, {menus}));
-        this.extractMenus(locals, menus);
+        if (locals && menus) {
+            this.extractIdsAndAssets(objectAssign({}, locals, {menus}));
+            this.extractMenus(locals, menus);
+        }
     }
 
     /**

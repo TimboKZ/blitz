@@ -10,7 +10,7 @@ import * as fm from 'front-matter';
 import * as deepEqual from 'deep-equal';
 import * as deepDiff from 'deep-diff';
 import {Logger} from '../Logger';
-import {GenericFile, IReloadable} from './GenericFile';
+import {GenericFile} from './GenericFile';
 import {Content} from './Content';
 import {ContentParser} from '../ContentParser';
 import {IAssetPathGenerator, IUrlGenerator} from '../SiteGenerator';
@@ -42,7 +42,12 @@ export interface IContentFileChanges {
  * @class File responsible for representing content files
  * @since 0.2.0
  */
-export class ContentFile extends GenericFile implements IReloadable {
+export class ContentFile extends GenericFile {
+    /**
+     * @since 0.2.0
+     */
+    private relativePath: string;
+
     /**
      * Attributes extracted from the front matter
      * @since 0.2.0
@@ -65,8 +70,9 @@ export class ContentFile extends GenericFile implements IReloadable {
      * ContentFile constructor
      * @since 0.2.0
      */
-    public constructor(rootPath: string, relativePath: string[], name: string) {
-        super(rootPath, relativePath, name);
+    public constructor(rootPath: string, relativePath: string) {
+        super(rootPath, [], relativePath);
+        this.relativePath = relativePath;
         this.attributes = {};
         this.content = new Content();
     }

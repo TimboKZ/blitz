@@ -10,14 +10,6 @@ import * as path from 'path';
 import * as fse from 'fs-extra';
 
 /**
- * Specifies that the file is able to reload itself
- * @since 0.2.0
- */
-export interface IReloadable {
-    reload: () => void;
-}
-
-/**
  * @class A class.
  * @since 0.2.0
  */
@@ -32,7 +24,7 @@ export class GenericFile {
      * Path relative to the root path specified above
      * @since 0.2.0
      */
-    protected relativePath: string[];
+    protected relativePathArray: string[];
 
     /**
      * Name of the file, including extension
@@ -58,9 +50,9 @@ export class GenericFile {
      */
     constructor(rootPath: string, relativePath: string[], name: string) {
         this.rootPath = rootPath;
-        this.relativePath = relativePath;
+        this.relativePathArray = relativePath;
         this.name = name;
-        let relativePathString = path.join.apply(undefined, this.relativePath);
+        let relativePathString = path.join.apply(undefined, this.relativePathArray);
         this.fullPath = path.join(this.rootPath, relativePathString, this.name);
     }
 

@@ -48,14 +48,23 @@ describe('StringHelper', () => {
             assert.equal(StringHelper.stringify(['hello']), JSON.stringify(['hello']));
         });
     });
-    describe('#isEmpty()', () => {
+    describe('#empty()', () => {
         it('correctly identifies empty strings', () => {
-            assert.isTrue(StringHelper.isEmpty(null)); // tslint:disable-line:no-null-keyword
-            assert.isTrue(StringHelper.isEmpty(undefined));
-            assert.isTrue(StringHelper.isEmpty(''));
+            assert.isTrue(StringHelper.empty(null)); // tslint:disable-line:no-null-keyword
+            assert.isTrue(StringHelper.empty(undefined));
+            assert.isTrue(StringHelper.empty(''));
         });
         it('correctly identifies non-empty strings', () => {
-            assert.isFalse(StringHelper.isEmpty('hello'));
+            assert.isFalse(StringHelper.empty('hello'));
+        });
+    });
+    describe('#stripExtension()', () => {
+        it('leaves strings without extension untouched', () => {
+            assert.equal(StringHelper.stripExtension('hello'), 'hello');
+        });
+        it('correctly removes a single extension', () => {
+            assert.equal(StringHelper.stripExtension('hello.test'), 'hello');
+            assert.equal(StringHelper.stripExtension('index.blade.php'), 'index.blade');
         });
     });
 });

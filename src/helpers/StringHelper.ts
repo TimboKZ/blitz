@@ -47,7 +47,15 @@ export class StringHelper {
      * Checks if the string contains anything
      * @since 0.2.0
      */
-    public static isEmpty(str: string) {
+    public static empty(str: string) {
         return str === undefined || str === null || str === ''; // tslint:disable-line:no-null-keyword
+    }
+
+    /**
+     * Removes file extension from the file
+     * @since 0.2.0
+     */
+    public static stripExtension(path: string) {
+        return path.replace(/\.[^.]*$/g, '');
     }
 }

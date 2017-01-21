@@ -110,11 +110,11 @@ export class ProjectWatcher {
     }
 
     /**
-     * Setup watchers for a directory using an event pair
+     * Setup watchers for a path using an event pair
      * @since 0.2.0
      */
-    private setupFileWatcher(directory: string, events: IFSEventPair[]) {
-        let fullPath = path.join(this.projectPath, directory);
+    private setupFileWatcher(watchPath: string, events: IFSEventPair[]) {
+        let fullPath = path.join(this.projectPath, watchPath);
         let watcher = chokidar.watch(fullPath);
         for (let i = 0; i < events.length; i++) {
             let event = events[i];

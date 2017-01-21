@@ -8,7 +8,7 @@
 
 import {FileGenerator} from './FileGenerator';
 import {GenericFile} from './GenericFile';
-import {Logger} from '../Logger';
+import {Logger} from '../cli/Logger';
 
 /**
  * @class A class.

@@ -8,15 +8,15 @@
 
 import * as nomnom from 'nomnom';
 import * as path from 'path';
-import {DEFAULT_TEMPLATE} from './ProjectInitialiser';
+import {DEFAULT_TEMPLATE} from '../core/ProjectInitialiser';
 import {Logger} from './Logger';
-import {Blitz} from './Blitz';
-import {DEFAULT_CONFIG_NAME} from './Config';
-import {DEFAULT_BUILD_DIRECTORY_NAME} from './SiteGenerator';
-import {Util} from './Util';
+import {Blitz} from '../Blitz';
+import {DEFAULT_CONFIG_NAME} from '../components/Config';
+import {DEFAULT_BUILD_DIRECTORY_NAME} from '../core/SiteGenerator';
+import {Util} from '../helpers/Util';
 
 /**
- * Name of the CLI command used to run Blitz
+ * Name of the cli command used to run Blitz
  * @since 0.2.0
  */
 export const CLI_NAME = 'blitz';
@@ -28,7 +28,7 @@ export const CLI_NAME = 'blitz';
 export let args;
 
 /**
- * @class Exposes an API for the CLI
+ * @class Exposes an API for the cli
  * @since 0.2.0
  */
 export class CLI {

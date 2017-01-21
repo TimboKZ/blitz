@@ -1,0 +1,9 @@
+"use strict";
+var ProjectBuilder = (function () {
+    function ProjectBuilder() {
+    }
+    return ProjectBuilder;
+}());
+exports.ProjectBuilder = ProjectBuilder;
+
+//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jb3JlL1Byb2plY3RCdWlsZGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFVQTtJQUFBO0lBRUEsQ0FBQztJQUFELHFCQUFDO0FBQUQsQ0FGQSxBQUVDLElBQUE7QUFGWSx3Q0FBYyIsImZpbGUiOiJzcmMvY29yZS9Qcm9qZWN0QnVpbGRlci5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGZpbGUgQSBUeXBlU2NyaXB0IGNsYXNzLlxuICogQGF1dGhvciBUaW11ciBLdXpoYWdhbGl5ZXYgPHRpbS5rdXpoQGdtYWlsLmNvbT5cbiAqIEBjb3B5cmlnaHQgMjAxN1xuICogQGxpY2Vuc2UgR1BMLTMuMFxuICovXG5cbi8qKlxuICogQGNsYXNzIEEgVHlwZVNjcmlwdCBjbGFzcy5cbiAqL1xuZXhwb3J0IGNsYXNzIFByb2plY3RCdWlsZGVyIHtcblxufVxuIl19

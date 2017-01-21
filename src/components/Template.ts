@@ -8,7 +8,7 @@
 
 import * as pug from 'pug';
 import * as objectAssign from 'object-assign';
-import {ISiteMenuMap} from '../Menu';
+import {ISiteMenuMap} from './Menu';
 
 /**
  * @class Wrapper around a specific templating engine, currently only Pug

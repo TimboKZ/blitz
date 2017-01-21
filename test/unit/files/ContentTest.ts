@@ -7,7 +7,7 @@
  */
 
 import {assert} from 'chai';
-import {Content} from '../../../src/files/Content';
+import {Content} from '../../../src/components/Content';
 
 describe('Content', () => {
     describe('#prepare()', () => {

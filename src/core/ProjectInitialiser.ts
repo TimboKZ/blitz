@@ -9,8 +9,8 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as yesNo from 'yesno';
-import {Logger, LogLevel} from './Logger';
-import {Util} from './Util';
+import {Logger, LogLevel} from '../cli/Logger';
+import {Util} from '../helpers/Util';
 
 /**
  * Template used for project initialisation by default

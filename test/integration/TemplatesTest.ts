@@ -10,7 +10,7 @@ import {assert} from 'chai';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import {execSync} from 'child_process';
-import {Util} from '../../src/Util';
+import {Util} from '../../src/helpers/Util';
 
 describe('Blitz project initialiser', () => {
 

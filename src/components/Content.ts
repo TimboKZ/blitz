@@ -6,7 +6,7 @@
  * @since 0.2.0
  */
 
-import {IAssetPathGenerator, IUrlGenerator, ContentParser} from '../SiteGenerator';
+import {IAssetPathGenerator, IUrlGenerator, ContentParser} from '../core/SiteGenerator';
 import {StringHelper} from '../helpers/StringHelper';
 
 /**

@@ -6,9 +6,9 @@
  * @since 0.2.0
  */
 
-import {Util} from './Util';
-import {Logger, LogLevel} from './Logger';
-import {StringHelper} from './helpers/StringHelper';
+import {Util} from '../helpers/Util';
+import {Logger, LogLevel} from '../cli/Logger';
+import {StringHelper} from '../helpers/StringHelper';
 
 /**
  * Menu interface as seen in the config

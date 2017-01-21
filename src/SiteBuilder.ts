@@ -12,7 +12,7 @@ import * as objectAssign from 'object-assign';
 import * as fse from 'fs-extra';
 import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
-import {Util} from './Util';
+import {Util} from './helpers/Util';
 
 /**
  * Constants indicating the locations of assets, content and templates

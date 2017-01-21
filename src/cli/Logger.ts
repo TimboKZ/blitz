@@ -7,7 +7,7 @@
  */
 
 import * as colors from 'colors';
-import {Util} from './Util';
+import {Util} from '../helpers/Util';
 
 /**
  * Log levels which change prefixes, conditions for logging and colours

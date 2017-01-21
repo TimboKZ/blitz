@@ -9,7 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as fm from 'front-matter';
-import {Util} from './Util';
+import {Util} from './helpers/Util';
 
 /**
  * Interface for content cache

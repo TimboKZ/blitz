@@ -8,8 +8,8 @@
 
 import * as pug from 'pug';
 import {assert} from 'chai';
-import {Template} from '../../../src/files/Template';
-import {ISiteMenuMap} from '../../../src/Menu';
+import {Template} from '../../../src/components/Template';
+import {ISiteMenuMap} from '../../../src/components/Menu';
 
 describe('Template', () => {
     describe('#prepare()', () => {

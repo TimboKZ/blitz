@@ -10,8 +10,8 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import {EventEmitter} from 'events';
 import {BUILD_CHANGE_EVENT} from './ProjectWatcher';
-import {ListenerContainer} from './ListenerContainer';
-import {Logger} from './Logger';
+import {ListenerContainer} from '../ListenerContainer';
+import {Logger} from '../cli/Logger';
 
 /**
  * Event triggered when an asset is changed or created

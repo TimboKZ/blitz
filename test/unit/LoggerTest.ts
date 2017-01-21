@@ -8,7 +8,7 @@
 
 import * as colors from 'colors';
 import {assert} from 'chai';
-import {Logger, LogLevel} from '../../src/Logger';
+import {Logger, LogLevel} from '../../src/cli/Logger';
 
 describe('Logger', () => {
     describe('#brand()', () => {

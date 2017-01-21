@@ -7,7 +7,7 @@
  */
 
 import {assert} from 'chai';
-import {Config, CONFIG_PROPERTIES} from '../../src/Config';
+import {Config, CONFIG_PROPERTIES} from '../../src/components/Config';
 
 describe('Config', () => {
     describe('#load()', () => {

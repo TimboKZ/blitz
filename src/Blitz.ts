@@ -9,12 +9,12 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import * as yaml from 'js-yaml';
-import {ProjectInitialiser} from './ProjectInitialiser';
-import {Logger, LogLevel} from './Logger';
-import {Config} from './Config';
-import {ProjectWatcher} from './ProjectWatcher';
+import {ProjectInitialiser} from './core/ProjectInitialiser';
+import {Logger, LogLevel} from './cli/Logger';
+import {Config} from './components/Config';
+import {ProjectWatcher} from './core/ProjectWatcher';
 import {EventEmitter} from 'events';
-import {ProjectPreviewer} from './ProjectPreviewer';
+import {ProjectPreviewer} from './core/ProjectPreviewer';
 
 /**
  * @class Main class of Blitz, exposes the API for external modules to use

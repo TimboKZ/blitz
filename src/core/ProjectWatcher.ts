@@ -55,10 +55,6 @@ export class ProjectWatcher {
      */
     private eventEmitter: EventEmitter;
 
-    /**
-     * ProjectWatcher constructor
-     * @since 0.2.0
-     */
     constructor(configPath: string, buildPath: string, eventEmitter: EventEmitter) {
         this.configPath = configPath;
         this.projectPath = path.dirname(configPath);
@@ -66,10 +62,6 @@ export class ProjectWatcher {
         this.eventEmitter = eventEmitter;
     }
 
-    /**
-     *
-     * @since 0.2.0
-     */
     public watch() {
         this.setupFileWatchers();
         let assetManager = new AssetManager(
@@ -80,10 +72,6 @@ export class ProjectWatcher {
         assetManager.setupListeners();
     }
 
-    /**
-     * Setup
-     * @since 0.2.0
-     */
     private setupFileWatchers() {
         this.setupFileWatcher('assets', [
             {

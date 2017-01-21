@@ -9,11 +9,11 @@
 import * as fm from 'front-matter';
 import * as deepEqual from 'deep-equal';
 import * as deepDiff from 'deep-diff';
-import {Logger} from '../Logger';
+import {Logger} from '../cli/Logger';
 import {GenericFile, IReloadable} from './GenericFile';
-import {Content} from './Content';
+import {Content} from '../components/Content';
 import {ContentParser} from '../ContentParser';
-import {IAssetPathGenerator, IUrlGenerator} from '../SiteGenerator';
+import {IAssetPathGenerator, IUrlGenerator} from '../core/SiteGenerator';
 
 /**
  * Attributes defined in the front matter of a content file
@@ -98,24 +98,14 @@ export class ContentFile extends GenericFile implements IReloadable {
         return changes as IContentFileChanges;
     }
 
-    /**
-     * Throws an error because content files should not be written to
-     * @since 0.2.0
-     */
     public write() {
         throw new Error('Attempted to write to a content file `' + Logger.brand(this.name) + '`. This is not allowed!');
     }
 
-    /**
-     * @since 0.2.0
-     */
     public getAttributes(): IContentFileAttributes {
         return this.attributes;
     }
 
-    /**
-     * @since 0.2.0
-     */
     public getContent(): Content {
         return this.content;
     }

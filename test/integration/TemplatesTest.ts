@@ -59,6 +59,8 @@ describe('Blitz project initialiser', () => {
         done();
     }).timeout(6000);
 
+    // TODO: Enable this
+
     // it('should create a `build` folder on build', (done) => {
     //     // Build all projects
     //     for (let i = 0; i < templateTestCount; i++) {

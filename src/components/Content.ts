@@ -6,8 +6,8 @@
  * @since 0.2.0
  */
 
-import {IAssetPathGenerator, IUrlGenerator, ContentParser} from '../core/SiteGenerator';
 import {StringHelper} from '../helpers/StringHelper';
+import {IUrlGenerator, IAssetPathGenerator, IContentGenerator} from '../core/ProjectBuilder';
 
 /**
  * Interface for functions in the content
@@ -86,7 +86,7 @@ export class Content {
      */
     public generate(urlGenerator: IUrlGenerator,
                     assetPathGenerator: IAssetPathGenerator,
-                    contentParser: ContentParser): string {
+                    contentParser: IContentGenerator): string {
         if (this.preparedContent === undefined) {
             throw new Error('Cannot generate content with nothing prepared!');
         }

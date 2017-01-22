@@ -34,7 +34,7 @@ export class TemplateFile extends GenericFile {
         if (tempContents === this.contents) {
             return changes;
         }
-        this._template.prepare(this.contents, locals, menus);
+        this._template.prepare(this.contents, this.path, locals, menus);
     }
 
     public write() {

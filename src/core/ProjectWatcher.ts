@@ -8,7 +8,7 @@
 
 import * as path from 'path';
 import * as chokidar from 'chokidar';
-import {AssetManager, ASSET_CHANGE_EVENT, ASSET_REMOVE_EVENT} from './AssetManager';
+import {AssetManager, ASSET_CHANGE_EVENT, ASSET_REMOVE_EVENT} from '../components/AssetManager';
 import {EventEmitter} from 'events';
 import {ProjectSettings} from '../components/ProjectSettings';
 

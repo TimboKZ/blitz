@@ -4,16 +4,31 @@
  * @license GPL-3.0
  */
 
+import * as path from 'path';
 import {ProjectSettings} from '../components/ProjectSettings';
-import {IConfigPage, IConfig} from '../components/Config';
+import {IConfigPage, IConfig, IConfigMenu} from '../components/Config';
 import {URLHelper} from '../helpers/URLHelper';
 import {PathHelper} from '../helpers/PathHelper';
-import {SiteFile} from '../files/SiteFile';
+import {SiteFile, IBlitzPageLocals} from '../files/SiteFile';
 import {TemplateFile} from '../files/TemplateFile';
-import {AssetManager} from './AssetManager';
+import {AssetManager} from '../components/AssetManager';
+import {ContentFile} from '../files/ContentFile';
+import {StringHelper} from '../helpers/StringHelper';
 
 const DEFAULT_PAGE_EXTENSION = '.html';
 const DEFAULT_INDEX_PAGE = 'index' + DEFAULT_PAGE_EXTENSION;
+
+export interface IUrlGenerator {
+    (id: string): string;
+}
+
+export interface IAssetPathGenerator {
+    (assetPath: string): string;
+}
+
+export interface IContentGenerator {
+    (rawContent: string): string;
+}
 
 export class ProjectBuilder {
 
@@ -44,11 +59,40 @@ export class ProjectBuilder {
 
         // TODO: Recursively prepare pages/directories
 
+        let contentFile: ContentFile;
+
+        if (page.content) {
+
+            let contentPath = PathHelper.join(this.settings.contentPath, page.content);
+            contentFile = new ContentFile(contentPath);
+            contentFile.reload();
+
+        }
+
         if (page.template) {
 
             let relativePagePathArray = this.determinePagePathArray(relativeUriArray);
-            let pageUri = this.determineUri(relativePagePathArray);
+            let relativeUrl = URLHelper.join(relativePagePathArray);
             let fullPagePath = PathHelper.join(this.settings.buildPath, currentPath, relativePagePathArray);
+
+            let urlGenerator = URLHelper.prepareUrlGenerator(relativeUrl);
+
+            for (let i = 0; i < page.menus.length; i++) {
+                let menu = page.menus[i];
+                let itemTitle = this.determineMenuItemTitle(menu, contentFile.getAttributes());
+                if (itemTitle === undefined) {
+                    itemTitle = path.basename(fullPagePath, DEFAULT_PAGE_EXTENSION);
+                }
+            }
+
+            let locals: IBlitzPageLocals = {
+                url: urlGenerator,
+                asset: '',
+                menus: {},
+                hash: StringHelper.randomString(8),
+                site_url: this.config.site_url,
+                site_root: this.config.site_root,
+            };
 
             let templatePath = PathHelper.join(this.settings.templatePath, page.template);
             let templateFile = new TemplateFile(templatePath);
@@ -57,6 +101,9 @@ export class ProjectBuilder {
             let siteFile = new SiteFile(fullPagePath, templateFile);
             siteFile.rebuild();
             siteFile.write();
+
+        } else {
+
         }
 
     }
@@ -89,14 +136,18 @@ export class ProjectBuilder {
         return uriArray;
     }
 
-    private determineUri(pagePathArray: string[]): string {
-        let array = pagePathArray.slice(0);
-        let lastIndex = array.length - 1;
-        if (array[lastIndex] === DEFAULT_INDEX_PAGE
-            && !this.config.explicit_html_extensions) {
-            array.pop();
+    private determineMenuItemTitle(menu: IConfigMenu, contentAttributes: any): string {
+        let title;
+        if (menu.title_key && contentAttributes[menu.title_key]) {
+            title = contentAttributes[menu.title_key];
+        } else if (menu.title) {
+            title = menu.title;
+        } else if (contentAttributes.menu_title) {
+            title = contentAttributes.menu_title;
+        } else if (contentAttributes.title) {
+            title = contentAttributes.title;
         }
-        return URLHelper.join(array);
+        return title;
     }
 
 }

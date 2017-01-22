@@ -8,6 +8,18 @@
 import {GenericFile} from './GenericFile';
 import {TemplateFile} from './TemplateFile';
 import {ContentFile} from './ContentFile';
+import {IUrlGenerator, IAssetPathGenerator} from '../core/ProjectBuilder';
+import {ISiteMenuMap} from '../components/Menu';
+
+export interface IBlitzPageLocals {
+    url: IUrlGenerator;
+    asset: IAssetPathGenerator;
+    child_pages: any[];
+    menus: ISiteMenuMap;
+    hash: string;
+    site_url: string;
+    site_root: string;
+}
 
 /**
  * @class A class.

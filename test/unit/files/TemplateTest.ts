@@ -16,13 +16,13 @@ describe('Template', () => {
         it('extracts IDs correctly', () => {
             let template = new Template();
             let templateString = '-- url(\'hello\')\n-- url(\'world\')\n-- url()';
-            template.prepare(templateString, {}, {});
+            template.prepare(templateString, '', {}, {});
             assert.deepEqual(template.getIds(), ['hello', 'world']);
         });
         it('extracts assets correctly', () => {
             let template = new Template();
             let templateString = '-- asset(\'style.css\')\n-- asset(\'world.js\')';
-            template.prepare(templateString, {}, {});
+            template.prepare(templateString, '', {}, {});
             assert.deepEqual(template.getAssets(), ['style.css', 'world.js']);
         });
         it('extracts menus correctly', () => {
@@ -33,7 +33,7 @@ describe('Template', () => {
                 main: [],
                 secondary: [],
             };
-            template.prepare(templateString, {}, menusObject);
+            template.prepare(templateString, '', {}, menusObject);
             assert.deepEqual(template.getMenus(), ['main', 'secondary']);
         });
     });
@@ -45,7 +45,7 @@ describe('Template', () => {
         it('generates HTML string correctly', () => {
             let template = new Template();
             let templateString = 'p Hello World!';
-            template.prepare(templateString, {}, {});
+            template.prepare(templateString, '', {}, {});
             assert.equal(template.generate(), pug.render(templateString));
         });
     });

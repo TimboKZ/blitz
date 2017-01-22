@@ -6,6 +6,8 @@
  * @since 0.2.0
  */
 
+import {IUrlGenerator} from '../core/ProjectBuilder';
+
 /**
  * Menu item as it will be passed to Pug locals
  * @since 0.2.0

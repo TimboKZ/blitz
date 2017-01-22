@@ -12,7 +12,7 @@ import * as deepDiff from 'deep-diff';
 import {GenericFile, IReloadable} from './GenericFile';
 import {Content} from '../components/Content';
 import {ContentParser} from '../ContentParser';
-import {IAssetPathGenerator, IUrlGenerator} from '../core/SiteGenerator';
+import {IUrlGenerator, IAssetPathGenerator} from '../core/ProjectBuilder';
 
 /**
  * Attributes defined in the front matter of a content file

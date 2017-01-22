@@ -1,2 +1,3 @@
 #!/usr/bin/env node
-require('./dist/src/blitz.js').main(process.argv);
+
+require('./dist/src/cli/CLI.js').CLI.run(process.argv);

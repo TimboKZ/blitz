@@ -1,0 +1,9 @@
+"use strict";
+var MenuManager = (function () {
+    function MenuManager() {
+    }
+    return MenuManager;
+}());
+exports.MenuManager = MenuManager;
+
+//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9jb21wb25lbnRzL01lbnVNYW5hZ2VyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFVQTtJQUFBO0lBSUEsQ0FBQztJQUFELGtCQUFDO0FBQUQsQ0FKQSxBQUlDLElBQUE7QUFKWSxtQkFBVyxjQUl2QixDQUFBIiwiZmlsZSI6InNyYy9jb21wb25lbnRzL01lbnVNYW5hZ2VyLmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAZmlsZSBBIFR5cGVTY3JpcHQgZmlsZS5cbiAqIEBhdXRob3IgVGltdXIgS3V6aGFnYWxpeWV2IDx0aW0ua3V6aEBnbWFpbC5jb20+XG4gKiBAY29weXJpZ2h0IDIwMTdcbiAqIEBsaWNlbnNlIEdQTC0zLjBcbiAqL1xuXG4vKipcbiAqIEBjbGFzcyBBIGNsYXNzLlxuICovXG5leHBvcnQgY2xhc3MgTWVudU1hbmFnZXIge1xuXG5cblxufVxuIl19

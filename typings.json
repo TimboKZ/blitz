@@ -1,8 +1,10 @@
 {
   "globalDependencies": {
     "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "chokidar": "registry:dt/chokidar#1.4.3+20161212145303",
     "colors": "registry:dt/colors#0.6.0-1+20160914114039",
-    "fs-extra": "registry:dt/fs-extra#0.0.0+20161004190449",
+    "deep-diff": "registry:dt/deep-diff#0.0.0+20160510002910",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20161208164608",
     "js-yaml": "registry:dt/js-yaml#3.5.2+20160316171810",
     "marked": "registry:dt/marked#0.0.0+20160325085301",
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",
@@ -11,5 +13,9 @@
     "nomnom": "registry:dt/nomnom#0.0.0+20160317120654",
     "object-assign": "registry:dt/object-assign#4.0.1+20161006140353",
     "pug": "registry:dt/pug#2.0.0-beta6+20160919072324"
+  },
+  "dependencies": {
+    "bluebird": "registry:dt/bluebird#3.0.0+20161229155504",
+    "browser-sync": "registry:dt/browser-sync#0.0.0+20161119044246"
   }
 }

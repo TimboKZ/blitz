@@ -12,8 +12,7 @@ import * as objectAssign from 'object-assign';
 import * as fse from 'fs-extra';
 import {IBlitzConfig, IBlitzChildDirectory, IBlitzPage} from './ConfigParser';
 import {ContentParser} from './ContentParser';
-import {Util} from './Util';
-import {args} from './blitz';
+import {Util} from './helpers/Util';
 
 /**
  * Constants indicating the locations of assets, content and templates
@@ -182,7 +181,7 @@ export class SiteBuilder {
 
     /**
      * SiteBuilder constructor.
-     * @since 0.1.0 Now also generates a random string for `buildHash`
+     * @since 0.1.0 Now also generates a randomString string for `buildHash`
      * @since 0.0.1
      */
     public constructor(config: IBlitzConfig, projectPath: string, buildDirectory: string) {
@@ -225,9 +224,6 @@ export class SiteBuilder {
             return undefined;
         }
         Util.debug('Site map generated!');
-        if (args.map) {
-            Util.log(JSON.stringify(this.siteMap));
-        }
         Util.debug('Building site . . . ');
         if (!this.buildSite()) {
             Util.error('Site building failed!');
@@ -373,6 +369,13 @@ export class SiteBuilder {
                     return processedPageUrls[pageID];
                 };
 
+                // TODO: Remove this code
+                let assetUrlGenerator = this.generateAssetUrl.bind(this, currentDirectoryArray);
+                file.contentData.content = file.contentData.content.replace(/%%asset%%.*?%%/g, (match) => {
+                    let strippedString = match.replace(/^%%asset%%/, '').replace(/%%$/, '');
+                    return assetUrlGenerator(strippedString);
+                });
+
                 let locals = objectAssign(
                     {},
                     this.config.globals,
@@ -386,11 +389,12 @@ export class SiteBuilder {
                         named_child_directories: namedChildDirectories,
                         hash: this.buildHash,
                         menus: processedMenus,
-                        asset: this.generateAssetUrl.bind(this, currentDirectoryArray),
+                        asset: assetUrlGenerator,
                         site_url: this.config.site_url,
                         site_root: this.config.site_root,
                     }
                 );
+
                 if (!Util.writeFileFromArray(this.buildPath, fileArray, file.generator(locals))) {
                     Util.error('Could not write file from array!');
                     return false;

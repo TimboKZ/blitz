@@ -8,7 +8,7 @@
 
 import * as mock from 'mock-fs';
 import {assert} from 'chai';
-import {Util} from '../../src/Util';
+import {Util} from '../../src/helpers/Util';
 import {ContentParser} from '../../src/ContentParser';
 
 describe('ContentParser', () => {

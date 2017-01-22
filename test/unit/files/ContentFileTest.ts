@@ -23,7 +23,7 @@ describe('ContentFile', () => {
                 }),
             };
             mock(mockConfig);
-            let file = new ContentFile('', [], 'test.txt');
+            let file = new ContentFile('test.txt');
             file.reload();
             let idFunction = (input: string) => input;
             let generatedString = file.getContent().generate(idFunction, idFunction, idFunction);
@@ -33,7 +33,7 @@ describe('ContentFile', () => {
     });
     describe('#write()', () => {
         it('throws an error because operation is prohibited', () => {
-            let contentFile = new ContentFile('', [], 'test.txt');
+            let contentFile = new ContentFile('test.txt');
             assert.throws(() => contentFile.write());
         });
     });

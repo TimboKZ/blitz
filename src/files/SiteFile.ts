@@ -6,23 +6,22 @@
  * @since 0.0.1
  */
 
-import {FileGenerator} from './FileGenerator';
+import {SiteFileGenerator} from './SiteFileGenerator';
 import {GenericFile} from './GenericFile';
-import {Logger} from '../cli/Logger';
 
 /**
  * @class A class.
  * @since 0.2.0
  */
 export class SiteFile extends GenericFile {
-    private generator: FileGenerator;
+    private generator: SiteFileGenerator;
 
-    constructor(rootPath: string, relativePath: string[], name: string, generator: FileGenerator) {
-        super(rootPath, relativePath, name);
+    constructor(path: string, generator: SiteFileGenerator) {
+        super(path);
         this.generator = generator;
     }
 
     public read() {
-        throw new Error('Attempted to read from a site file `' + Logger.brand(this.name) + '`. This is not allowed!');
+        throw new Error('Attempted to read from a site file. This is not allowed!');
     }
 }

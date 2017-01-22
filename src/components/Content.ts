@@ -67,7 +67,7 @@ export class Content {
             if (match.substr(0, 1) === '\\') {
                 return match.substr(1);
             }
-            let token = '<%' + functionName + '-' + StringHelper.random(6) + '%>';
+            let token = '<%' + functionName + '-' + StringHelper.randomString(6) + '%>';
             if (match.substr(2 + functionName.length, 1) !== '|') {
                 map[token] = undefined;
             } else {

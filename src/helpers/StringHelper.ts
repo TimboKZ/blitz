@@ -11,19 +11,8 @@
  * @since 0.2.0
  */
 export class StringHelper {
-    /**
-     * Checks if an object is a string
-     * @since 0.2.0
-     */
-    public static isString(object: any): boolean {
-        return typeof object === 'string';
-    }
 
-    /**
-     * Generates a random string of the specified length
-     * @since 0.2.0
-     */
-    public static random(length: number): string {
+    public static randomString(length: number): string {
         let characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let result = '';
         for (let i = length; i > 0; --i) {
@@ -32,10 +21,10 @@ export class StringHelper {
         return result;
     }
 
-    /**
-     * Return as-is if the object is a string, stringify as JSON otherwise
-     * @since 0.2.0
-     */
+    public static endsWith(source: string, suffix: string): boolean {
+        return source.indexOf(suffix, source.length - suffix.length) !== -1;
+    }
+
     public static stringify(object: any): string {
         if (StringHelper.isString(object)) {
             return object;
@@ -43,11 +32,12 @@ export class StringHelper {
         return JSON.stringify(object);
     }
 
-    /**
-     * Checks if the string contains anything
-     * @since 0.2.0
-     */
+    public static isString(object: any): boolean {
+        return typeof object === 'string';
+    }
+
     public static isEmpty(str: string) {
         return str === undefined || str === null || str === ''; // tslint:disable-line:no-null-keyword
     }
+
 }

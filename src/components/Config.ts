@@ -91,12 +91,6 @@ export interface IConfigNamedPropertyValidators {
 }
 
 /**
- * GenericFile that is treated as the Blitz config by default
- * @since 0.2.0
- */
-export const DEFAULT_CONFIG_NAME = 'blitz.yml';
-
-/**
  * Array of validation objects for the config
  * @since 0.2.0
  */
@@ -361,13 +355,20 @@ export class Config {
         );
 
         if (validatedPage.menus) {
-            validatedPage.menus = this.validateMenus(validatedPage.menus);
+            validatedPage.menus = Config.validateMenus(validatedPage.menus);
         }
         if (validatedPage.child_pages) {
             validatedPage.child_pages = this.validatePages(validatedPage.child_pages);
         }
         if (validatedPage.child_directories) {
-            validatedPage.child_directories = this.validateDirectories(validatedPage.child_directories);
+            validatedPage.child_directories = Config.validateDirectories(validatedPage.child_directories);
+        }
+        if (!validatedPage.template && validatedPage.id) {
+            let errorString = 'Error parsing page property from the config:';
+            errorString += '\n';
+            errorString += 'You cannot have an `' + Logger.brand('id') + '` without ';
+            errorString += '`' + Logger.brand('template') + '` specified!';
+            throw new Error(errorString);
         }
         return validatedPage as IConfigPage;
     }
@@ -376,10 +377,10 @@ export class Config {
      * Validates a single directory extracted from the config
      * @since 0.2.0
      */
-    private validateDirectories(rawDirectories: any[]): IConfigDirectory[] {
+    private static validateDirectories(rawDirectories: any[]): IConfigDirectory[] {
         let validatedDirectories: IConfigDirectory[] = [];
         for (let i = 0; i < rawDirectories.length; i++) {
-            validatedDirectories.push(this.validateDirectory(rawDirectories[i]));
+            validatedDirectories.push(Config.validateDirectory(rawDirectories[i]));
         }
         return validatedDirectories;
     }
@@ -388,37 +389,38 @@ export class Config {
      * Validates a single directory extracted from the config
      * @since 0.2.0
      */
-    private validateDirectory(rawDirectory: any): IConfigDirectory {
+    private static validateDirectory(rawDirectory: any): IConfigDirectory {
         let validatedDirectory: IConfigDirectory = Config.validateNamedProperties(
             rawDirectory,
             CONFIG_DIRECTORY_PROPERTIES,
             'directory'
         );
 
+        let errorString = 'Error parsing directory property from the config:';
+        errorString += '\n';
         if (validatedDirectory.template && validatedDirectory.template_directory) {
-            let errorString = 'Error parsing directory property from the config:';
-            errorString += '\n';
             errorString += 'You cannot have both `' + Logger.brand('template') + '` and ';
             errorString += '`' + Logger.brand('template_directory') + '` specified!';
             throw new Error(errorString);
         }
         if (validatedDirectory.content && validatedDirectory.content_directory) {
-            let errorString = 'Error parsing directory property from the config:';
-            errorString += '\n';
             errorString += 'You cannot have both `' + Logger.brand('content') + '` and ';
             errorString += '`' + Logger.brand('content_directory') + '` specified!';
             throw new Error(errorString);
         }
         if (validatedDirectory.template_directory && validatedDirectory.content_directory) {
-            let errorString = 'Error parsing directory property from the config:';
-            errorString += '\n';
             errorString += 'You cannot have both `' + Logger.brand('template_directory') + '` and ';
             errorString += '`' + Logger.brand('content_directory') + '` specified!';
             throw new Error(errorString);
         }
+        if (!validatedDirectory.template_directory && validatedDirectory.id_key) {
+            errorString += 'You cannot have an `' + Logger.brand('id_key') + '` without ';
+            errorString += '`' + Logger.brand('template_directory') + '` specified!';
+            throw new Error(errorString);
+        }
 
         if (validatedDirectory.menus) {
-            validatedDirectory.menus = this.validateMenus(validatedDirectory.menus);
+            validatedDirectory.menus = Config.validateMenus(validatedDirectory.menus);
         }
         return validatedDirectory as IConfigDirectory;
     }
@@ -427,7 +429,7 @@ export class Config {
      * Validates a single menu extracted from the
      * @since 0.2.0
      */
-    private validateMenus(rawMenus: any[]): IConfigMenu[] {
+    private static validateMenus(rawMenus: any[]): IConfigMenu[] {
         let validatedMenus: IConfigMenu[] = [];
         for (let i = 0; i < rawMenus.length; i++) {
             validatedMenus.push(Config.validateMenu(rawMenus[i]));

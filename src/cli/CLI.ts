@@ -11,8 +11,8 @@ import * as path from 'path';
 import {DEFAULT_TEMPLATE} from '../core/ProjectInitialiser';
 import {Logger} from './Logger';
 import {Blitz} from '../Blitz';
-import {DEFAULT_CONFIG_NAME} from '../components/Config';
-import {DEFAULT_BUILD_DIRECTORY_NAME} from '../core/SiteGenerator';
+import {DEFAULT_CONFIG_NAME, DEFAULT_BUILD_DIRECTORY_NAME} from '../components/ProjectSettings';
+import {} from '../core/SiteGenerator';
 import {Util} from '../helpers/Util';
 
 /**

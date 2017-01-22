@@ -181,7 +181,7 @@ export class SiteBuilder {
 
     /**
      * SiteBuilder constructor.
-     * @since 0.1.0 Now also generates a random string for `buildHash`
+     * @since 0.1.0 Now also generates a randomString string for `buildHash`
      * @since 0.0.1
      */
     public constructor(config: IBlitzConfig, projectPath: string, buildDirectory: string) {

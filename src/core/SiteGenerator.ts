@@ -7,12 +7,6 @@
  */
 
 /**
- * Default name of the directory into which the generated files will be placed
- * @since 0.2.0
- */
-export const DEFAULT_BUILD_DIRECTORY_NAME = 'build';
-
-/**
  * Interfaces for partially applied URL and asset path generators
  * @since 0.2.0
  */

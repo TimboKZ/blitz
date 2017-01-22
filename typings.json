@@ -1,6 +1,5 @@
 {
   "globalDependencies": {
-    "browser-sync": "registry:dt/browser-sync#0.0.0+20160928124223",
     "chai": "registry:dt/chai#3.4.0+20160601211834",
     "chokidar": "registry:dt/chokidar#1.4.3+20161212145303",
     "colors": "registry:dt/colors#0.6.0-1+20160914114039",
@@ -16,6 +15,7 @@
     "pug": "registry:dt/pug#2.0.0-beta6+20160919072324"
   },
   "dependencies": {
-    "bluebird": "registry:dt/bluebird#3.0.0+20161229155504"
+    "bluebird": "registry:dt/bluebird#3.0.0+20161229155504",
+    "browser-sync": "registry:dt/browser-sync#0.0.0+20161119044246"
   }
 }

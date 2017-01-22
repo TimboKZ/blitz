@@ -15,6 +15,8 @@ import {Config} from './components/Config';
 import {ProjectWatcher} from './core/ProjectWatcher';
 import {EventEmitter} from 'events';
 import {ProjectPreviewer} from './core/ProjectPreviewer';
+import {ProjectSettings} from './components/ProjectSettings';
+import {ProjectBuilder} from './core/ProjectBuilder';
 
 /**
  * @class Main class of Blitz, exposes the API for external modules to use
@@ -52,21 +54,17 @@ export class Blitz {
         Logger.log('Building site using `' +
             Logger.brand(configPath) + '` in directory `' +
             Logger.brand(buildPath) + '`...', LogLevel.Debug);
-        let configContents = fse.readFileSync(configPath, 'utf8');
-        let rawConfig = yaml.safeLoad(configContents);
-        if (!rawConfig) {
-            rawConfig = {};
-        }
-        let config = new Config();
-        config.load(rawConfig);
+        let settings = new ProjectSettings(configPath);
         try {
-            config.validate();
+            settings.config.validate();
+            let builder = new ProjectBuilder(settings);
+            builder.build();
         } catch (exception) {
-            Logger.log('Error validating the config:', LogLevel.Error);
+            Logger.log('Error building the project:', LogLevel.Error);
             Logger.logMany(Logger.split(exception.message), LogLevel.Error);
+            console.log(exception);
             process.exit(1);
         }
-        console.log(config.get());
     }
 
     /**

@@ -24,14 +24,14 @@ describe('StringHelper', () => {
     });
     describe('#isString()', () => {
         it('generates strings of the right length', () => {
-            assert.equal(StringHelper.random(5).length, 5);
-            assert.equal(StringHelper.random(10).length, 10);
-            assert.equal(StringHelper.random(15).length, 15);
+            assert.equal(StringHelper.randomString(5).length, 5);
+            assert.equal(StringHelper.randomString(10).length, 10);
+            assert.equal(StringHelper.randomString(15).length, 15);
         });
         it('generates different strings', () => {
-            let first = StringHelper.random(8);
-            let second = StringHelper.random(8);
-            let third = StringHelper.random(8);
+            let first = StringHelper.randomString(8);
+            let second = StringHelper.randomString(8);
+            let third = StringHelper.randomString(8);
             assert.notEqual(first, second);
             assert.notEqual(first, third);
             assert.notEqual(second, third);

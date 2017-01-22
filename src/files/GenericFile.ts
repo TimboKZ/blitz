@@ -6,7 +6,6 @@
  * @since 0.2.0
  */
 
-import * as path from 'path';
 import * as fse from 'fs-extra';
 
 /**
@@ -23,45 +22,23 @@ export interface IReloadable {
  */
 export class GenericFile {
     /**
-     * Path in a file system that will be appended to the relative path
-     * @since 0.2.0
-     */
-    protected rootPath: string;
-
-    /**
-     * Path relative to the root path specified above
-     * @since 0.2.0
-     */
-    protected relativePath: string[];
-
-    /**
-     * Name of the file, including extension
-     * @since 0.2.0
-     */
-    protected name: string;
-
-    /**
      * Full path to the file
      * @since 0.2.0
      */
-    protected fullPath: string;
+    private _path: string;
 
     /**
      * The contents of the file
      * @since 0.2.0
      */
-    protected contents: string;
+    private _contents: string;
 
     /**
      * GenericFile constructor
      * @since 0.2.0
      */
-    constructor(rootPath: string, relativePath: string[], name: string) {
-        this.rootPath = rootPath;
-        this.relativePath = relativePath;
-        this.name = name;
-        let relativePathString = path.join.apply(undefined, this.relativePath);
-        this.fullPath = path.join(this.rootPath, relativePathString, this.name);
+    constructor(path: string) {
+        this._path = path;
     }
 
     /**
@@ -69,7 +46,7 @@ export class GenericFile {
      * @since 0.2.0
      */
     public read() {
-        this.contents = fse.readFileSync(this.getFullPath(), 'utf8');
+        this._contents = fse.readFileSync(this._path, 'utf8');
     }
 
     /**
@@ -77,35 +54,22 @@ export class GenericFile {
      * @since 0.2.0
      */
     public write() {
-        fse.writeFileSync(this.getFullPath(), this.contents);
+        fse.writeFileSync(this._path, this._contents);
     }
 
-    /**
-     * Returns full path to the file
-     * @since 0.2.0
-     */
-    public getFullPath(): string {
-        return this.fullPath;
+    public get path(): string {
+        return this._path;
     }
 
-    /**
-     * @since 0.2.0
-     */
-    public getName(): string {
-        return this.name;
+    public set path(value: string) {
+        this._path = value;
     }
 
-    /**
-     * @since 0.2.0
-     */
-    public getContents(): string {
-        return this.contents;
+    public get contents(): string {
+        return this._contents;
     }
 
-    /**
-     * @since 0.2.0
-     */
-    public setContents(contents: string) {
-        this.contents = contents;
+    public set contents(value: string) {
+        this._contents = value;
     }
 }

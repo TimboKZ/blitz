@@ -9,7 +9,6 @@
 import * as fm from 'front-matter';
 import * as deepEqual from 'deep-equal';
 import * as deepDiff from 'deep-diff';
-import {Logger} from '../cli/Logger';
 import {GenericFile, IReloadable} from './GenericFile';
 import {Content} from '../components/Content';
 import {ContentParser} from '../ContentParser';
@@ -65,8 +64,8 @@ export class ContentFile extends GenericFile implements IReloadable {
      * ContentFile constructor
      * @since 0.2.0
      */
-    public constructor(rootPath: string, relativePath: string[], name: string) {
-        super(rootPath, relativePath, name);
+    public constructor(path: string) {
+        super(path);
         this.attributes = {};
         this.content = new Content();
     }
@@ -99,7 +98,7 @@ export class ContentFile extends GenericFile implements IReloadable {
     }
 
     public write() {
-        throw new Error('Attempted to write to a content file `' + Logger.brand(this.name) + '`. This is not allowed!');
+        throw new Error('Attempted to write to a content file. This is not allowed!');
     }
 
     public getAttributes(): IContentFileAttributes {

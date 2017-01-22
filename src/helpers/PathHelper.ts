@@ -14,7 +14,7 @@ export class PathHelper {
         for (let i = 0; i < parts.length; i++) {
             let object = parts[i];
             if (typeof object === 'string') {
-                pathParts.push(object);
+                pathParts.push(path.normalize(object));
             } else {
                 pathParts.push(PathHelper.join.apply(undefined, object));
             }

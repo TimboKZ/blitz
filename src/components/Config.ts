@@ -370,6 +370,13 @@ export class Config {
             errorString += '`' + Logger.brand('template') + '` specified!';
             throw new Error(errorString);
         }
+        if (!validatedPage.template && validatedPage.menus) {
+            let errorString = 'Error parsing page property from the config:';
+            errorString += '\n';
+            errorString += 'You cannot have an `' + Logger.brand('menus') + '` without ';
+            errorString += '`' + Logger.brand('template') + '` specified!';
+            throw new Error(errorString);
+        }
         return validatedPage as IConfigPage;
     }
 

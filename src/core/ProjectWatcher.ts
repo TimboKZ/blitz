@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as chokidar from 'chokidar';
 import {AssetManager, ASSET_CHANGE_EVENT, ASSET_REMOVE_EVENT} from './AssetManager';
 import {EventEmitter} from 'events';
+import {ProjectSettings} from '../components/ProjectSettings';
 
 /**
  *
@@ -64,11 +65,8 @@ export class ProjectWatcher {
 
     public watch() {
         this.setupFileWatchers();
-        let assetManager = new AssetManager(
-            path.join(this.projectPath, 'assets'),
-            path.join(this.buildPath, 'assets'),
-            this.eventEmitter
-        );
+        let settings = new ProjectSettings(this.configPath);
+        let assetManager = new AssetManager(settings);
         assetManager.setupListeners();
     }
 

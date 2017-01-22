@@ -8,6 +8,9 @@ import {ProjectSettings} from '../components/ProjectSettings';
 import {IConfigPage, IConfig} from '../components/Config';
 import {URLHelper} from '../helpers/URLHelper';
 import {PathHelper} from '../helpers/PathHelper';
+import {SiteFile} from '../files/SiteFile';
+import {TemplateFile} from '../files/TemplateFile';
+import {AssetManager} from './AssetManager';
 
 const DEFAULT_PAGE_EXTENSION = '.html';
 const DEFAULT_INDEX_PAGE = 'index' + DEFAULT_PAGE_EXTENSION;
@@ -23,6 +26,9 @@ export class ProjectBuilder {
     }
 
     public build() {
+        let assetManager = new AssetManager(this.settings);
+        assetManager.setupListeners();
+        assetManager.copyAssets();
         this.preparePages(this.config.pages, []);
     }
 
@@ -35,16 +41,23 @@ export class ProjectBuilder {
 
     private preparePage(page: IConfigPage, currentPath: string[]) {
         let relativeUriArray = ProjectBuilder.extractRelativeUriArray(page);
-        let relativePagePathArray = this.determinePagePathArray(relativeUriArray);
-        let pageUri = this.determineUri(relativePagePathArray);
-        let fullPagePath = PathHelper.join(this.settings.buildPath, currentPath, relativePagePathArray);
 
         // TODO: Recursively prepare pages/directories
 
-        let contentFile
+        if (page.template) {
 
-        console.log(fullPagePath);
-        console.log(pageUri);
+            let relativePagePathArray = this.determinePagePathArray(relativeUriArray);
+            let pageUri = this.determineUri(relativePagePathArray);
+            let fullPagePath = PathHelper.join(this.settings.buildPath, currentPath, relativePagePathArray);
+
+            let templatePath = PathHelper.join(this.settings.templatePath, page.template);
+            let templateFile = new TemplateFile(templatePath);
+            templateFile.reload();
+
+            let siteFile = new SiteFile(fullPagePath, templateFile);
+            siteFile.rebuild();
+            siteFile.write();
+        }
 
     }
 

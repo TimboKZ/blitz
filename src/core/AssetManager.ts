@@ -8,10 +8,10 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import {EventEmitter} from 'events';
 import {BUILD_CHANGE_EVENT} from './ProjectWatcher';
 import {ListenerContainer} from '../ListenerContainer';
 import {Logger} from '../cli/Logger';
+import {ProjectSettings} from '../components/ProjectSettings';
 
 /**
  * Event triggered when an asset is changed or created
@@ -30,45 +30,27 @@ export const ASSET_REMOVE_EVENT = 'assetRemove';
  * @since 0.2.0
  */
 export class AssetManager extends ListenerContainer {
-    /**
-     * Folder in which project assets are located
-     * @since 0.2.0
-     */
-    private sourcePath: string;
 
-    /**
-     * Assets folder inside the `build` directory
-     * @since 0.2.0
-     */
-    private targetPath: string;
+    private settings: ProjectSettings;
 
-    /**
-     * AssetManager constructor
-     * @since 0.2.0
-     */
-    public constructor(sourcePath: string, targetPath: string, eventEmitter?: EventEmitter) {
-        if (eventEmitter) {
-            let eventListenerPairs = [];
-            super(eventEmitter, eventListenerPairs);
-            eventListenerPairs.push({
-                event: ASSET_CHANGE_EVENT,
-                listener: (assetPath) => {
-                    Logger.log('Updating `' + Logger.brand(path.join('assets', assetPath)) + '`...');
-                    this.copyAsset(assetPath);
-                },
-            });
-            eventListenerPairs.push({
-                event: ASSET_REMOVE_EVENT,
-                listener: (assetPath) => {
-                    Logger.log('Removing `' + Logger.brand(path.join('assets', assetPath)) + '`...');
-                    this.removeAsset(assetPath);
-                },
-            });
-        } else {
-            super();
-        }
-        this.sourcePath = sourcePath;
-        this.targetPath = targetPath;
+    public constructor(settings: ProjectSettings) {
+        let eventListenerPairs = [];
+        super(settings.eventEmitter, eventListenerPairs);
+        this.settings = settings;
+        eventListenerPairs.push({
+            event: ASSET_CHANGE_EVENT,
+            listener: (assetPath) => {
+                Logger.log('Updating `' + Logger.brand(path.join('assets', assetPath)) + '`...');
+                this.copyAsset(assetPath);
+            },
+        });
+        eventListenerPairs.push({
+            event: ASSET_REMOVE_EVENT,
+            listener: (assetPath) => {
+                Logger.log('Removing `' + Logger.brand(path.join('assets', assetPath)) + '`...');
+                this.removeAsset(assetPath);
+            },
+        });
     }
 
     /**
@@ -76,7 +58,9 @@ export class AssetManager extends ListenerContainer {
      * @since 0.2.0
      */
     public copyAssets() {
-        fse.copySync(this.sourcePath, this.targetPath);
+        if (fse.exists(this.settings.assetPath)) {
+            fse.copySync(this.settings.assetPath, this.settings.buildAssetPath);
+        }
     }
 
     /**
@@ -84,8 +68,8 @@ export class AssetManager extends ListenerContainer {
      * @since 0.2.0
      */
     public copyAsset(assetPath: string) {
-        let assetSourcePath = path.join(this.sourcePath, assetPath);
-        let assetTargetPath = path.join(this.targetPath, assetPath);
+        let assetSourcePath = path.join(this.settings.assetPath, assetPath);
+        let assetTargetPath = path.join(this.settings.buildAssetPath, assetPath);
         fse.ensureDirSync(path.dirname(assetTargetPath));
         fse.copySync(assetSourcePath, assetTargetPath);
         if (this.eventEmitter) {
@@ -97,7 +81,7 @@ export class AssetManager extends ListenerContainer {
      * @since 0.2.0
      */
     public removeAsset(assetPath: string) {
-        fse.removeSync(path.join(this.targetPath, assetPath));
+        fse.removeSync(path.join(this.settings.buildAssetPath, assetPath));
         if (this.eventEmitter) {
             this.eventEmitter.emit(BUILD_CHANGE_EVENT, path.join('assets', assetPath));
         }

@@ -3,22 +3,28 @@
  * @author Timur Kuzhagaliyev <tim.kuzh@gmail.com>
  * @copyright 2016
  * @license GPL-3.0
- * @since 0.0.1
  */
 
-import {SiteFileGenerator} from './SiteFileGenerator';
 import {GenericFile} from './GenericFile';
+import {TemplateFile} from './TemplateFile';
+import {ContentFile} from './ContentFile';
 
 /**
  * @class A class.
- * @since 0.2.0
  */
 export class SiteFile extends GenericFile {
-    private generator: SiteFileGenerator;
 
-    constructor(path: string, generator: SiteFileGenerator) {
+    private templateFile: TemplateFile;
+    private contentFile: ContentFile;
+
+    public constructor(path: string, templateFile: TemplateFile, contentFile?: ContentFile) {
         super(path);
-        this.generator = generator;
+        this.templateFile = templateFile;
+        this.contentFile = contentFile;
+    }
+
+    public rebuild() {
+        this.contents = this.templateFile.template.generate();
     }
 
     public read() {

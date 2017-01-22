@@ -15,6 +15,7 @@ import {EventEmitter} from 'events';
 export const DEFAULT_CONFIG_NAME = 'blitz.yml';
 export const DEFAULT_ASSET_DIRECTORY_NAME = 'assets';
 export const DEFAULT_BUILD_DIRECTORY_NAME = 'build';
+export const DEFAULT_BUILD_ASSET_DIRECTORY_NAME = 'assets';
 export const DEFAULT_CONTENT_DIRECTORY_NAME = 'content';
 export const DEFAULT_TEMPLATE_DIRECTORY_NAME = 'templates';
 
@@ -28,6 +29,7 @@ export class ProjectSettings {
     private _projectPath: string;
     private _assetPath: string;
     private _buildPath: string;
+    private _buildAssetPath: string;
     private _contentPath: string;
     private _templatePath: string;
     private _eventEmitter: EventEmitter;
@@ -53,6 +55,7 @@ export class ProjectSettings {
         this._projectPath = path.dirname(this._configPath);
         this._assetPath = path.join(this._projectPath, DEFAULT_ASSET_DIRECTORY_NAME);
         this._buildPath = path.join(this._projectPath, DEFAULT_BUILD_DIRECTORY_NAME);
+        this._buildAssetPath = path.join(this._buildPath, DEFAULT_BUILD_ASSET_DIRECTORY_NAME);
         this._contentPath = path.join(this._projectPath, DEFAULT_CONTENT_DIRECTORY_NAME);
         this._templatePath = path.join(this._projectPath, DEFAULT_TEMPLATE_DIRECTORY_NAME);
     }
@@ -75,6 +78,10 @@ export class ProjectSettings {
 
     public get buildPath(): string {
         return this._buildPath;
+    }
+
+    public get buildAssetPath(): string {
+        return this._buildAssetPath;
     }
 
     public get contentPath(): string {

@@ -6,6 +6,7 @@
  * @since 0.2.0
  */
 
+import * as path from 'path';
 import * as fse from 'fs-extra';
 
 /**
@@ -54,6 +55,7 @@ export class GenericFile {
      * @since 0.2.0
      */
     public write() {
+        fse.ensureDirSync(path.dirname(this._path));
         fse.writeFileSync(this._path, this._contents);
     }
 
